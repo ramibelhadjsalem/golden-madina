@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import BlogDialog from "@/components/admin/BlogDialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
@@ -18,7 +18,8 @@ const MOCK_BLOGS = [
     author: "Dr. Eleanor Hughes",
     date: "2023-05-15",
     status: "published",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi."
+    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi.",
+    image: "https://images.unsplash.com/photo-1568667256549-094345857637?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fG11c2V1bXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60"
   },
   {
     id: "2",
@@ -27,7 +28,8 @@ const MOCK_BLOGS = [
     author: "James Richardson",
     date: "2023-06-02",
     status: "published",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi."
+    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi.",
+    image: "https://images.unsplash.com/photo-1574182245530-967d9b3831af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHBvdHRlcnl8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60"
   },
   {
     id: "3",
@@ -36,7 +38,8 @@ const MOCK_BLOGS = [
     author: "Prof. Sarah Chen",
     date: "2023-06-18",
     status: "published",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi."
+    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi.",
+    image: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGFyY2hpdGVjdHVyZSUyMGhpc3Rvcnl8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60"
   },
   {
     id: "4",
@@ -45,7 +48,8 @@ const MOCK_BLOGS = [
     author: "Dr. Michael Torres",
     date: "2023-07-05",
     status: "draft",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi."
+    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi.",
+    image: "https://images.unsplash.com/photo-1599928577074-a188f4605511?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHRyZWFzdXJlc3xlbnwwfHwwfHx8MA%3D&auto=format&fit=crop&w=800&q=60"
   },
   {
     id: "5",
@@ -54,7 +58,8 @@ const MOCK_BLOGS = [
     author: "Lisa Montgomery",
     date: "2023-07-22",
     status: "published",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi."
+    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi.",
+    image: "https://images.unsplash.com/photo-1536240478700-b869070f9279?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8ZGlnaXRhbCUyMGNvbnNlcnZhdGlvbnxlbnwwfHwwfHx8MA%3D&auto=format&fit=crop&w=800&q=60"
   },
   {
     id: "6",
@@ -63,7 +68,8 @@ const MOCK_BLOGS = [
     author: "Dr. Robert Fields",
     date: "2023-08-10",
     status: "published",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi."
+    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi.",
+    image: "https://images.unsplash.com/photo-1577083552334-28b7fb7fab12?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmVuYWlzc2FuY2UlMjBhcnR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60"
   }
 ];
 
@@ -95,6 +101,7 @@ const AdminBlogList = () => {
     summary: string;
     author: string;
     content: string;
+    image?: string;
   }) => {
     if (selectedBlog) {
       // Update existing blog
@@ -103,7 +110,8 @@ const AdminBlogList = () => {
           ...blog, 
           ...blogData,
           date: blog.date, // Preserve original date
-          status: blog.status // Preserve status
+          status: blog.status, // Preserve status
+          image: blogData.image || blog.image // Use new image or keep existing one
         } : blog
       ));
       toast({
@@ -116,7 +124,8 @@ const AdminBlogList = () => {
         id: (blogs.length + 1).toString(),
         ...blogData,
         date: new Date().toISOString().split('T')[0],
-        status: "published"
+        status: "published",
+        image: blogData.image || "https://images.unsplash.com/photo-1568667256549-094345857637?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60" // Default image if none provided
       };
       setBlogs([...blogs, newBlog]);
       toast({
@@ -173,83 +182,84 @@ const AdminBlogList = () => {
         </Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Author</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredBlogs.length > 0 ? (
-                filteredBlogs.map((blog) => (
-                  <TableRow key={blog.id} className="hover:bg-slate-50 transition-colors">
-                    <TableCell>
-                      <div className="font-medium text-slate-900">{blog.title}</div>
-                      <div className="text-sm text-slate-500 truncate max-w-xs">{blog.summary}</div>
-                    </TableCell>
-                    <TableCell className="text-sm text-slate-500">
-                      {blog.author}
-                    </TableCell>
-                    <TableCell className="text-sm text-slate-500">
-                      {new Date(blog.date).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        blog.status === 'published' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-amber-100 text-amber-800'
-                      }`}>
-                        {blog.status === 'published' ? 'Published' : 'Draft'}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleOpenDialog(blog)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleDeleteClick(blog.id)}
-                          className="text-red-600 hover:text-red-800 hover:bg-red-100"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center">
-                    <div className="text-slate-500">No blog posts found</div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleOpenDialog()}
-                      className="mt-3"
-                    >
-                      Create New Blog Post
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+      {/* Grid card layout */}
+      {filteredBlogs.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {filteredBlogs.map((blog) => (
+            <Card key={blog.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="aspect-video w-full overflow-hidden bg-slate-100 relative">
+                <img 
+                  src={blog.image} 
+                  alt={blog.title} 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-2 right-2 flex gap-1">
+                  <Button 
+                    variant="secondary" 
+                    size="icon"
+                    onClick={() => handleOpenDialog(blog)}
+                    className="rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
+                  >
+                    <Pencil className="h-4 w-4" />
+                    <span className="sr-only">Edit</span>
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="icon"
+                    onClick={() => handleDeleteClick(blog.id)}
+                    className="rounded-full bg-white/80 backdrop-blur-sm text-red-600 hover:bg-white hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                </div>
+                <span className={`absolute bottom-2 left-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  blog.status === 'published' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-amber-100 text-amber-800'
+                }`}>
+                  {blog.status === 'published' ? 'Published' : 'Draft'}
+                </span>
+              </div>
+              <CardHeader>
+                <CardTitle className="line-clamp-1 text-lg">{blog.title}</CardTitle>
+                <CardDescription className="flex justify-between">
+                  <span>By {blog.author}</span>
+                  <span className="text-slate-500">{new Date(blog.date).toLocaleDateString()}</span>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600 line-clamp-2">{blog.summary}</p>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button variant="ghost" size="sm" onClick={() => handleOpenDialog(blog)}>
+                  <Pencil className="h-4 w-4 mr-2" /> Edit
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => handleDeleteClick(blog.id)}
+                  className="text-red-600 hover:text-red-800 hover:bg-red-100"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" /> Delete
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
         </div>
-      </div>
+      ) : (
+        <div className="text-center py-12 bg-slate-50 rounded-lg">
+          <div className="text-slate-500">No blog posts found</div>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => handleOpenDialog()}
+            className="mt-3"
+          >
+            Create New Blog Post
+          </Button>
+        </div>
+      )}
 
       {/* Blog Dialog */}
       <BlogDialog 

@@ -16,12 +16,14 @@ interface BlogDialogProps {
     summary: string;
     author: string;
     content: string;
+    image?: string;
   };
   onSave: (blog: {
     title: string;
     summary: string;
     author: string;
     content: string;
+    image?: string;
   }) => void;
 }
 
@@ -30,6 +32,7 @@ const BlogDialog = ({ isOpen, onClose, blog, onSave }: BlogDialogProps) => {
   const [summary, setSummary] = useState(blog?.summary || "");
   const [author, setAuthor] = useState(blog?.author || "");
   const [content, setContent] = useState(blog?.content || "");
+  const [image, setImage] = useState(blog?.image || "");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -51,7 +54,8 @@ const BlogDialog = ({ isOpen, onClose, blog, onSave }: BlogDialogProps) => {
       title,
       summary,
       author,
-      content
+      content,
+      image
     });
     
     setIsLoading(false);
@@ -83,6 +87,27 @@ const BlogDialog = ({ isOpen, onClose, blog, onSave }: BlogDialogProps) => {
                 onChange={(e) => setAuthor(e.target.value)}
                 placeholder="Enter author name"
               />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="image">Image URL</Label>
+              <Input
+                id="image"
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
+                placeholder="Enter image URL"
+              />
+              {image && (
+                <div className="mt-2 aspect-video w-full overflow-hidden rounded-md bg-slate-50">
+                  <img 
+                    src={image} 
+                    alt="Blog preview" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "https://placehold.co/600x400?text=Invalid+Image+URL";
+                    }}
+                  />
+                </div>
+              )}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="summary">Summary</Label>
