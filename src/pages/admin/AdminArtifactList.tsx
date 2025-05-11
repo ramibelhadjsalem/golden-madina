@@ -1,10 +1,13 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import ArtifactDialog from "@/components/admin/ArtifactDialog";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 
 // Temporary mock data until we connect to Supabase
 const MOCK_ARTIFACTS = [
@@ -14,7 +17,8 @@ const MOCK_ARTIFACTS = [
     period: "5th Century BCE",
     category: "Pottery",
     hasModel: true,
-    dateAdded: "2023-02-15"
+    dateAdded: "2023-02-15",
+    description: "A large ancient Greek jar with two handles and a narrow neck. Used for storage and transport of wine, olive oil, etc."
   },
   {
     id: "2",
@@ -22,7 +26,8 @@ const MOCK_ARTIFACTS = [
     period: "14th Century",
     category: "Books",
     hasModel: false,
-    dateAdded: "2023-03-22"
+    dateAdded: "2023-03-22",
+    description: "A handwritten book decorated with gold or silver, brilliant colors, elaborate designs, or miniature illustrations."
   },
   {
     id: "3",
@@ -30,7 +35,8 @@ const MOCK_ARTIFACTS = [
     period: "1200 BCE",
     category: "Ceremonial",
     hasModel: true,
-    dateAdded: "2023-04-10"
+    dateAdded: "2023-04-10",
+    description: "A ceremonial mask used in religious rituals during the Bronze Age. Made of hammered bronze with intricate detailing."
   },
   {
     id: "4",
@@ -38,7 +44,8 @@ const MOCK_ARTIFACTS = [
     period: "1870s",
     category: "Jewelry",
     hasModel: true,
-    dateAdded: "2023-05-08"
+    dateAdded: "2023-05-08",
+    description: "An elegant pocket watch from the Victorian era, with gold plating and intricate engravings."
   },
   {
     id: "5",
@@ -46,13 +53,18 @@ const MOCK_ARTIFACTS = [
     period: "16th Century",
     category: "Pottery",
     hasModel: false,
-    dateAdded: "2023-06-14"
+    dateAdded: "2023-06-14",
+    description: "A blue and white porcelain vase from the Ming Dynasty, featuring traditional Chinese motifs."
   }
 ];
 
 const AdminArtifactList = () => {
   const [artifacts, setArtifacts] = useState(MOCK_ARTIFACTS);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedArtifact, setSelectedArtifact] = useState<typeof MOCK_ARTIFACTS[0] | undefined>(undefined);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [artifactToDelete, setArtifactToDelete] = useState<string | null>(null);
 
   const filteredArtifacts = artifacts.filter(artifact => 
     artifact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -60,14 +72,65 @@ const AdminArtifactList = () => {
     artifact.period.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDelete = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this artifact?")) {
-      // Here we would normally delete from Supabase
-      setArtifacts(artifacts.filter(artifact => artifact.id !== id));
+  const handleOpenDialog = (artifact?: typeof MOCK_ARTIFACTS[0]) => {
+    setSelectedArtifact(artifact);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedArtifact(undefined);
+    setIsDialogOpen(false);
+  };
+
+  const handleSaveArtifact = (artifactData: {
+    name: string;
+    period: string;
+    category: string;
+    hasModel: boolean;
+    description?: string;
+  }) => {
+    if (selectedArtifact) {
+      // Update existing artifact
+      setArtifacts(artifacts.map(artifact => 
+        artifact.id === selectedArtifact.id ? { 
+          ...artifact, 
+          ...artifactData,
+          dateAdded: artifact.dateAdded // Preserve original date
+        } : artifact
+      ));
+      toast({
+        title: "Artifact Updated",
+        description: "The artifact has been successfully updated",
+      });
+    } else {
+      // Create new artifact
+      const newArtifact = {
+        id: (artifacts.length + 1).toString(),
+        ...artifactData,
+        dateAdded: new Date().toISOString().split('T')[0]
+      };
+      setArtifacts([...artifacts, newArtifact]);
+      toast({
+        title: "Artifact Created",
+        description: "The new artifact has been successfully created",
+      });
+    }
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setArtifactToDelete(id);
+    setIsDeleteAlertOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (artifactToDelete) {
+      setArtifacts(artifacts.filter(artifact => artifact.id !== artifactToDelete));
       toast({
         title: "Artifact Deleted",
         description: "The artifact has been successfully deleted",
       });
+      setIsDeleteAlertOpen(false);
+      setArtifactToDelete(null);
     }
   };
 
@@ -95,52 +158,39 @@ const AdminArtifactList = () => {
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
-        <Link to="/admin/artifacts/new">
-          <Button className="w-full sm:w-auto">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5 mr-2" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-            Add New Artifact
-          </Button>
-        </Link>
+        <Button className="w-full sm:w-auto" onClick={() => handleOpenDialog()}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add New Artifact
+        </Button>
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-slate-50 border-b">
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Artifact</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Period</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Category</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">3D Model</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Date Added</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Artifact</TableHead>
+                <TableHead>Period</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>3D Model</TableHead>
+                <TableHead>Date Added</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredArtifacts.length > 0 ? (
                 filteredArtifacts.map((artifact) => (
-                  <tr key={artifact.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                  <TableRow key={artifact.id} className="hover:bg-slate-50 transition-colors">
+                    <TableCell>
                       <div className="font-medium text-slate-900">{artifact.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-500">
                       {artifact.period}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-500">
                       {artifact.category}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    </TableCell>
+                    <TableCell>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         artifact.hasModel 
                           ? 'bg-green-100 text-green-800' 
@@ -148,50 +198,81 @@ const AdminArtifactList = () => {
                       }`}>
                         {artifact.hasModel ? 'Yes' : 'No'}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-500">
                       {new Date(artifact.dateAdded).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    </TableCell>
+                    <TableCell>
                       <div className="flex items-center space-x-2">
-                        <Link 
-                          to={`/admin/artifacts/edit/${artifact.id}`} 
-                          className="text-slate-600 hover:text-slate-900"
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleOpenDialog(artifact)}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                          </svg>
-                        </Link>
-                        <button 
-                          onClick={() => handleDelete(artifact.id)}
-                          className="text-red-600 hover:text-red-800"
+                          <Pencil className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDeleteClick(artifact.id)}
+                          className="text-red-600 hover:text-red-800 hover:bg-red-100"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                          </svg>
-                        </button>
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete</span>
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))
               ) : (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
+                <TableRow>
+                  <TableCell colSpan={6} className="h-32 text-center">
                     <div className="text-slate-500">No artifacts found</div>
-                    <Link to="/admin/artifacts/new" className="inline-block mt-3">
-                      <Button variant="outline" size="sm">Add New Artifact</Button>
-                    </Link>
-                  </td>
-                </tr>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleOpenDialog()}
+                      className="mt-3"
+                    >
+                      Add New Artifact
+                    </Button>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
+
+      {/* Artifact Dialog */}
+      <ArtifactDialog 
+        isOpen={isDialogOpen} 
+        onClose={handleCloseDialog} 
+        artifact={selectedArtifact}
+        onSave={handleSaveArtifact}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this artifact?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the artifact.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 };

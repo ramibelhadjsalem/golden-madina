@@ -1,10 +1,13 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import ServiceDialog from "@/components/admin/ServiceDialog";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 
 // Temporary mock data until we connect to Supabase
 const MOCK_SERVICES = [
@@ -13,62 +16,122 @@ const MOCK_SERVICES = [
     name: "Guided Museum Tour",
     duration: "90 minutes",
     price: "$20",
-    bookingCount: 157
+    bookingCount: 157,
+    description: "Explore our museum's highlights with an expert guide who will provide fascinating insights into the artifacts and their historical context."
   },
   {
     id: "2",
     name: "Conservation Workshop",
     duration: "3 hours",
     price: "$45",
-    bookingCount: 42
+    bookingCount: 42,
+    description: "Learn about conservation techniques used to preserve historical artifacts, with hands-on demonstrations and activities."
   },
   {
     id: "3",
     name: "Historical Research Assistance",
     duration: "By appointment",
     price: "$60/hour",
-    bookingCount: 18
+    bookingCount: 18,
+    description: "Get personalized assistance from our research team for academic projects, genealogy searches, or historical investigations."
   },
   {
     id: "4",
     name: "Private Artifact Viewing",
     duration: "60 minutes",
     price: "$75",
-    bookingCount: 36
+    bookingCount: 36,
+    description: "Enjoy an exclusive, private viewing of selected artifacts not currently on public display, with expert commentary."
   },
   {
     id: "5",
     name: "Educational School Program",
     duration: "2 hours",
     price: "$10 per student",
-    bookingCount: 28
+    bookingCount: 28,
+    description: "Specially designed interactive programs for school groups, tailored to different age ranges and curriculum requirements."
   },
   {
     id: "6",
     name: "Heritage Lecture Series",
     duration: "120 minutes",
     price: "$15",
-    bookingCount: 93
+    bookingCount: 93,
+    description: "Attend fascinating lectures by renowned historians and researchers on various topics related to our collections and cultural heritage."
   }
 ];
 
 const AdminServiceList = () => {
   const [services, setServices] = useState(MOCK_SERVICES);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<typeof MOCK_SERVICES[0] | undefined>(undefined);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
 
   const filteredServices = services.filter(service => 
     service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     service.duration.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDelete = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this service?")) {
-      // Here we would normally delete from Supabase
-      setServices(services.filter(service => service.id !== id));
+  const handleOpenDialog = (service?: typeof MOCK_SERVICES[0]) => {
+    setSelectedService(service);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedService(undefined);
+    setIsDialogOpen(false);
+  };
+
+  const handleSaveService = (serviceData: {
+    name: string;
+    duration: string;
+    price: string;
+    description?: string;
+  }) => {
+    if (selectedService) {
+      // Update existing service
+      setServices(services.map(service => 
+        service.id === selectedService.id ? { 
+          ...service, 
+          ...serviceData,
+          bookingCount: service.bookingCount // Preserve original count
+        } : service
+      ));
+      toast({
+        title: "Service Updated",
+        description: "The service has been successfully updated",
+      });
+    } else {
+      // Create new service
+      const newService = {
+        id: (services.length + 1).toString(),
+        ...serviceData,
+        bookingCount: 0
+      };
+      setServices([...services, newService]);
+      toast({
+        title: "Service Created",
+        description: "The new service has been successfully created",
+      });
+    }
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setServiceToDelete(id);
+    setIsDeleteAlertOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (serviceToDelete) {
+      setServices(services.filter(service => service.id !== serviceToDelete));
       toast({
         title: "Service Deleted",
         description: "The service has been successfully deleted",
       });
+      setIsDeleteAlertOpen(false);
+      setServiceToDelete(null);
     }
   };
 
@@ -96,93 +159,111 @@ const AdminServiceList = () => {
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
-        <Link to="/admin/services/new">
-          <Button className="w-full sm:w-auto">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5 mr-2" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-            Add New Service
-          </Button>
-        </Link>
+        <Button className="w-full sm:w-auto" onClick={() => handleOpenDialog()}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add New Service
+        </Button>
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-slate-50 border-b">
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Service Name</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Duration</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Price</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Total Bookings</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Service Name</TableHead>
+                <TableHead>Duration</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Total Bookings</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredServices.length > 0 ? (
                 filteredServices.map((service) => (
-                  <tr key={service.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                  <TableRow key={service.id} className="hover:bg-slate-50 transition-colors">
+                    <TableCell>
                       <div className="font-medium text-slate-900">{service.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-500">
                       {service.duration}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-500">
                       {service.price}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
+                    </TableCell>
+                    <TableCell className="text-sm font-medium text-slate-900">
                       {service.bookingCount}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    </TableCell>
+                    <TableCell>
                       <div className="flex items-center space-x-2">
-                        <Link 
-                          to={`/admin/services/edit/${service.id}`} 
-                          className="text-slate-600 hover:text-slate-900"
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleOpenDialog(service)}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                          </svg>
-                        </Link>
-                        <button 
-                          onClick={() => handleDelete(service.id)}
-                          className="text-red-600 hover:text-red-800"
+                          <Pencil className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDeleteClick(service.id)}
+                          className="text-red-600 hover:text-red-800 hover:bg-red-100"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                          </svg>
-                        </button>
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete</span>
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))
               ) : (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
+                <TableRow>
+                  <TableCell colSpan={5} className="h-32 text-center">
                     <div className="text-slate-500">No services found</div>
-                    <Link to="/admin/services/new" className="inline-block mt-3">
-                      <Button variant="outline" size="sm">Add New Service</Button>
-                    </Link>
-                  </td>
-                </tr>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleOpenDialog()}
+                      className="mt-3"
+                    >
+                      Add New Service
+                    </Button>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
+
+      {/* Service Dialog */}
+      <ServiceDialog 
+        isOpen={isDialogOpen} 
+        onClose={handleCloseDialog} 
+        service={selectedService}
+        onSave={handleSaveService}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this service?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the service.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 };

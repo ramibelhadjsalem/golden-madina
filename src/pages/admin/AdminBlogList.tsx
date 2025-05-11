@@ -1,10 +1,13 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import BlogDialog from "@/components/admin/BlogDialog";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 
 // Temporary mock data until we connect to Supabase
 const MOCK_BLOGS = [
@@ -14,7 +17,8 @@ const MOCK_BLOGS = [
     summary: "Learn about how our prestigious collection was first established in the late 19th century.",
     author: "Dr. Eleanor Hughes",
     date: "2023-05-15",
-    status: "published"
+    status: "published",
+    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi."
   },
   {
     id: "2",
@@ -22,7 +26,8 @@ const MOCK_BLOGS = [
     summary: "A deep dive into the meticulous process of restoring ceramic artifacts from the Bronze Age.",
     author: "James Richardson",
     date: "2023-06-02",
-    status: "published"
+    status: "published",
+    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi."
   },
   {
     id: "3",
@@ -30,7 +35,8 @@ const MOCK_BLOGS = [
     summary: "Exploring architectural evolution from ancient civilizations to modern marvels through our collection.",
     author: "Prof. Sarah Chen",
     date: "2023-06-18",
-    status: "published"
+    status: "published",
+    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi."
   },
   {
     id: "4",
@@ -38,7 +44,8 @@ const MOCK_BLOGS = [
     summary: "The fascinating stories behind artifacts that were once lost to history and their journey to our collection.",
     author: "Dr. Michael Torres",
     date: "2023-07-05",
-    status: "draft"
+    status: "draft",
+    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi."
   },
   {
     id: "5",
@@ -46,7 +53,8 @@ const MOCK_BLOGS = [
     summary: "How modern technology is helping us overcome preservation challenges for delicate historical artifacts.",
     author: "Lisa Montgomery",
     date: "2023-07-22",
-    status: "published"
+    status: "published",
+    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi."
   },
   {
     id: "6",
@@ -54,27 +62,84 @@ const MOCK_BLOGS = [
     summary: "Decoding the secret messages and symbols embedded in famous Renaissance masterpieces.",
     author: "Dr. Robert Fields",
     date: "2023-08-10",
-    status: "published"
+    status: "published",
+    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi."
   }
 ];
 
 const AdminBlogList = () => {
   const [blogs, setBlogs] = useState(MOCK_BLOGS);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedBlog, setSelectedBlog] = useState<typeof MOCK_BLOGS[0] | undefined>(undefined);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [blogToDelete, setBlogToDelete] = useState<string | null>(null);
 
   const filteredBlogs = blogs.filter(blog => 
     blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     blog.author.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDelete = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this blog post?")) {
-      // Here we would normally delete from Supabase
-      setBlogs(blogs.filter(blog => blog.id !== id));
+  const handleOpenDialog = (blog?: typeof MOCK_BLOGS[0]) => {
+    setSelectedBlog(blog);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedBlog(undefined);
+    setIsDialogOpen(false);
+  };
+
+  const handleSaveBlog = (blogData: {
+    title: string;
+    summary: string;
+    author: string;
+    content: string;
+  }) => {
+    if (selectedBlog) {
+      // Update existing blog
+      setBlogs(blogs.map(blog => 
+        blog.id === selectedBlog.id ? { 
+          ...blog, 
+          ...blogData,
+          date: blog.date, // Preserve original date
+          status: blog.status // Preserve status
+        } : blog
+      ));
+      toast({
+        title: "Blog Updated",
+        description: "The blog post has been successfully updated",
+      });
+    } else {
+      // Create new blog
+      const newBlog = {
+        id: (blogs.length + 1).toString(),
+        ...blogData,
+        date: new Date().toISOString().split('T')[0],
+        status: "published"
+      };
+      setBlogs([...blogs, newBlog]);
+      toast({
+        title: "Blog Created",
+        description: "The new blog post has been successfully created",
+      });
+    }
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setBlogToDelete(id);
+    setIsDeleteAlertOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (blogToDelete) {
+      setBlogs(blogs.filter(blog => blog.id !== blogToDelete));
       toast({
         title: "Blog Deleted",
         description: "The blog post has been successfully deleted",
       });
+      setIsDeleteAlertOpen(false);
+      setBlogToDelete(null);
     }
   };
 
@@ -102,52 +167,39 @@ const AdminBlogList = () => {
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
-        <Link to="/admin/blogs/new">
-          <Button className="w-full sm:w-auto">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5 mr-2" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-            New Blog Post
-          </Button>
-        </Link>
+        <Button className="w-full sm:w-auto" onClick={() => handleOpenDialog()}>
+          <Plus className="mr-2 h-4 w-4" />
+          New Blog Post
+        </Button>
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-slate-50 border-b">
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Title</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Author</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Author</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredBlogs.length > 0 ? (
                 filteredBlogs.map((blog) => (
-                  <tr key={blog.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                  <TableRow key={blog.id} className="hover:bg-slate-50 transition-colors">
+                    <TableCell>
                       <div className="font-medium text-slate-900">{blog.title}</div>
                       <div className="text-sm text-slate-500 truncate max-w-xs">{blog.summary}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-500">
                       {blog.author}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-500">
                       {new Date(blog.date).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    </TableCell>
+                    <TableCell>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         blog.status === 'published' 
                           ? 'bg-green-100 text-green-800' 
@@ -155,47 +207,78 @@ const AdminBlogList = () => {
                       }`}>
                         {blog.status === 'published' ? 'Published' : 'Draft'}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    </TableCell>
+                    <TableCell>
                       <div className="flex items-center space-x-2">
-                        <Link 
-                          to={`/admin/blogs/edit/${blog.id}`} 
-                          className="text-slate-600 hover:text-slate-900"
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleOpenDialog(blog)}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                          </svg>
-                        </Link>
-                        <button 
-                          onClick={() => handleDelete(blog.id)}
-                          className="text-red-600 hover:text-red-800"
+                          <Pencil className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDeleteClick(blog.id)}
+                          className="text-red-600 hover:text-red-800 hover:bg-red-100"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                          </svg>
-                        </button>
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete</span>
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))
               ) : (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
+                <TableRow>
+                  <TableCell colSpan={5} className="h-32 text-center">
                     <div className="text-slate-500">No blog posts found</div>
-                    <Link to="/admin/blogs/new" className="inline-block mt-3">
-                      <Button variant="outline" size="sm">Create New Blog Post</Button>
-                    </Link>
-                  </td>
-                </tr>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleOpenDialog()}
+                      className="mt-3"
+                    >
+                      Create New Blog Post
+                    </Button>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
+
+      {/* Blog Dialog */}
+      <BlogDialog 
+        isOpen={isDialogOpen} 
+        onClose={handleCloseDialog} 
+        blog={selectedBlog}
+        onSave={handleSaveBlog}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this blog post?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the blog post.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 };
