@@ -9,8 +9,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import ArtifactDialog from "@/components/admin/ArtifactDialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
+// Define consistent type for artifacts
+type Artifact = {
+  id: string;
+  name: string;
+  period: string;
+  category: string;
+  hasModel: boolean;
+  dateAdded: string;
+  description: string; // Make it non-optional here to match MOCK_ARTIFACTS
+};
+
 // Temporary mock data until we connect to Supabase
-const MOCK_ARTIFACTS = [
+const MOCK_ARTIFACTS: Artifact[] = [
   {
     id: "1",
     name: "Ancient Greek Amphora",
@@ -58,11 +69,20 @@ const MOCK_ARTIFACTS = [
   }
 ];
 
+// Define the input type for the dialog
+type ArtifactInput = {
+  name: string;
+  period: string;
+  category: string;
+  hasModel: boolean;
+  description: string; // Make it required here to match the Artifact type
+};
+
 const AdminArtifactList = () => {
-  const [artifacts, setArtifacts] = useState(MOCK_ARTIFACTS);
+  const [artifacts, setArtifacts] = useState<Artifact[]>(MOCK_ARTIFACTS);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedArtifact, setSelectedArtifact] = useState<typeof MOCK_ARTIFACTS[0] | undefined>(undefined);
+  const [selectedArtifact, setSelectedArtifact] = useState<Artifact | undefined>(undefined);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [artifactToDelete, setArtifactToDelete] = useState<string | null>(null);
 
@@ -72,7 +92,7 @@ const AdminArtifactList = () => {
     artifact.period.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleOpenDialog = (artifact?: typeof MOCK_ARTIFACTS[0]) => {
+  const handleOpenDialog = (artifact?: Artifact) => {
     setSelectedArtifact(artifact);
     setIsDialogOpen(true);
   };
@@ -82,13 +102,7 @@ const AdminArtifactList = () => {
     setIsDialogOpen(false);
   };
 
-  const handleSaveArtifact = (artifactData: {
-    name: string;
-    period: string;
-    category: string;
-    hasModel: boolean;
-    description?: string;
-  }) => {
+  const handleSaveArtifact = (artifactData: ArtifactInput) => {
     if (selectedArtifact) {
       // Update existing artifact
       setArtifacts(artifacts.map(artifact => 
@@ -104,7 +118,7 @@ const AdminArtifactList = () => {
       });
     } else {
       // Create new artifact
-      const newArtifact = {
+      const newArtifact: Artifact = {
         id: (artifacts.length + 1).toString(),
         ...artifactData,
         dateAdded: new Date().toISOString().split('T')[0]

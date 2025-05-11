@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -17,14 +16,14 @@ interface ArtifactDialogProps {
     period: string;
     category: string;
     hasModel: boolean;
-    description?: string;
+    description: string;
   };
   onSave: (artifact: {
     name: string;
     period: string;
     category: string;
     hasModel: boolean;
-    description?: string;
+    description: string;
   }) => void;
 }
 
@@ -56,7 +55,7 @@ const ArtifactDialog = ({ isOpen, onClose, artifact, onSave }: ArtifactDialogPro
       period,
       category,
       hasModel,
-      description
+      description: description || "" // Ensure description is never undefined
     });
     
     setIsLoading(false);

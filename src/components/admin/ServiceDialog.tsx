@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -15,13 +14,13 @@ interface ServiceDialogProps {
     name: string;
     duration: string;
     price: string;
-    description?: string;
+    description: string;
   };
   onSave: (service: {
     name: string;
     duration: string;
     price: string;
-    description?: string;
+    description: string;
   }) => void;
 }
 
@@ -51,7 +50,7 @@ const ServiceDialog = ({ isOpen, onClose, service, onSave }: ServiceDialogProps)
       name,
       duration,
       price,
-      description
+      description: description || "" // Ensure description is never undefined
     });
     
     setIsLoading(false);

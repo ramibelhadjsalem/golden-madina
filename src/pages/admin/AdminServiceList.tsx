@@ -9,8 +9,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import ServiceDialog from "@/components/admin/ServiceDialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
+// Define consistent type for services
+type Service = {
+  id: string;
+  name: string;
+  duration: string;
+  price: string;
+  bookingCount: number;
+  description: string; // Make it non-optional here to match MOCK_SERVICES
+};
+
 // Temporary mock data until we connect to Supabase
-const MOCK_SERVICES = [
+const MOCK_SERVICES: Service[] = [
   {
     id: "1",
     name: "Guided Museum Tour",
@@ -61,11 +71,19 @@ const MOCK_SERVICES = [
   }
 ];
 
+// Define the input type for the dialog
+type ServiceInput = {
+  name: string;
+  duration: string;
+  price: string;
+  description: string; // Make it required here to match the Service type
+};
+
 const AdminServiceList = () => {
-  const [services, setServices] = useState(MOCK_SERVICES);
+  const [services, setServices] = useState<Service[]>(MOCK_SERVICES);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<typeof MOCK_SERVICES[0] | undefined>(undefined);
+  const [selectedService, setSelectedService] = useState<Service | undefined>(undefined);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
 
@@ -74,7 +92,7 @@ const AdminServiceList = () => {
     service.duration.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleOpenDialog = (service?: typeof MOCK_SERVICES[0]) => {
+  const handleOpenDialog = (service?: Service) => {
     setSelectedService(service);
     setIsDialogOpen(true);
   };
@@ -84,12 +102,7 @@ const AdminServiceList = () => {
     setIsDialogOpen(false);
   };
 
-  const handleSaveService = (serviceData: {
-    name: string;
-    duration: string;
-    price: string;
-    description?: string;
-  }) => {
+  const handleSaveService = (serviceData: ServiceInput) => {
     if (selectedService) {
       // Update existing service
       setServices(services.map(service => 
@@ -105,7 +118,7 @@ const AdminServiceList = () => {
       });
     } else {
       // Create new service
-      const newService = {
+      const newService: Service = {
         id: (services.length + 1).toString(),
         ...serviceData,
         bookingCount: 0
