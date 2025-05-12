@@ -9,6 +9,10 @@ import { toast } from "@/hooks/use-toast";
 import { Editor } from "@tiptap/react";
 import { useTranslate } from "@/hooks/use-translate";
 import { useLanguage } from "@/context/LanguageContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Eye } from "lucide-react";
 
 // Define the blog post interface
 interface BlogPost {
@@ -163,8 +167,9 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
+      <div className="space-y-6">
+        {/* Title and Author in a row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="title">{t('title')}</Label>
             <Input
@@ -186,123 +191,189 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
               className="mt-1"
             />
           </div>
-
-          <div>
-            <FileUploadField
-              label={t('blogImage')}
-              value={image}
-              onChange={setImage}
-              placeholder={t('enterImageUrl')}
-              accept="image/*"
-              maxSizeMB={2}
-              bucket="blogs"
-              folder="covers"
-              showPreview={false}
-              description={t('recommendedImageSize')}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="status">{t('status')}</Label>
-              <select
-                id="status"
-                value={status}
-                onChange={(e) => setStatus(e.target.value as 'draft' | 'published')}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="draft">{t('draft')}</option>
-                <option value="published">{t('published')}</option>
-              </select>
-            </div>
-
-            <div>
-              <Label htmlFor="language">{t('language')}</Label>
-              <select
-                id="language"
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="en">English</option>
-                <option value="fr">Français</option>
-                <option value="ar">العربية</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="summary">{t('summary')}</Label>
-            <Textarea
-              id="summary"
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              placeholder={t('enterSummary')}
-              className="mt-1 h-32"
-            />
-          </div>
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <Label>{t('imagePreview')}</Label>
-            <div className="mt-1 border border-gray-200 rounded-md overflow-hidden h-48 bg-gray-50">
-              {image ? (
-                <FilePreview
-                  url={image}
-                  width="100%"
-                  height="100%"
-                  alt={title || t('blogImagePreview')}
-                  className="object-cover"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-400">
-                  {t('noImageSelected')}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className={!image ? "mt-8" : ""}>
-            <Label>{t('blogPreview')}</Label>
-            <div className="mt-1 p-4 border border-gray-200 rounded-md bg-white">
-              <h2 className="text-xl font-bold">{title || t('blogTitle')}</h2>
-              <p className="text-sm text-gray-500 mt-1">
-                {t('by')} {author || t('authorName')}
-              </p>
-              <p className="mt-2 text-gray-700">{summary || t('blogSummary')}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="content">{t('content')}</Label>
-        <div className="mt-1">
-          <SimpleEditor
-            initContent={content}
-            onChange={handleContentChange}
-            setEditor={setEditor}
+        {/* Image upload */}
+        <div>
+          <FileUploadField
+            label={t('blogImage')}
+            value={image}
+            onChange={setImage}
+            placeholder={t('enterImageUrl')}
+            accept="image/*"
+            maxSizeMB={2}
+            bucket="blogs"
+            folder="covers"
+            showPreview={true}
+            description={t('recommendedImageSize')}
           />
         </div>
+
+        {/* Status and Language in a row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="status">{t('status')}</Label>
+            <Select
+              value={status}
+              onValueChange={(value) => setStatus(value as 'draft' | 'published')}
+            >
+              <SelectTrigger className="w-full mt-1">
+                <SelectValue placeholder={t('status')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">
+                  <div className="flex items-center">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 mr-2"></span>
+                    {t('draft')}
+                  </div>
+                </SelectItem>
+                <SelectItem value="published">
+                  <div className="flex items-center">
+                    <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                    {t('published')}
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="language">{t('language')}</Label>
+            <Select value={language} onValueChange={setLanguage}>
+              <SelectTrigger className="w-full mt-1">
+                <SelectValue placeholder={t('language')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">
+                  <div className="flex items-center">
+                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                    English
+                  </div>
+                </SelectItem>
+                <SelectItem value="fr">
+                  <div className="flex items-center">
+                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                    Français
+                  </div>
+                </SelectItem>
+                <SelectItem value="ar">
+                  <div className="flex items-center">
+                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                    العربية
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Summary */}
+        <div>
+          <Label htmlFor="summary">{t('summary')}</Label>
+          <Textarea
+            id="summary"
+            value={summary}
+            onChange={(e) => setSummary(e.target.value)}
+            placeholder={t('enterSummary')}
+            className="mt-1 h-32"
+          />
+        </div>
+
+        {/* Content */}
+        <div>
+          <Label htmlFor="content">{t('content')}</Label>
+          <div className="mt-1">
+            <SimpleEditor
+              initContent={content}
+              onChange={handleContentChange}
+              setEditor={setEditor}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="flex justify-end space-x-4 pt-4 border-t">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isSubmitting}
-        >
-          {t('cancel')}
-        </Button>
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? t('saving') : blog?.id ? t('updateBlog') : t('createBlog')}
-        </Button>
-      </div>
+      {/* Preview Dialog */}
+      <Dialog>
+        <div className="flex justify-between items-center pt-4 border-t mt-6">
+          <DialogTrigger asChild>
+            <Button type="button" variant="outline" className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              {t('previewBlog')}
+            </Button>
+          </DialogTrigger>
+
+          <div className="flex space-x-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isSubmitting}
+            >
+              {t('cancel')}
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isSubmitting ? t('saving') : blog?.id ? t('updateBlog') : t('createBlog')}
+            </Button>
+          </div>
+        </div>
+
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>{t('blogPreview')}</DialogTitle>
+            <DialogDescription>
+              {t('previewDescription')}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-4">
+            <Card className="overflow-hidden shadow-md">
+              <div className="aspect-video w-full overflow-hidden bg-slate-100 relative">
+                {image ? (
+                  <FilePreview
+                    url={image}
+                    width="100%"
+                    height="100%"
+                    alt={title || t('blogImagePreview')}
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-400">
+                    {t('noImageSelected')}
+                  </div>
+                )}
+                <span className={`absolute bottom-2 left-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${status === 'published' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
+                  }`}>
+                  {status === 'published' ? t('published') : t('draft')}
+                </span>
+                {language && (
+                  <span className="absolute bottom-2 right-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {language === 'en' ? 'English' : language === 'fr' ? 'Français' : 'العربية'}
+                  </span>
+                )}
+              </div>
+              <CardHeader className="p-4">
+                <CardTitle className="line-clamp-1 text-lg">{title || t('blogTitle')}</CardTitle>
+                <CardDescription className="flex justify-between text-sm">
+                  <span>{t('by')} {author || t('authorName')}</span>
+                  <span className="text-slate-500">
+                    {new Date().toLocaleDateString(
+                      language === 'ar' ? 'ar-SA' : language === 'fr' ? 'fr-FR' : 'en-US',
+                      { year: 'numeric', month: 'short', day: 'numeric' }
+                    )}
+                  </span>
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                <p className="text-slate-600">{summary || t('blogSummary')}</p>
+              </CardContent>
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
     </form>
   );
 };
