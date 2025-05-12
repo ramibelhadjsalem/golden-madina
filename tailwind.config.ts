@@ -23,6 +23,118 @@ export default {
 				'playfair': ['"Playfair Display"', 'serif'],
 				'sans': ['"Source Sans 3"', 'sans-serif'],
 			},
+			typography: {
+				DEFAULT: {
+					css: {
+						maxWidth: '65ch',
+						color: 'var(--tw-prose-body)',
+						'[class~="lead"]': {
+							color: 'var(--tw-prose-lead)',
+						},
+						a: {
+							color: 'var(--tw-prose-links)',
+							textDecoration: 'underline',
+							fontWeight: '500',
+						},
+						strong: {
+							color: 'var(--tw-prose-bold)',
+							fontWeight: '600',
+						},
+						ol: {
+							listStyleType: 'decimal',
+						},
+						ul: {
+							listStyleType: 'disc',
+						},
+						hr: {
+							borderColor: 'var(--tw-prose-hr)',
+							borderTopWidth: 1,
+						},
+						blockquote: {
+							fontWeight: '500',
+							fontStyle: 'italic',
+							color: 'var(--tw-prose-quotes)',
+							borderLeftWidth: '0.25rem',
+							borderLeftColor: 'var(--tw-prose-quote-borders)',
+							paddingLeft: '1em',
+						},
+						h1: {
+							color: 'var(--tw-prose-headings)',
+							fontWeight: '800',
+							fontSize: '2.25em',
+							marginTop: '0',
+							marginBottom: '0.8888889em',
+							lineHeight: '1.1111111',
+						},
+						h2: {
+							color: 'var(--tw-prose-headings)',
+							fontWeight: '700',
+							fontSize: '1.5em',
+							marginTop: '2em',
+							marginBottom: '1em',
+							lineHeight: '1.3333333',
+						},
+						h3: {
+							color: 'var(--tw-prose-headings)',
+							fontWeight: '600',
+							fontSize: '1.25em',
+							marginTop: '1.6em',
+							marginBottom: '0.6em',
+							lineHeight: '1.6',
+						},
+						h4: {
+							color: 'var(--tw-prose-headings)',
+							fontWeight: '600',
+							marginTop: '1.5em',
+							marginBottom: '0.5em',
+							lineHeight: '1.5',
+						},
+						code: {
+							color: 'var(--tw-prose-code)',
+							fontWeight: '600',
+							fontSize: '0.875em',
+						},
+						'code::before': {
+							content: '"`"',
+						},
+						'code::after': {
+							content: '"`"',
+						},
+						pre: {
+							color: 'var(--tw-prose-pre-code)',
+							backgroundColor: 'var(--tw-prose-pre-bg)',
+							overflowX: 'auto',
+							fontWeight: '400',
+							fontSize: '0.875em',
+							lineHeight: '1.7142857',
+							marginTop: '1.7142857em',
+							marginBottom: '1.7142857em',
+							borderRadius: '0.375rem',
+							paddingTop: '0.8571429em',
+							paddingRight: '1.1428571em',
+							paddingBottom: '0.8571429em',
+							paddingLeft: '1.1428571em',
+						},
+						'pre code': {
+							backgroundColor: 'transparent',
+							borderWidth: '0',
+							borderRadius: '0',
+							padding: '0',
+							fontWeight: 'inherit',
+							color: 'inherit',
+							fontSize: 'inherit',
+							fontFamily: 'inherit',
+							lineHeight: 'inherit',
+						},
+						'pre code::before': {
+							content: 'none',
+						},
+						'pre code::after': {
+							content: 'none',
+						},
+					},
+				},
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -108,5 +220,32 @@ export default {
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [
+		// @ts-ignore
+		require("tailwindcss-animate"),
+		// @ts-ignore
+		require("@tailwindcss/typography"),
+		function ({ addBase, theme }) {
+			addBase({
+				'h1': {
+					fontSize: theme('fontSize.3xl'),
+					fontWeight: theme('fontWeight.bold'),
+					marginBottom: theme('spacing.4'),
+					fontFamily: theme('fontFamily.playfair')
+				},
+				'h2': {
+					fontSize: theme('fontSize.2xl'),
+					fontWeight: theme('fontWeight.semibold'),
+					marginBottom: theme('spacing.3'),
+					fontFamily: theme('fontFamily.playfair')
+				},
+				'h3': {
+					fontSize: theme('fontSize.xl'),
+					fontWeight: theme('fontWeight.medium'),
+					marginBottom: theme('spacing.2'),
+					fontFamily: theme('fontFamily.playfair')
+				},
+			})
+		}
+	],
 } satisfies Config;

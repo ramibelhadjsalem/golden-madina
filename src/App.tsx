@@ -15,6 +15,7 @@ import ServicesPage from "./pages/main/ServicesPage";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminBlogList from "./pages/admin/AdminBlogList";
+import AdminBlogEdit from "./pages/admin/AdminBlogEdit";
 import AdminArtifactList from "./pages/admin/AdminArtifactList";
 import AdminServiceList from "./pages/admin/AdminServiceList";
 import AdminBookingList from "./pages/admin/AdminBookingList";
@@ -46,8 +47,8 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="" element={<MainLayout />} >
-                <Route path="/" element={<Index />} />
+              <Route path="/" element={<MainLayout />} >
+                <Route index element={<Index />} />
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/blog/:id" element={<BlogDetail />} />
                 <Route path="/artifacts" element={<ArtifactsPage />} />
@@ -62,6 +63,7 @@ const App = () => {
               <Route path="/admin" element={<AdminLayout />}>
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="blogs" element={<AdminBlogList />} />
+                <Route path="blogs/:id" element={<AdminBlogEdit />} />
                 <Route path="artifacts" element={<AdminArtifactList />} />
                 <Route path="services" element={<AdminServiceList />} />
                 <Route path="bookings" element={<AdminBookingList />} />

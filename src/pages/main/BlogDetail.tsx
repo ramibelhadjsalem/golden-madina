@@ -77,8 +77,11 @@ const BlogDetail = () => {
 
       {/* Article Content */}
       <article className="container mx-auto px-4 py-12">
-        <div className="max-w-3xl mx-auto prose prose-slate prose-lg">
-          <div dangerouslySetInnerHTML={{ __html: blog.content }} />
+        <div className="max-w-3xl mx-auto">
+          <div
+            className="rich-text-content"
+            dangerouslySetInnerHTML={{ __html: blog.content }}
+          />
         </div>
 
         {/* Navigation */}

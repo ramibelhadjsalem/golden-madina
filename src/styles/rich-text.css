@@ -1,0 +1,100 @@
+/* Rich Text Content Styles */
+
+.rich-text-content {
+  @apply prose prose-slate max-w-none;
+}
+
+/* Heading styles */
+.rich-text-content h1 {
+  @apply text-3xl font-bold mb-4 font-playfair text-slate-900;
+}
+
+.rich-text-content h2 {
+  @apply text-2xl font-semibold mb-3 font-playfair text-slate-800;
+}
+
+.rich-text-content h3 {
+  @apply text-xl font-medium mb-2 font-playfair text-slate-800;
+}
+
+/* Paragraph styles */
+.rich-text-content p {
+  @apply mb-4 text-slate-700 leading-relaxed;
+}
+
+/* List styles */
+.rich-text-content ul {
+  @apply list-disc pl-5 mb-4;
+}
+
+.rich-text-content ol {
+  @apply list-decimal pl-5 mb-4;
+}
+
+.rich-text-content li {
+  @apply mb-1;
+}
+
+/* Link styles */
+.rich-text-content a {
+  @apply text-blue-600 hover:text-blue-800 underline;
+}
+
+/* Blockquote styles */
+.rich-text-content blockquote {
+  @apply pl-4 border-l-4 border-slate-300 italic text-slate-600 my-4;
+}
+
+/* Code styles */
+.rich-text-content code {
+  @apply bg-slate-100 px-1 py-0.5 rounded text-sm font-mono;
+}
+
+.rich-text-content pre {
+  @apply bg-slate-800 text-white p-4 rounded-md overflow-x-auto my-4;
+}
+
+.rich-text-content pre code {
+  @apply bg-transparent text-white p-0;
+}
+
+/* Image styles */
+.rich-text-content img {
+  @apply max-w-full h-auto rounded-md my-4;
+}
+
+/* Table styles */
+.rich-text-content table {
+  @apply w-full border-collapse my-4;
+}
+
+.rich-text-content th {
+  @apply bg-slate-100 border border-slate-300 px-4 py-2 text-left font-semibold;
+}
+
+.rich-text-content td {
+  @apply border border-slate-300 px-4 py-2;
+}
+
+/* Text alignment */
+.rich-text-content .text-left {
+  @apply text-left;
+}
+
+.rich-text-content .text-center {
+  @apply text-center;
+}
+
+.rich-text-content .text-right {
+  @apply text-right;
+}
+
+/* RTL support */
+[dir="rtl"] .rich-text-content blockquote {
+  @apply pr-4 pl-0 border-r-4 border-l-0;
+}
+
+[dir="rtl"] .rich-text-content ul,
+[dir="rtl"] .rich-text-content ol {
+  @apply pr-5 pl-0;
+}

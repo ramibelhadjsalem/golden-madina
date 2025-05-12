@@ -1,14 +1,13 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import BlogDialog from "@/components/admin/BlogDialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
-import { useLanguage } from "@/context/LanguageContext";
 
 // Temporary mock data until we connect to Supabase
 const MOCK_BLOGS = [
@@ -76,11 +75,9 @@ const MOCK_BLOGS = [
 
 const AdminBlogList = () => {
   const { t } = useTranslate();
-  const { currentLanguage } = useLanguage();
+  const navigate = useNavigate();
   const [blogs, setBlogs] = useState(MOCK_BLOGS);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedBlog, setSelectedBlog] = useState<typeof MOCK_BLOGS[0] | undefined>(undefined);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState<string | null>(null);
 
@@ -89,54 +86,7 @@ const AdminBlogList = () => {
     blog.author.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleOpenDialog = (blog?: typeof MOCK_BLOGS[0]) => {
-    setSelectedBlog(blog);
-    setIsDialogOpen(true);
-  };
 
-  const handleCloseDialog = () => {
-    setSelectedBlog(undefined);
-    setIsDialogOpen(false);
-  };
-
-  const handleSaveBlog = (blogData: {
-    title: string;
-    summary: string;
-    author: string;
-    content: string;
-    image?: string;
-  }) => {
-    if (selectedBlog) {
-      // Update existing blog
-      setBlogs(blogs.map(blog =>
-        blog.id === selectedBlog.id ? {
-          ...blog,
-          ...blogData,
-          date: blog.date, // Preserve original date
-          status: blog.status, // Preserve status
-          image: blogData.image || blog.image // Use new image or keep existing one
-        } : blog
-      ));
-      toast({
-        title: t('blogUpdated'),
-        description: t('blogUpdateSuccess'),
-      });
-    } else {
-      // Create new blog
-      const newBlog = {
-        id: (blogs.length + 1).toString(),
-        ...blogData,
-        date: new Date().toISOString().split('T')[0],
-        status: "published",
-        image: blogData.image || "https://images.unsplash.com/photo-1568667256549-094345857637?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60" // Default image if none provided
-      };
-      setBlogs([...blogs, newBlog]);
-      toast({
-        title: t('blogCreated'),
-        description: t('blogCreateSuccess'),
-      });
-    }
-  };
 
   const handleDeleteClick = (id: string) => {
     setBlogToDelete(id);
@@ -179,7 +129,7 @@ const AdminBlogList = () => {
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
-        <Button className="w-full sm:w-auto" onClick={() => handleOpenDialog()}>
+        <Button className="w-full sm:w-auto" onClick={() => navigate('/admin/blogs/new')}>
           <Plus className="mr-2 h-4 w-4" />
           {t('newBlogPost')}
         </Button>
@@ -200,11 +150,11 @@ const AdminBlogList = () => {
                   <Button
                     variant="secondary"
                     size="icon"
-                    onClick={() => handleOpenDialog(blog)}
+                    onClick={() => navigate(`/admin/blogs/${blog.id}`)}
                     className="rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
                   >
                     <Pencil className="h-4 w-4" />
-                    <span className="sr-only">Edit</span>
+                    <span className="sr-only">{t('edit')}</span>
                   </Button>
                   <Button
                     variant="destructive"
@@ -234,7 +184,7 @@ const AdminBlogList = () => {
                 <p className="text-slate-600 line-clamp-2">{blog.summary}</p>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Button variant="ghost" size="sm" onClick={() => handleOpenDialog(blog)}>
+                <Button variant="ghost" size="sm" onClick={() => navigate(`/admin/blogs/${blog.id}`)}>
                   <Pencil className="h-4 w-4 mr-2" /> {t('edit')}
                 </Button>
                 <Button
@@ -255,7 +205,7 @@ const AdminBlogList = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => handleOpenDialog()}
+            onClick={() => navigate('/admin/blogs/new')}
             className="mt-3"
           >
             {t('createNewBlogPost')}
@@ -263,13 +213,7 @@ const AdminBlogList = () => {
         </div>
       )}
 
-      {/* Blog Dialog */}
-      <BlogDialog
-        isOpen={isDialogOpen}
-        onClose={handleCloseDialog}
-        blog={selectedBlog}
-        onSave={handleSaveBlog}
-      />
+
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
