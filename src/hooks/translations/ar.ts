@@ -217,6 +217,22 @@ export const ar = {
     serviceDeleted: "تم حذف الخدمة",
     serviceDeleteSuccess: "تم حذف الخدمة بنجاح",
 
+    // Authentication
+    unauthorized: "غير مصرح",
+    unauthorizedMessage: "ليس لديك إذن للوصول إلى هذه الصفحة.",
+    backToHome: "العودة إلى الصفحة الرئيسية",
+    goBack: "رجوع",
+    loginFailed: "فشل تسجيل الدخول",
+    loginSuccessful: "تم تسجيل الدخول بنجاح",
+    welcomeAdmin: "مرحبًا بك في لوحة تحكم المسؤول",
+    invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صالحة",
+    invalidEmailPassword: "البريد الإلكتروني أو كلمة المرور التي أدخلتها غير صحيحة",
+    logout: "تسجيل الخروج",
+    loggingOut: "جاري تسجيل الخروج...",
+    logoutSuccessful: "تم تسجيل الخروج",
+    logoutSuccessMessage: "تم تسجيل خروجك بنجاح",
+    logoutErrorMessage: "حدث خطأ أثناء تسجيل الخروج. يرجى المحاولة مرة أخرى.",
+
     // Booking Management
     searchBookings: "البحث عن الحجوزات...",
     bookingId: "رقم الحجز",

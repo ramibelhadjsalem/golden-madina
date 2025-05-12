@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,14 +8,24 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { useTranslate } from "@/hooks/use-translate";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslate();
   const { currentLanguage } = useLanguage();
+  const { signIn, user, loading: authLoading } = useAuth();
   const [credentials, setCredentials] = useState({ email: "admin@example.com", password: "password" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/admin/dashboard");
+    }
+  }, [user, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -29,22 +39,21 @@ const AdminLogin = () => {
     setError("");
 
     try {
-      // This is a placeholder for Supabase authentication
-      // We're simulating a successful login for demo purposes
-      if (credentials.email === "admin@example.com" && credentials.password === "password") {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+      // Use Supabase authentication
+      const { user, session } = await signIn(credentials.email, credentials.password);
 
+      if (user) {
         // Show success message
         toast({
           title: t('loginSuccessful'),
           description: t('welcomeAdmin'),
         });
 
-        // Redirect to admin dashboard
-        navigate("/admin/dashboard");
+        // Redirect to admin dashboard or the page they were trying to access
+        const from = location.state?.from?.pathname || "/admin/dashboard";
+        navigate(from);
       } else {
-        throw new Error("Invalid credentials");
+        throw new Error("Login failed");
       }
     } catch (error) {
       setError(t('invalidEmailPassword'));
@@ -103,8 +112,8 @@ const AdminLogin = () => {
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? t('signingIn') : t('signIn')}
+            <Button type="submit" className="w-full" disabled={loading || authLoading}>
+              {loading || authLoading ? t('signingIn') : t('signIn')}
             </Button>
           </form>
         </CardContent>

@@ -217,6 +217,22 @@ export const en = {
     serviceDeleted: "Service Deleted",
     serviceDeleteSuccess: "The service has been successfully deleted",
 
+    // Authentication
+    unauthorized: "Unauthorized",
+    unauthorizedMessage: "You don't have permission to access this page.",
+    backToHome: "Back to Home",
+    goBack: "Go Back",
+    loginFailed: "Login Failed",
+    loginSuccessful: "Login Successful",
+    welcomeAdmin: "Welcome to the admin dashboard",
+    invalidCredentials: "Invalid email or password",
+    invalidEmailPassword: "The email or password you entered is incorrect",
+    logout: "Logout",
+    loggingOut: "Logging out...",
+    logoutSuccessful: "Logged Out",
+    logoutSuccessMessage: "You have been successfully logged out",
+    logoutErrorMessage: "There was an error logging out. Please try again.",
+
     // Booking Management
     searchBookings: "Search bookings...",
     bookingId: "Booking ID",

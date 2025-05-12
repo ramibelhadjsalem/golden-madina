@@ -217,6 +217,22 @@ export const fr = {
     serviceDeleted: "Service Supprimé",
     serviceDeleteSuccess: "Le service a été supprimé avec succès",
 
+    // Authentication
+    unauthorized: "Non Autorisé",
+    unauthorizedMessage: "Vous n'avez pas la permission d'accéder à cette page.",
+    backToHome: "Retour à l'Accueil",
+    goBack: "Retour",
+    loginFailed: "Échec de Connexion",
+    loginSuccessful: "Connexion Réussie",
+    welcomeAdmin: "Bienvenue sur le tableau de bord administrateur",
+    invalidCredentials: "Email ou mot de passe invalide",
+    invalidEmailPassword: "L'email ou le mot de passe que vous avez saisi est incorrect",
+    logout: "Déconnexion",
+    loggingOut: "Déconnexion en cours...",
+    logoutSuccessful: "Déconnecté",
+    logoutSuccessMessage: "Vous avez été déconnecté avec succès",
+    logoutErrorMessage: "Une erreur s'est produite lors de la déconnexion. Veuillez réessayer.",
+
     // Booking Management
     searchBookings: "Rechercher des réservations...",
     bookingId: "ID de Réservation",
