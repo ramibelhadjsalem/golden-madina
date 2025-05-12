@@ -11,11 +11,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { languages } from "@/context/LanguageContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { currentLanguage, switchLanguage } = useLanguage();
+  const { currentLanguage, switchLanguage, languagesList } = useLanguage();
   const { t } = useTranslate();
 
   return (
@@ -52,7 +51,7 @@ const Navbar = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {languages.map((language) => (
+                {languagesList.map((language) => (
                   <DropdownMenuItem
                     key={language.code}
                     onClick={() => switchLanguage(language)}
@@ -154,7 +153,7 @@ const Navbar = () => {
             {/* Mobile Language Selector */}
             <div className="px-4 py-2 flex items-center">
               <span className="mr-2">Language:</span>
-              {languages.map((language) => (
+              {languagesList.map((language) => (
                 <Button
                   key={language.code}
                   variant="ghost"

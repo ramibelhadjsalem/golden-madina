@@ -1,150 +1,182 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, Pencil, Trash2, Filter } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
+import { useLanguage } from "@/context/LanguageContext";
+import { useBlogs, deleteBlog } from "@/hooks/use-blogs-fixed";
 
-// Temporary mock data until we connect to Supabase
-const MOCK_BLOGS = [
-  {
-    id: "1",
-    title: "The Origin of Our Museum Collection",
-    summary: "Learn about how our prestigious collection was first established in the late 19th century.",
-    author: "Dr. Eleanor Hughes",
-    date: "2023-05-15",
-    status: "published",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi.",
-    image: "https://images.unsplash.com/photo-1568667256549-094345857637?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fG11c2V1bXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60"
-  },
-  {
-    id: "2",
-    title: "Restoration Techniques for Ancient Pottery",
-    summary: "A deep dive into the meticulous process of restoring ceramic artifacts from the Bronze Age.",
-    author: "James Richardson",
-    date: "2023-06-02",
-    status: "published",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi.",
-    image: "https://images.unsplash.com/photo-1574182245530-967d9b3831af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHBvdHRlcnl8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60"
-  },
-  {
-    id: "3",
-    title: "Architecture Through the Ages: A Visual Journey",
-    summary: "Exploring architectural evolution from ancient civilizations to modern marvels through our collection.",
-    author: "Prof. Sarah Chen",
-    date: "2023-06-18",
-    status: "published",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi.",
-    image: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGFyY2hpdGVjdHVyZSUyMGhpc3Rvcnl8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60"
-  },
-  {
-    id: "4",
-    title: "Lost Treasures: Rediscovering Forgotten Artifacts",
-    summary: "The fascinating stories behind artifacts that were once lost to history and their journey to our collection.",
-    author: "Dr. Michael Torres",
-    date: "2023-07-05",
-    status: "draft",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi.",
-    image: "https://images.unsplash.com/photo-1599928577074-a188f4605511?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHRyZWFzdXJlc3xlbnwwfHwwfHx8MA%3D&auto=format&fit=crop&w=800&q=60"
-  },
-  {
-    id: "5",
-    title: "Conservation Challenges in the Digital Age",
-    summary: "How modern technology is helping us overcome preservation challenges for delicate historical artifacts.",
-    author: "Lisa Montgomery",
-    date: "2023-07-22",
-    status: "published",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi.",
-    image: "https://images.unsplash.com/photo-1536240478700-b869070f9279?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8ZGlnaXRhbCUyMGNvbnNlcnZhdGlvbnxlbnwwfHwwfHx8MA%3D&auto=format&fit=crop&w=800&q=60"
-  },
-  {
-    id: "6",
-    title: "The Hidden Symbolism in Renaissance Art",
-    summary: "Decoding the secret messages and symbols embedded in famous Renaissance masterpieces.",
-    author: "Dr. Robert Fields",
-    date: "2023-08-10",
-    status: "published",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel consectetur euismod, nisi nisl consectetur nisi, euismod nisi nisl euismod nisi.",
-    image: "https://images.unsplash.com/photo-1577083552334-28b7fb7fab12?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmVuYWlzc2FuY2UlMjBhcnR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60"
-  }
-];
+// Blog card skeleton for loading state
+const BlogCardSkeleton = () => (
+  <Card className="overflow-hidden">
+    <div className="aspect-video w-full overflow-hidden bg-slate-200 animate-pulse" />
+    <CardHeader>
+      <Skeleton className="h-6 w-3/4 mb-2" />
+      <Skeleton className="h-4 w-1/2" />
+    </CardHeader>
+    <CardContent>
+      <Skeleton className="h-4 w-full mb-2" />
+      <Skeleton className="h-4 w-full mb-2" />
+      <Skeleton className="h-4 w-2/3" />
+    </CardContent>
+    <CardFooter>
+      <Skeleton className="h-4 w-24" />
+    </CardFooter>
+  </Card>
+);
 
 const AdminBlogList = () => {
   const { t } = useTranslate();
+  const { languagesList } = useLanguage();
   const navigate = useNavigate();
-  const [blogs, setBlogs] = useState(MOCK_BLOGS);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<'all' | 'published' | 'draft'>('all');
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const filteredBlogs = blogs.filter(blog =>
-    blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    blog.author.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Create memoized filters object to prevent infinite re-renders
+  const filters = useMemo(() => ({
+    language: selectedLanguage !== 'all' ? selectedLanguage : undefined,
+    status: selectedStatus !== 'all' ? selectedStatus : undefined,
+    searchQuery: searchTerm.length > 2 ? searchTerm : undefined,
+    orderBy: { column: 'created_at', ascending: false }
+  }), [selectedLanguage, selectedStatus, searchTerm]);
 
-
+  // Fetch blogs from Supabase with filters
+  const { blogs, loading, error } = useBlogs(filters);
 
   const handleDeleteClick = (id: string) => {
     setBlogToDelete(id);
     setIsDeleteAlertOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (blogToDelete) {
-      setBlogs(blogs.filter(blog => blog.id !== blogToDelete));
-      toast({
-        title: t('blogDeleted'),
-        description: t('blogDeleteSuccess'),
-      });
-      setIsDeleteAlertOpen(false);
-      setBlogToDelete(null);
+      setIsDeleting(true);
+      try {
+        const success = await deleteBlog(blogToDelete);
+        if (success) {
+          toast({
+            title: t('blogDeleted'),
+            description: t('blogDeleteSuccess'),
+          });
+        } else {
+          throw new Error('Failed to delete blog');
+        }
+      } catch (error) {
+        toast({
+          title: t('error'),
+          description: t('errorDeletingBlog'),
+          variant: 'destructive',
+        });
+      } finally {
+        setIsDeleteAlertOpen(false);
+        setBlogToDelete(null);
+        setIsDeleting(false);
+      }
     }
   };
 
   return (
     <>
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="relative w-full sm:w-64 md:w-96">
-          <Input
-            placeholder={t('searchBlogs')}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
+      <div className="mb-6 flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="relative w-full sm:w-64 md:w-96">
+            <Input
+              placeholder={t('searchBlogs')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <Button className="w-full sm:w-auto" onClick={() => navigate('/admin/blogs/new')}>
+            <Plus className="mr-2 h-4 w-4" />
+            {t('newBlogPost')}
+          </Button>
         </div>
-        <Button className="w-full sm:w-auto" onClick={() => navigate('/admin/blogs/new')}>
-          <Plus className="mr-2 h-4 w-4" />
-          {t('newBlogPost')}
-        </Button>
+
+        {/* Filters */}
+        <div className="flex flex-wrap gap-3 items-center">
+          <div className="flex items-center">
+            <Filter className="h-4 w-4 mr-2 text-slate-500" />
+            <span className="text-sm font-medium text-slate-700 mr-2">{t('filters')}:</span>
+          </div>
+
+          {/* Status Filter */}
+          <Select value={selectedStatus} onValueChange={(value) => setSelectedStatus(value as 'all' | 'published' | 'draft')}>
+            <SelectTrigger className="h-8 w-[130px]">
+              <SelectValue placeholder={t('status')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('allStatus')}</SelectItem>
+              <SelectItem value="published">{t('published')}</SelectItem>
+              <SelectItem value="draft">{t('draft')}</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Language Filter */}
+          <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+            <SelectTrigger className="h-8 w-[130px]">
+              <SelectValue placeholder={t('language')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('allLanguages')}</SelectItem>
+              {languagesList.map((lang) => (
+                <SelectItem key={lang.code} value={lang.code}>
+                  {lang.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Grid card layout */}
-      {filteredBlogs.length > 0 ? (
+      {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {filteredBlogs.map((blog) => (
+          {[...Array(6)].map((_, index) => (
+            <BlogCardSkeleton key={index} />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-12 bg-slate-50 rounded-lg">
+          <div className="text-slate-500">{t('errorOccurred')}</div>
+          <p className="text-slate-400 mt-2">{t('tryAgainLater')}</p>
+        </div>
+      ) : blogs.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {blogs.map((blog) => (
             <Card key={blog.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <div className="aspect-video w-full overflow-hidden bg-slate-100 relative">
                 <img
                   src={blog.image}
                   alt={blog.title}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
+                  }}
                 />
                 <div className="absolute top-2 right-2 flex gap-1">
                   <Button
@@ -159,11 +191,12 @@ const AdminBlogList = () => {
                   <Button
                     variant="destructive"
                     size="icon"
-                    onClick={() => handleDeleteClick(blog.id)}
+                    onClick={() => handleDeleteClick(blog.id as string)}
                     className="rounded-full bg-white/80 backdrop-blur-sm text-red-600 hover:bg-white hover:text-red-700"
+                    disabled={isDeleting}
                   >
                     <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Delete</span>
+                    <span className="sr-only">{t('delete')}</span>
                   </Button>
                 </div>
                 <span className={`absolute bottom-2 left-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${blog.status === 'published'
@@ -172,12 +205,22 @@ const AdminBlogList = () => {
                   }`}>
                   {blog.status === 'published' ? t('published') : t('draft')}
                 </span>
+                {blog.language && (
+                  <span className="absolute bottom-2 right-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {languagesList.find(lang => lang.code === blog.language)?.name || blog.language.toUpperCase()}
+                  </span>
+                )}
               </div>
               <CardHeader>
                 <CardTitle className="line-clamp-1 text-lg">{blog.title}</CardTitle>
                 <CardDescription className="flex justify-between">
                   <span>{t('by')} {blog.author}</span>
-                  <span className="text-slate-500">{new Date(blog.date).toLocaleDateString()}</span>
+                  <span className="text-slate-500">
+                    {new Date(blog.date).toLocaleDateString(
+                      blog.language === 'ar' ? 'ar-SA' : blog.language === 'fr' ? 'fr-FR' : 'en-US',
+                      { year: 'numeric', month: 'short', day: 'numeric' }
+                    )}
+                  </span>
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -190,8 +233,9 @@ const AdminBlogList = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleDeleteClick(blog.id)}
+                  onClick={() => handleDeleteClick(blog.id as string)}
                   className="text-red-600 hover:text-red-800 hover:bg-red-100"
+                  disabled={isDeleting}
                 >
                   <Trash2 className="h-4 w-4 mr-2" /> {t('delete')}
                 </Button>
@@ -225,12 +269,20 @@ const AdminBlogList = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
+              disabled={isDeleting}
             >
-              {t('delete')}
+              {isDeleting ? (
+                <>
+                  <div className="animate-spin h-4 w-4 mr-2 border-2 border-white rounded-full border-t-transparent"></div>
+                  {t('deleting')}
+                </>
+              ) : (
+                t('delete')
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

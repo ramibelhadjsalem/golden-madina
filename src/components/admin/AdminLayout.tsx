@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useTranslate } from "@/hooks/use-translate";
-import { useLanguage, languages } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -16,7 +16,7 @@ const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslate();
-  const { currentLanguage, switchLanguage } = useLanguage();
+  const { currentLanguage, switchLanguage, languagesList } = useLanguage();
   const { signOut } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -285,7 +285,7 @@ const AdminLayout = () => {
                     align={currentLanguage.rtl ? "start" : "end"}
                     className="w-40"
                   >
-                    {languages.map((language) => (
+                    {languagesList.map((language) => (
                       <DropdownMenuItem
                         key={language.code}
                         onClick={() => switchLanguage(language)}

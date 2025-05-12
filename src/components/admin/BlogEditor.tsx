@@ -4,21 +4,44 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { FileUploadField } from "@/components/ui/file-upload-field";
 import { toast } from "@/hooks/use-toast";
 import { Editor } from "@tiptap/react";
 import { useTranslate } from "@/hooks/use-translate";
+import { useLanguage } from "@/context/LanguageContext";
 
-// Define the blog post type
-export interface BlogPost {
-  id?: string;
-  title: string;
-  author: string;
-  date: string;
-  summary: string;
-  content: string;
-  image: string;
-  status?: 'draft' | 'published';
-}
+// Import the BlogPost type from the hooks
+import { BlogPost } from "@/hooks/use-blogs-fixed";
+
+// Simple component to preview files
+const FilePreview = ({ url, width, height, alt, className }: {
+  url: string;
+  width?: string | number;
+  height?: string | number;
+  alt?: string;
+  className?: string;
+}) => {
+  const [error, setError] = useState(false);
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full bg-gray-100 text-gray-400">
+        Image not found
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={url}
+      alt={alt || "Preview"}
+      width={width}
+      height={height}
+      className={className}
+      onError={() => setError(true)}
+    />
+  );
+};
 
 interface BlogEditorProps {
   blog?: BlogPost;
@@ -28,6 +51,7 @@ interface BlogEditorProps {
 
 const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
   const { t } = useTranslate();
+  const { currentLanguage } = useLanguage();
   const [editor, setEditor] = useState<Editor | null>(null);
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -35,6 +59,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
   const [content, setContent] = useState("");
   const [image, setImage] = useState("");
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
+  const [language, setLanguage] = useState(currentLanguage.code);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize form with blog data if editing
@@ -46,8 +71,9 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
       setContent(blog.content || "");
       setImage(blog.image || "");
       setStatus(blog.status || 'draft');
+      setLanguage(blog.language || currentLanguage.code);
     }
-  }, [blog]);
+  }, [blog, currentLanguage.code]);
 
   const handleContentChange = (newContent: string) => {
     setContent(newContent);
@@ -55,7 +81,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate form
     if (!title.trim()) {
       toast({
@@ -104,7 +130,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
       summary,
       content,
       image,
-      status
+      status,
+      language
     };
 
     // Save blog
@@ -149,27 +176,47 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
           </div>
 
           <div>
-            <Label htmlFor="image">{t('imageUrl')}</Label>
-            <Input
-              id="image"
+            <FileUploadField
+              label={t('blogImage')}
               value={image}
-              onChange={(e) => setImage(e.target.value)}
+              onChange={setImage}
               placeholder={t('enterImageUrl')}
-              className="mt-1"
+              accept="image/*"
+              maxSizeMB={2}
+              bucket="blogs"
+              folder="covers"
+              showPreview={false}
+              description={t('recommendedImageSize')}
             />
           </div>
 
-          <div>
-            <Label htmlFor="status">{t('status')}</Label>
-            <select
-              id="status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as 'draft' | 'published')}
-              className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="draft">{t('draft')}</option>
-              <option value="published">{t('published')}</option>
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="status">{t('status')}</Label>
+              <select
+                id="status"
+                value={status}
+                onChange={(e) => setStatus(e.target.value as 'draft' | 'published')}
+                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="draft">{t('draft')}</option>
+                <option value="published">{t('published')}</option>
+              </select>
+            </div>
+
+            <div>
+              <Label htmlFor="language">{t('language')}</Label>
+              <select
+                id="language"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+                <option value="ar">العربية</option>
+              </select>
+            </div>
           </div>
 
           <div>
@@ -185,21 +232,24 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
         </div>
 
         <div className="space-y-4">
-          {image && (
-            <div>
-              <Label>{t('imagePreview')}</Label>
-              <div className="mt-1 border border-gray-200 rounded-md overflow-hidden h-48 bg-gray-50">
-                <img
-                  src={image}
-                  alt={title}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Image+Preview';
-                  }}
+          <div>
+            <Label>{t('imagePreview')}</Label>
+            <div className="mt-1 border border-gray-200 rounded-md overflow-hidden h-48 bg-gray-50">
+              {image ? (
+                <FilePreview
+                  url={image}
+                  width="100%"
+                  height="100%"
+                  alt={title || t('blogImagePreview')}
+                  className="object-cover"
                 />
-              </div>
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-400">
+                  {t('noImageSelected')}
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
           <div className={!image ? "mt-8" : ""}>
             <Label>{t('blogPreview')}</Label>
