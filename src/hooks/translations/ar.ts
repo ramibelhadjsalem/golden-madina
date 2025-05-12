@@ -152,6 +152,11 @@ export const ar = {
     by: "بواسطة",
     published: "منشور",
     draft: "مسودة",
+    activeFilters: "التصفية النشطة",
+    noActiveFilters: "لا توجد عوامل تصفية نشطة",
+    enterAtLeast3Characters: "أدخل 3 أحرف على الأقل للبحث",
+    searching: "جاري البحث",
+    backToBlogList: "العودة إلى قائمة المدونات",
 
     // Blog Page
     searchArticles: "البحث عن مقالات...",

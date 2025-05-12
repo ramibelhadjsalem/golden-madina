@@ -152,6 +152,11 @@ export const en = {
     by: "By",
     published: "Published",
     draft: "Draft",
+    activeFilters: "Active Filters",
+    noActiveFilters: "No active filters",
+    enterAtLeast3Characters: "Enter at least 3 characters to search",
+    searching: "Searching",
+    backToBlogList: "Back to Blog List",
 
     // Blog Page
     searchArticles: "Search articles...",

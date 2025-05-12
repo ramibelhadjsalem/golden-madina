@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,16 @@ import { Plus, Pencil, Trash2, Filter } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
 import { useLanguage } from "@/context/LanguageContext";
 import { supabase } from "@/lib/supabase";
+
+// Simple debounce function
+function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
+  return function (...args: Parameters<T>) {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 
 // Define the blog post interface
 interface BlogPost {
@@ -52,6 +62,7 @@ const AdminBlogList = () => {
   const { languagesList } = useLanguage();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'published' | 'draft'>('all');
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
@@ -60,65 +71,94 @@ const AdminBlogList = () => {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const isMounted = useRef(true);
 
-  // Fetch blogs from Supabase with filters
+  // Debounce search term to prevent too many fetches
   useEffect(() => {
-    async function fetchBlogs() {
-      try {
-        setLoading(true);
-        setError(null);
+    const timer = setTimeout(() => {
+      if (isMounted.current) {
+        setDebouncedSearchTerm(searchTerm);
+      }
+    }, 300);
 
-        // Start with a simple query
-        const { data, error } = await supabase
-          .from('blogs')
-          .select('*')
-          .order('created_at', { ascending: false });
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
-        if (error) throw error;
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
-        // Filter the data in JavaScript to avoid type instantiation issues
-        let filteredData = data || [];
+  // Fetch blogs function
+  const fetchBlogs = useCallback(async () => {
+    if (!isMounted.current) return;
 
-        // Apply status filter if not 'all'
-        if (selectedStatus !== 'all') {
-          filteredData = filteredData.filter(blog => blog.status === selectedStatus);
-        }
+    try {
+      setLoading(true);
+      setError(null);
 
-        // Apply language filter if not 'all'
-        if (selectedLanguage !== 'all') {
-          filteredData = filteredData.filter(blog => {
-            // Type assertion to handle optional language property
-            const typedBlog = blog as { language?: string };
-            return typedBlog.language === selectedLanguage;
-          });
-        }
+      // Start with a simple query
+      const { data, error } = await supabase
+        .from('blogs')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-        // Apply search filter if term is long enough
-        if (searchTerm.length > 2) {
-          const searchLower = searchTerm.toLowerCase();
-          filteredData = filteredData.filter(blog =>
-          (blog.title?.toLowerCase().includes(searchLower) ||
-            blog.summary?.toLowerCase().includes(searchLower))
-          );
-        }
+      if (error) throw error;
+      if (!isMounted.current) return;
 
-        // Transform the data to match the BlogPost interface
-        const transformedData = filteredData.map(blog => ({
-          ...blog,
-          date: blog.published_at || blog.created_at
-        }));
+      // Filter the data in JavaScript to avoid type instantiation issues
+      let filteredData = data || [];
 
+      // Apply status filter if not 'all'
+      if (selectedStatus !== 'all') {
+        filteredData = filteredData.filter(blog => blog.status === selectedStatus);
+      }
+
+      // Apply language filter if not 'all'
+      if (selectedLanguage !== 'all') {
+        filteredData = filteredData.filter(blog => {
+          // Type assertion to handle optional language property
+          const typedBlog = blog as { language?: string };
+          return typedBlog.language === selectedLanguage;
+        });
+      }
+
+      // Apply search filter if term is long enough
+      if (debouncedSearchTerm.length > 2) {
+        const searchLower = debouncedSearchTerm.toLowerCase();
+        filteredData = filteredData.filter(blog =>
+        (blog.title?.toLowerCase().includes(searchLower) ||
+          blog.summary?.toLowerCase().includes(searchLower))
+        );
+      }
+
+      // Transform the data to match the BlogPost interface
+      const transformedData = filteredData.map(blog => ({
+        ...blog,
+        date: blog.published_at || blog.created_at
+      }));
+
+      if (isMounted.current) {
         setBlogs(transformedData);
-      } catch (err) {
-        console.error('Error fetching blogs:', err);
+      }
+    } catch (err) {
+      console.error('Error fetching blogs:', err);
+      if (isMounted.current) {
         setError(err instanceof Error ? err : new Error('Unknown error'));
-      } finally {
+      }
+    } finally {
+      if (isMounted.current) {
         setLoading(false);
       }
     }
+  }, [selectedLanguage, selectedStatus, debouncedSearchTerm]);
 
+  // Fetch blogs when filters change
+  useEffect(() => {
     fetchBlogs();
-  }, [selectedLanguage, selectedStatus, searchTerm]);
+  }, [fetchBlogs]);
 
   const handleDeleteClick = (id: string) => {
     setBlogToDelete(id);
@@ -165,65 +205,183 @@ const AdminBlogList = () => {
       <div className="mb-6 flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="relative w-full sm:w-64 md:w-96">
-            <Input
-              placeholder={t('searchBlogs')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
+            <div className="relative">
+              <Input
+                placeholder={t('searchBlogs')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-white border-slate-200 focus-visible:ring-blue-500"
+              />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              {searchTerm && (
+                <button
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  onClick={() => setSearchTerm("")}
+                  aria-label="Clear search"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            {searchTerm.length > 0 && searchTerm.length < 3 && (
+              <p className="text-xs text-amber-600 mt-1 ml-1">
+                {t('enterAtLeast3Characters')}
+              </p>
+            )}
+            {searchTerm.length >= 3 && debouncedSearchTerm !== searchTerm && (
+              <p className="text-xs text-blue-600 mt-1 ml-1">
+                {t('searching')}...
+              </p>
+            )}
           </div>
-          <Button className="w-full sm:w-auto" onClick={() => navigate('/admin/blogs/new')}>
+          <Button
+            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
+            onClick={() => navigate('/admin/blogs/new')}
+          >
             <Plus className="mr-2 h-4 w-4" />
             {t('newBlogPost')}
           </Button>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-3 items-center">
-          <div className="flex items-center">
+        <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+          <div className="flex items-center mb-3">
             <Filter className="h-4 w-4 mr-2 text-slate-500" />
-            <span className="text-sm font-medium text-slate-700 mr-2">{t('filters')}:</span>
+            <span className="text-sm font-medium text-slate-700">{t('filters')}</span>
           </div>
 
-          {/* Status Filter */}
-          <Select value={selectedStatus} onValueChange={(value) => setSelectedStatus(value as 'all' | 'published' | 'draft')}>
-            <SelectTrigger className="h-8 w-[130px]">
-              <SelectValue placeholder={t('status')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('allStatus')}</SelectItem>
-              <SelectItem value="published">{t('published')}</SelectItem>
-              <SelectItem value="draft">{t('draft')}</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Status Filter */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-slate-500">{t('status')}</label>
+              <Select
+                value={selectedStatus}
+                onValueChange={(value) => setSelectedStatus(value as 'all' | 'published' | 'draft')}
+              >
+                <SelectTrigger className="w-full bg-white">
+                  <SelectValue placeholder={t('status')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 rounded-full bg-slate-400 mr-2"></span>
+                      {t('allStatus')}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="published">
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                      {t('published')}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="draft">
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 mr-2"></span>
+                      {t('draft')}
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Language Filter */}
-          <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-            <SelectTrigger className="h-8 w-[130px]">
-              <SelectValue placeholder={t('language')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('allLanguages')}</SelectItem>
-              {languagesList.map((lang) => (
-                <SelectItem key={lang.code} value={lang.code}>
-                  {lang.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {/* Language Filter */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-slate-500">{t('language')}</label>
+              <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                <SelectTrigger className="w-full bg-white">
+                  <SelectValue placeholder={t('language')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 rounded-full bg-slate-400 mr-2"></span>
+                      {t('allLanguages')}
+                    </div>
+                  </SelectItem>
+                  {languagesList.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      <div className="flex items-center">
+                        <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                        {lang.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Active Filters Display */}
+            <div className="space-y-2 col-span-1 sm:col-span-2">
+              <label className="text-xs font-medium text-slate-500">{t('activeFilters')}</label>
+              <div className="flex flex-wrap gap-2">
+                {selectedStatus !== 'all' && (
+                  <div className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-slate-100 text-slate-800">
+                    <span className={`w-2 h-2 rounded-full mr-1.5 ${selectedStatus === 'published' ? 'bg-green-500' : 'bg-amber-500'
+                      }`}></span>
+                    {selectedStatus === 'published' ? t('published') : t('draft')}
+                    <button
+                      className="ml-1.5 text-slate-500 hover:text-slate-700"
+                      onClick={() => setSelectedStatus('all')}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+
+                {selectedLanguage !== 'all' && (
+                  <div className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-slate-100 text-slate-800">
+                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-1.5"></span>
+                    {languagesList.find(lang => lang.code === selectedLanguage)?.name || selectedLanguage}
+                    <button
+                      className="ml-1.5 text-slate-500 hover:text-slate-700"
+                      onClick={() => setSelectedLanguage('all')}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+
+                {debouncedSearchTerm.length > 2 && (
+                  <div className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-slate-100 text-slate-800">
+                    <span className="w-2 h-2 rounded-full bg-purple-500 mr-1.5"></span>
+                    {`"${debouncedSearchTerm}"`}
+                    <button
+                      className="ml-1.5 text-slate-500 hover:text-slate-700"
+                      onClick={() => setSearchTerm("")}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+
+                {(selectedStatus === 'all' && selectedLanguage === 'all' && debouncedSearchTerm.length <= 2) && (
+                  <div className="text-sm text-slate-500 italic">
+                    {t('noActiveFilters')}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

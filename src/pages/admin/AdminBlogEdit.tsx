@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import BlogEditor from "@/components/admin/BlogEditor";
 import { toast } from "@/hooks/use-toast";
 import { useTranslate } from "@/hooks/use-translate";
 import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
 
 // Define the blog post interface
 interface BlogPost {
@@ -29,19 +30,47 @@ const AdminBlogEdit = () => {
   const [blog, setBlog] = useState<BlogPost | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(!isNewBlog);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const hasFetchedRef = useRef(false);
 
   // Combined loading state for UI
   const isPageLoading = isLoading || isSubmitting;
 
+  // Reset the fetch flag when the ID changes
+  useEffect(() => {
+    console.log(`Resetting hasFetched for blog ID: ${id}`);
+    hasFetchedRef.current = false;
+
+    // Cleanup when component unmounts
+    return () => {
+      console.log(`Cleanup: Resetting hasFetched for blog ID: ${id}`);
+      hasFetchedRef.current = false;
+    };
+  }, [id]);
+
   // Fetch blog data if editing an existing blog
   useEffect(() => {
-    async function fetchBlog() {
+    // Skip if we've already fetched this blog or if it's a new blog
+    if (hasFetchedRef.current || isNewBlog) {
+      console.log(`Skipping fetch for blog ID: ${id}, hasFetched: ${hasFetchedRef.current}, isNewBlog: ${isNewBlog}`);
       if (isNewBlog) {
         setIsLoading(false);
-        return;
       }
+      return;
+    }
 
+    console.log(`Starting fetch for blog ID: ${id}, hasFetched: ${hasFetchedRef.current}`);
+
+    // Create a mounted flag to prevent state updates after unmounting
+    let isMounted = true;
+
+    async function fetchBlog() {
       try {
+        setIsLoading(true);
+        setError(null);
+
+        console.log(`Admin: Fetching blog with ID: ${id}`);
+
         // Fetch the blog directly from Supabase
         const { data, error } = await supabase
           .from('blogs')
@@ -49,9 +78,19 @@ const AdminBlogEdit = () => {
           .eq('id', id as string)
           .single();
 
-        if (error) throw error;
+        // Check if component is still mounted
+        if (!isMounted) return;
+
+        if (error) {
+          console.error("Supabase error:", error);
+          throw error;
+        }
 
         if (data) {
+          console.log("Admin: Blog data received:", data);
+          hasFetchedRef.current = true;
+          console.log(`Set hasFetched to true for blog ID: ${id}`);
+
           // Transform the data to match the BlogPost interface
           const blogPost: BlogPost = {
             ...data,
@@ -60,6 +99,7 @@ const AdminBlogEdit = () => {
 
           setBlog(blogPost);
         } else {
+          console.log("Admin: No blog found with ID:", id);
           toast({
             title: t('error'),
             description: t('blogNotFound'),
@@ -67,8 +107,12 @@ const AdminBlogEdit = () => {
           });
           navigate("/admin/blogs");
         }
-      } catch (error) {
-        console.error("Error fetching blog:", error);
+      } catch (err) {
+        // Check if component is still mounted
+        if (!isMounted) return;
+
+        console.error("Error fetching blog:", err);
+        setError(err instanceof Error ? err : new Error('Unknown error'));
         toast({
           title: t('error'),
           description: t('errorFetchingBlog'),
@@ -76,16 +120,28 @@ const AdminBlogEdit = () => {
         });
         navigate("/admin/blogs");
       } finally {
-        setIsLoading(false);
+        // Check if component is still mounted
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     fetchBlog();
+
+    // Cleanup function to prevent state updates after unmounting
+    return () => {
+      isMounted = false;
+    };
   }, [id, isNewBlog, navigate, t]);
 
   const handleSaveBlog = async (blogData: BlogPost) => {
+    // Create a mounted flag to prevent state updates after unmounting
+    let isMounted = true;
+
     try {
       setIsSubmitting(true);
+      console.log("Saving blog:", blogData);
 
       // Prepare the blog data
       const now = new Date().toISOString();
@@ -107,6 +163,8 @@ const AdminBlogEdit = () => {
       let result: BlogPost | null = null;
 
       if (id && id !== "new") {
+        console.log(`Updating existing blog with ID: ${id}`);
+
         // Update existing blog
         const { data, error } = await supabase
           .from('blogs')
@@ -115,9 +173,16 @@ const AdminBlogEdit = () => {
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error updating blog:", error);
+          throw error;
+        }
+
+        console.log("Blog updated successfully:", data);
         result = data;
       } else {
+        console.log("Creating new blog");
+
         // Create new blog
         const { data, error } = await supabase
           .from('blogs')
@@ -128,11 +193,22 @@ const AdminBlogEdit = () => {
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error creating blog:", error);
+          throw error;
+        }
+
+        console.log("Blog created successfully:", data);
         result = data;
       }
 
+      if (!isMounted) return;
+
       if (result) {
+        // Reset the fetch flag
+        console.log(`Save success: Resetting hasFetched for blog ID: ${id}`);
+        hasFetchedRef.current = false;
+
         // Show success message
         toast({
           title: id && id !== "new" ? t('blogUpdated') : t('blogCreated'),
@@ -145,6 +221,8 @@ const AdminBlogEdit = () => {
         throw new Error("Failed to save blog");
       }
     } catch (error) {
+      if (!isMounted) return;
+
       console.error("Error saving blog:", error);
       toast({
         title: t('error'),
@@ -152,7 +230,12 @@ const AdminBlogEdit = () => {
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      if (isMounted) {
+        setIsSubmitting(false);
+      }
+
+      // Cleanup function
+      isMounted = false;
     }
   };
 
@@ -162,8 +245,54 @@ const AdminBlogEdit = () => {
 
   if (isPageLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex flex-col space-y-6">
+        {/* Header Skeleton */}
+        <div className="mb-6">
+          <div className="h-8 bg-slate-200 animate-pulse mb-2 w-1/3 rounded"></div>
+          <div className="h-4 bg-slate-200 animate-pulse w-2/3 rounded"></div>
+        </div>
+
+        {/* Form Skeleton */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <div className="h-4 bg-slate-200 animate-pulse w-1/6 rounded"></div>
+              <div className="h-10 bg-slate-200 animate-pulse w-full rounded"></div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="h-4 bg-slate-200 animate-pulse w-1/6 rounded"></div>
+              <div className="h-10 bg-slate-200 animate-pulse w-full rounded"></div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="h-4 bg-slate-200 animate-pulse w-1/6 rounded"></div>
+              <div className="h-10 bg-slate-200 animate-pulse w-full rounded"></div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="h-4 bg-slate-200 animate-pulse w-1/6 rounded"></div>
+              <div className="h-32 bg-slate-200 animate-pulse w-full rounded"></div>
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <div className="h-10 bg-slate-200 animate-pulse w-24 rounded"></div>
+              <div className="h-10 bg-slate-200 animate-pulse w-24 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !isNewBlog) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+        <h2 className="text-xl font-bold text-red-600 mb-2">{t('errorOccurred')}</h2>
+        <p className="text-red-700 mb-4">{error.message || t('errorFetchingBlog')}</p>
+        <Button variant="outline" onClick={() => navigate("/admin/blogs")}>
+          ← {t('backToBlogList')}
+        </Button>
       </div>
     );
   }

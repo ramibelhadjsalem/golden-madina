@@ -32,6 +32,9 @@ const BlogDetail = () => {
 
   // Fetch blog data
   useEffect(() => {
+    // Create a mounted flag to prevent state updates after unmounting
+    let isMounted = true;
+
     async function fetchBlog() {
       if (!id) {
         navigate("/not-found", { replace: true });
@@ -40,6 +43,9 @@ const BlogDetail = () => {
 
       try {
         setLoading(true);
+        setError(null);
+
+        console.log(`Fetching blog with ID: ${id}`);
 
         // Fetch the blog directly from Supabase
         const { data, error } = await supabase
@@ -49,9 +55,17 @@ const BlogDetail = () => {
           .eq('status', 'published')
           .single();
 
-        if (error) throw error;
+        // Check if component is still mounted
+        if (!isMounted) return;
+
+        if (error) {
+          console.error("Supabase error:", error);
+          throw error;
+        }
 
         if (data) {
+          console.log("Blog data received:", data);
+
           // Transform the data to match the BlogPost interface
           const blogPost: BlogPost = {
             ...data,
@@ -60,17 +74,29 @@ const BlogDetail = () => {
 
           setBlog(blogPost);
         } else {
+          console.log("No blog found with ID:", id);
           navigate("/not-found", { replace: true });
         }
       } catch (err) {
+        // Check if component is still mounted
+        if (!isMounted) return;
+
         console.error("Error fetching blog:", err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
       } finally {
-        setLoading(false);
+        // Check if component is still mounted
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
     fetchBlog();
+
+    // Cleanup function to prevent state updates after unmounting
+    return () => {
+      isMounted = false;
+    };
   }, [id, navigate]);
 
   return (

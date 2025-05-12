@@ -152,6 +152,11 @@ export const fr = {
     by: "Par",
     published: "Publié",
     draft: "Brouillon",
+    activeFilters: "Filtres Actifs",
+    noActiveFilters: "Aucun filtre actif",
+    enterAtLeast3Characters: "Entrez au moins 3 caractères pour rechercher",
+    searching: "Recherche en cours",
+    backToBlogList: "Retour à la Liste des Blogs",
 
     // Blog Page
     searchArticles: "Rechercher des articles...",
