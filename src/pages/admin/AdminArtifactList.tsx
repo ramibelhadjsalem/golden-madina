@@ -86,7 +86,7 @@ const AdminArtifactList = () => {
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [artifactToDelete, setArtifactToDelete] = useState<string | null>(null);
 
-  const filteredArtifacts = artifacts.filter(artifact => 
+  const filteredArtifacts = artifacts.filter(artifact =>
     artifact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     artifact.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
     artifact.period.toLowerCase().includes(searchTerm.toLowerCase())
@@ -105,9 +105,9 @@ const AdminArtifactList = () => {
   const handleSaveArtifact = (artifactData: ArtifactInput) => {
     if (selectedArtifact) {
       // Update existing artifact
-      setArtifacts(artifacts.map(artifact => 
-        artifact.id === selectedArtifact.id ? { 
-          ...artifact, 
+      setArtifacts(artifacts.map(artifact =>
+        artifact.id === selectedArtifact.id ? {
+          ...artifact,
           ...artifactData,
           dateAdded: artifact.dateAdded // Preserve original date
         } : artifact
@@ -149,23 +149,23 @@ const AdminArtifactList = () => {
   };
 
   return (
-    <AdminLayout pageTitle="Artifacts Collection">
+    <>
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="relative w-full sm:w-64 md:w-96">
-          <Input 
-            placeholder="Search artifacts..." 
+          <Input
+            placeholder="Search artifacts..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
           />
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
             strokeLinejoin="round"
           >
             <circle cx="11" cy="11" r="8"></circle>
@@ -205,11 +205,10 @@ const AdminArtifactList = () => {
                       {artifact.category}
                     </TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        artifact.hasModel 
-                          ? 'bg-green-100 text-green-800' 
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${artifact.hasModel
+                          ? 'bg-green-100 text-green-800'
                           : 'bg-slate-100 text-slate-800'
-                      }`}>
+                        }`}>
                         {artifact.hasModel ? 'Yes' : 'No'}
                       </span>
                     </TableCell>
@@ -218,16 +217,16 @@ const AdminArtifactList = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleOpenDialog(artifact)}
                         >
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">Edit</span>
                         </Button>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => handleDeleteClick(artifact.id)}
                           className="text-red-600 hover:text-red-800 hover:bg-red-100"
@@ -243,8 +242,8 @@ const AdminArtifactList = () => {
                 <TableRow>
                   <TableCell colSpan={6} className="h-32 text-center">
                     <div className="text-slate-500">No artifacts found</div>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => handleOpenDialog()}
                       className="mt-3"
@@ -260,9 +259,9 @@ const AdminArtifactList = () => {
       </div>
 
       {/* Artifact Dialog */}
-      <ArtifactDialog 
-        isOpen={isDialogOpen} 
-        onClose={handleCloseDialog} 
+      <ArtifactDialog
+        isOpen={isDialogOpen}
+        onClose={handleCloseDialog}
         artifact={selectedArtifact}
         onSave={handleSaveArtifact}
       />
@@ -278,7 +277,7 @@ const AdminArtifactList = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
@@ -287,7 +286,7 @@ const AdminArtifactList = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AdminLayout>
+    </>
   );
 };
 

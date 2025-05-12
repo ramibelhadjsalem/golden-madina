@@ -19,6 +19,7 @@ import AdminArtifactList from "./pages/admin/AdminArtifactList";
 import AdminServiceList from "./pages/admin/AdminServiceList";
 import AdminBookingList from "./pages/admin/AdminBookingList";
 import { useEffect } from "react";
+import AdminLayout from "./components/admin/AdminLayout";
 
 // Add Google Fonts
 const loadFonts = () => {
@@ -49,15 +50,17 @@ const App = () => {
               <Route path="/artifacts" element={<ArtifactsPage />} />
               <Route path="/artifacts/:id" element={<ArtifactDetail />} />
               <Route path="/services" element={<ServicesPage />} />
-              
+
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/blogs" element={<AdminBlogList />} />
-              <Route path="/admin/artifacts" element={<AdminArtifactList />} />
-              <Route path="/admin/services" element={<AdminServiceList />} />
-              <Route path="/admin/bookings" element={<AdminBookingList />} />
-              
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="blogs" element={<AdminBlogList />} />
+                <Route path="artifacts" element={<AdminArtifactList />} />
+                <Route path="services" element={<AdminServiceList />} />
+                <Route path="bookings" element={<AdminBookingList />} />
+              </Route>
+
               {/* 404 Page */}
               <Route path="*" element={<NotFound />} />
             </Routes>

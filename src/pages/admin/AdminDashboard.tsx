@@ -1,5 +1,4 @@
 
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useTranslate } from "@/hooks/use-translate";
@@ -131,7 +130,7 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <AdminLayout pageTitle="Dashboard">
+    <>
       {/* Stats Cards */}
       <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {stats.map((stat, index) => (
@@ -234,7 +233,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

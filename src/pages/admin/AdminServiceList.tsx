@@ -87,7 +87,7 @@ const AdminServiceList = () => {
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
 
-  const filteredServices = services.filter(service => 
+  const filteredServices = services.filter(service =>
     service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     service.duration.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -105,9 +105,9 @@ const AdminServiceList = () => {
   const handleSaveService = (serviceData: ServiceInput) => {
     if (selectedService) {
       // Update existing service
-      setServices(services.map(service => 
-        service.id === selectedService.id ? { 
-          ...service, 
+      setServices(services.map(service =>
+        service.id === selectedService.id ? {
+          ...service,
           ...serviceData,
           bookingCount: service.bookingCount // Preserve original count
         } : service
@@ -149,23 +149,23 @@ const AdminServiceList = () => {
   };
 
   return (
-    <AdminLayout pageTitle="Heritage Services">
+    <>
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="relative w-full sm:w-64 md:w-96">
-          <Input 
-            placeholder="Search services..." 
+          <Input
+            placeholder="Search services..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
           />
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
             strokeLinejoin="round"
           >
             <circle cx="11" cy="11" r="8"></circle>
@@ -208,16 +208,16 @@ const AdminServiceList = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleOpenDialog(service)}
                         >
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">Edit</span>
                         </Button>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => handleDeleteClick(service.id)}
                           className="text-red-600 hover:text-red-800 hover:bg-red-100"
@@ -233,8 +233,8 @@ const AdminServiceList = () => {
                 <TableRow>
                   <TableCell colSpan={5} className="h-32 text-center">
                     <div className="text-slate-500">No services found</div>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => handleOpenDialog()}
                       className="mt-3"
@@ -250,9 +250,9 @@ const AdminServiceList = () => {
       </div>
 
       {/* Service Dialog */}
-      <ServiceDialog 
-        isOpen={isDialogOpen} 
-        onClose={handleCloseDialog} 
+      <ServiceDialog
+        isOpen={isDialogOpen}
+        onClose={handleCloseDialog}
         service={selectedService}
         onSave={handleSaveService}
       />
@@ -268,7 +268,7 @@ const AdminServiceList = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
@@ -277,7 +277,7 @@ const AdminServiceList = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AdminLayout>
+    </>
   );
 };
 

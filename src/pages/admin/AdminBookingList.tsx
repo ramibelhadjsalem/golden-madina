@@ -121,7 +121,7 @@ const AdminBookingList = () => {
   };
 
   return (
-    <AdminLayout pageTitle="Service Bookings">
+    <>
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-4 sm:space-y-0 sm:flex sm:items-center sm:gap-4 w-full">
           <div className="relative w-full sm:w-64 md:w-96">
@@ -240,7 +240,7 @@ const AdminBookingList = () => {
           onStatusChange={handleStatusChange}
         />
       )}
-    </AdminLayout>
+    </>
   );
 };
 

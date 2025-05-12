@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
@@ -81,7 +80,7 @@ const AdminBlogList = () => {
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState<string | null>(null);
 
-  const filteredBlogs = blogs.filter(blog => 
+  const filteredBlogs = blogs.filter(blog =>
     blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     blog.author.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -105,9 +104,9 @@ const AdminBlogList = () => {
   }) => {
     if (selectedBlog) {
       // Update existing blog
-      setBlogs(blogs.map(blog => 
-        blog.id === selectedBlog.id ? { 
-          ...blog, 
+      setBlogs(blogs.map(blog =>
+        blog.id === selectedBlog.id ? {
+          ...blog,
           ...blogData,
           date: blog.date, // Preserve original date
           status: blog.status, // Preserve status
@@ -153,23 +152,23 @@ const AdminBlogList = () => {
   };
 
   return (
-    <AdminLayout pageTitle="Blog Posts">
+    <>
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="relative w-full sm:w-64 md:w-96">
-          <Input 
-            placeholder="Search blogs..." 
+          <Input
+            placeholder="Search blogs..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
           />
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
             strokeLinejoin="round"
           >
             <circle cx="11" cy="11" r="8"></circle>
@@ -188,14 +187,14 @@ const AdminBlogList = () => {
           {filteredBlogs.map((blog) => (
             <Card key={blog.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <div className="aspect-video w-full overflow-hidden bg-slate-100 relative">
-                <img 
-                  src={blog.image} 
-                  alt={blog.title} 
+                <img
+                  src={blog.image}
+                  alt={blog.title}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute top-2 right-2 flex gap-1">
-                  <Button 
-                    variant="secondary" 
+                  <Button
+                    variant="secondary"
                     size="icon"
                     onClick={() => handleOpenDialog(blog)}
                     className="rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
@@ -203,8 +202,8 @@ const AdminBlogList = () => {
                     <Pencil className="h-4 w-4" />
                     <span className="sr-only">Edit</span>
                   </Button>
-                  <Button 
-                    variant="destructive" 
+                  <Button
+                    variant="destructive"
                     size="icon"
                     onClick={() => handleDeleteClick(blog.id)}
                     className="rounded-full bg-white/80 backdrop-blur-sm text-red-600 hover:bg-white hover:text-red-700"
@@ -213,11 +212,10 @@ const AdminBlogList = () => {
                     <span className="sr-only">Delete</span>
                   </Button>
                 </div>
-                <span className={`absolute bottom-2 left-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  blog.status === 'published' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-amber-100 text-amber-800'
-                }`}>
+                <span className={`absolute bottom-2 left-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${blog.status === 'published'
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-amber-100 text-amber-800'
+                  }`}>
                   {blog.status === 'published' ? 'Published' : 'Draft'}
                 </span>
               </div>
@@ -235,8 +233,8 @@ const AdminBlogList = () => {
                 <Button variant="ghost" size="sm" onClick={() => handleOpenDialog(blog)}>
                   <Pencil className="h-4 w-4 mr-2" /> Edit
                 </Button>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={() => handleDeleteClick(blog.id)}
                   className="text-red-600 hover:text-red-800 hover:bg-red-100"
@@ -250,8 +248,8 @@ const AdminBlogList = () => {
       ) : (
         <div className="text-center py-12 bg-slate-50 rounded-lg">
           <div className="text-slate-500">No blog posts found</div>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => handleOpenDialog()}
             className="mt-3"
@@ -262,9 +260,9 @@ const AdminBlogList = () => {
       )}
 
       {/* Blog Dialog */}
-      <BlogDialog 
-        isOpen={isDialogOpen} 
-        onClose={handleCloseDialog} 
+      <BlogDialog
+        isOpen={isDialogOpen}
+        onClose={handleCloseDialog}
         blog={selectedBlog}
         onSave={handleSaveBlog}
       />
@@ -280,7 +278,7 @@ const AdminBlogList = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
@@ -289,7 +287,7 @@ const AdminBlogList = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AdminLayout>
+    </>
   );
 };
 
