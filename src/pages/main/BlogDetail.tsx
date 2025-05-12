@@ -1,8 +1,7 @@
 
-import { useParams, Link } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 
 // Temporary mock data until we connect to Supabase
 const MOCK_BLOG_POSTS = [
@@ -46,72 +45,60 @@ const MOCK_BLOG_POSTS = [
 ];
 
 const BlogDetail = () => {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const blog = MOCK_BLOG_POSTS.find(post => post.id === id);
+  const blog = MOCK_BLOG_POSTS.find(post => post.id === "1");
 
-  if (!blog) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Blog Post Not Found</h2>
-            <Link to="/blog">
-              <Button>Return to Blog</Button>
-            </Link>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
+  // Use useEffect to handle the navigation when blog is not found
+  useEffect(() => {
+    if (!blog) {
+      navigate("/not-found", { replace: true });
+    }
+  }, [blog, navigate]);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow">
-        {/* Hero Image */}
-        <div className="w-full h-[40vh] relative">
-          <img 
-            src={blog.image} 
-            alt={blog.title} 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black bg-opacity-40 flex items-end">
-            <div className="container mx-auto px-4 py-8">
-              <h1 className="text-4xl md:text-5xl font-serif font-bold text-white">{blog.title}</h1>
-              <p className="text-white text-opacity-90 mt-2">
-                By {blog.author} • {new Date(blog.date).toLocaleDateString()}
-              </p>
-            </div>
+    <main className="flex-grow">
+      {/* Hero Image */}
+      <div className="w-full h-[40vh] relative">
+        <img
+          src={blog.image}
+          alt={blog.title}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-end">
+          <div className="container mx-auto px-4 py-8">
+            <h1 className="text-4xl md:text-5xl font-serif font-bold text-white">{blog.title}</h1>
+            <p className="text-white text-opacity-90 mt-2">
+              By {blog.author} • {new Date(blog.date).toLocaleDateString()}
+            </p>
           </div>
         </div>
+      </div>
 
-        {/* Article Content */}
-        <article className="container mx-auto px-4 py-12">
-          <div className="max-w-3xl mx-auto prose prose-slate prose-lg">
-            <div dangerouslySetInnerHTML={{ __html: blog.content }} />
-          </div>
+      {/* Article Content */}
+      <article className="container mx-auto px-4 py-12">
+        <div className="max-w-3xl mx-auto prose prose-slate prose-lg">
+          <div dangerouslySetInnerHTML={{ __html: blog.content }} />
+        </div>
 
-          {/* Navigation */}
-          <div className="max-w-3xl mx-auto mt-12 pt-8 border-t border-slate-200">
-            <div className="flex justify-between">
-              <Link to="/blog">
-                <Button variant="outline">
-                  ← Back to All Articles
-                </Button>
-              </Link>
-              <Link to="/">
-                <Button>
-                  Explore More
-                </Button>
-              </Link>
-            </div>
+        {/* Navigation */}
+        <div className="max-w-3xl mx-auto mt-12 pt-8 border-t border-slate-200">
+          <div className="flex justify-between">
+            <Link to="/blog">
+              <Button variant="outline">
+                ← Back to All Articles
+              </Button>
+            </Link>
+            <Link to="/">
+              <Button>
+                Explore More
+              </Button>
+            </Link>
           </div>
-        </article>
-      </main>
-      <Footer />
-    </div>
+        </div>
+      </article>
+    </main>
+
   );
 };
 

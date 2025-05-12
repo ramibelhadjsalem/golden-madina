@@ -1,12 +1,12 @@
 
 import { useState } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import BookingDetailsDialog from "@/components/admin/BookingDetailsDialog";
 import { Search, Eye } from "lucide-react";
+import { useTranslate } from "@/hooks/use-translate";
 
 // Temporary mock data until we connect to Supabase
 const MOCK_BOOKINGS = [
@@ -69,6 +69,7 @@ const MOCK_BOOKINGS = [
 ];
 
 const AdminBookingList = () => {
+  const { t } = useTranslate();
   const [bookings, setBookings] = useState(MOCK_BOOKINGS);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -76,13 +77,13 @@ const AdminBookingList = () => {
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
 
   const filteredBookings = bookings.filter(booking => {
-    const matchesSearch = 
+    const matchesSearch =
       booking.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.service.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = statusFilter === "all" || booking.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -97,18 +98,18 @@ const AdminBookingList = () => {
 
   const handleStatusChange = (id: string, newStatus: string) => {
     // Here we would normally update in Supabase
-    setBookings(bookings.map(booking => 
+    setBookings(bookings.map(booking =>
       booking.id === id ? { ...booking, status: newStatus } : booking
     ));
-    
+
     toast({
-      title: "Booking Updated",
-      description: `Booking status changed to ${newStatus}`,
+      title: t('bookingUpdated'),
+      description: t('bookingStatusChanged'),
     });
   };
 
   const getStatusBadgeClasses = (status: string) => {
-    switch(status) {
+    switch (status) {
       case 'confirmed':
         return 'bg-green-100 text-green-800';
       case 'pending':
@@ -125,45 +126,45 @@ const AdminBookingList = () => {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-4 sm:space-y-0 sm:flex sm:items-center sm:gap-4 w-full">
           <div className="relative w-full sm:w-64 md:w-96">
-            <Input 
-              placeholder="Search bookings..." 
+            <Input
+              placeholder={t('searchBookings')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
             <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
           </div>
-          
+
           <div className="flex items-center gap-2 font-medium text-sm text-slate-700">
-            <span>Status:</span>
+            <span>{t('status')}:</span>
             <div className="flex gap-2">
-              <Button 
-                variant={statusFilter === "all" ? "default" : "outline"} 
+              <Button
+                variant={statusFilter === "all" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setStatusFilter("all")}
               >
-                All
+                {t('all')}
               </Button>
-              <Button 
-                variant={statusFilter === "pending" ? "default" : "outline"} 
+              <Button
+                variant={statusFilter === "pending" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setStatusFilter("pending")}
               >
-                Pending
+                {t('pending')}
               </Button>
-              <Button 
-                variant={statusFilter === "confirmed" ? "default" : "outline"} 
+              <Button
+                variant={statusFilter === "confirmed" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setStatusFilter("confirmed")}
               >
-                Confirmed
+                {t('confirmed')}
               </Button>
-              <Button 
-                variant={statusFilter === "canceled" ? "default" : "outline"} 
+              <Button
+                variant={statusFilter === "canceled" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setStatusFilter("canceled")}
               >
-                Canceled
+                {t('canceled')}
               </Button>
             </div>
           </div>
@@ -175,12 +176,12 @@ const AdminBookingList = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Booking ID</TableHead>
-                <TableHead>Service</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t('bookingId')}</TableHead>
+                <TableHead>{t('service')}</TableHead>
+                <TableHead>{t('customer')}</TableHead>
+                <TableHead>{t('date')}</TableHead>
+                <TableHead>{t('status')}</TableHead>
+                <TableHead>{t('bookingActions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -201,20 +202,19 @@ const AdminBookingList = () => {
                       {new Date(booking.date).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        getStatusBadgeClasses(booking.status)
-                      }`}>
-                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClasses(booking.status)
+                        }`}>
+                        {t(booking.status)}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleViewDetails(booking)}
                       >
                         <Eye className="h-4 w-4 mr-1" />
-                        View
+                        {t('view')}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -222,7 +222,7 @@ const AdminBookingList = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="h-32 text-center">
-                    <div className="text-slate-500">No bookings found</div>
+                    <div className="text-slate-500">{t('noBookingsFound')}</div>
                   </TableCell>
                 </TableRow>
               )}
@@ -233,7 +233,7 @@ const AdminBookingList = () => {
 
       {/* Booking Details Dialog */}
       {selectedBooking && (
-        <BookingDetailsDialog 
+        <BookingDetailsDialog
           isOpen={isDetailsDialogOpen}
           onClose={handleCloseDialog}
           booking={selectedBooking}

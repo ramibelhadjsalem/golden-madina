@@ -7,6 +7,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import BlogDialog from "@/components/admin/BlogDialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useTranslate } from "@/hooks/use-translate";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Temporary mock data until we connect to Supabase
 const MOCK_BLOGS = [
@@ -73,6 +75,8 @@ const MOCK_BLOGS = [
 ];
 
 const AdminBlogList = () => {
+  const { t } = useTranslate();
+  const { currentLanguage } = useLanguage();
   const [blogs, setBlogs] = useState(MOCK_BLOGS);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -114,8 +118,8 @@ const AdminBlogList = () => {
         } : blog
       ));
       toast({
-        title: "Blog Updated",
-        description: "The blog post has been successfully updated",
+        title: t('blogUpdated'),
+        description: t('blogUpdateSuccess'),
       });
     } else {
       // Create new blog
@@ -128,8 +132,8 @@ const AdminBlogList = () => {
       };
       setBlogs([...blogs, newBlog]);
       toast({
-        title: "Blog Created",
-        description: "The new blog post has been successfully created",
+        title: t('blogCreated'),
+        description: t('blogCreateSuccess'),
       });
     }
   };
@@ -143,8 +147,8 @@ const AdminBlogList = () => {
     if (blogToDelete) {
       setBlogs(blogs.filter(blog => blog.id !== blogToDelete));
       toast({
-        title: "Blog Deleted",
-        description: "The blog post has been successfully deleted",
+        title: t('blogDeleted'),
+        description: t('blogDeleteSuccess'),
       });
       setIsDeleteAlertOpen(false);
       setBlogToDelete(null);
@@ -156,7 +160,7 @@ const AdminBlogList = () => {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="relative w-full sm:w-64 md:w-96">
           <Input
-            placeholder="Search blogs..."
+            placeholder={t('searchBlogs')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -177,7 +181,7 @@ const AdminBlogList = () => {
         </div>
         <Button className="w-full sm:w-auto" onClick={() => handleOpenDialog()}>
           <Plus className="mr-2 h-4 w-4" />
-          New Blog Post
+          {t('newBlogPost')}
         </Button>
       </div>
 
@@ -216,13 +220,13 @@ const AdminBlogList = () => {
                   ? 'bg-green-100 text-green-800'
                   : 'bg-amber-100 text-amber-800'
                   }`}>
-                  {blog.status === 'published' ? 'Published' : 'Draft'}
+                  {blog.status === 'published' ? t('published') : t('draft')}
                 </span>
               </div>
               <CardHeader>
                 <CardTitle className="line-clamp-1 text-lg">{blog.title}</CardTitle>
                 <CardDescription className="flex justify-between">
-                  <span>By {blog.author}</span>
+                  <span>{t('by')} {blog.author}</span>
                   <span className="text-slate-500">{new Date(blog.date).toLocaleDateString()}</span>
                 </CardDescription>
               </CardHeader>
@@ -231,7 +235,7 @@ const AdminBlogList = () => {
               </CardContent>
               <CardFooter className="flex justify-between">
                 <Button variant="ghost" size="sm" onClick={() => handleOpenDialog(blog)}>
-                  <Pencil className="h-4 w-4 mr-2" /> Edit
+                  <Pencil className="h-4 w-4 mr-2" /> {t('edit')}
                 </Button>
                 <Button
                   variant="ghost"
@@ -239,7 +243,7 @@ const AdminBlogList = () => {
                   onClick={() => handleDeleteClick(blog.id)}
                   className="text-red-600 hover:text-red-800 hover:bg-red-100"
                 >
-                  <Trash2 className="h-4 w-4 mr-2" /> Delete
+                  <Trash2 className="h-4 w-4 mr-2" /> {t('delete')}
                 </Button>
               </CardFooter>
             </Card>
@@ -247,14 +251,14 @@ const AdminBlogList = () => {
         </div>
       ) : (
         <div className="text-center py-12 bg-slate-50 rounded-lg">
-          <div className="text-slate-500">No blog posts found</div>
+          <div className="text-slate-500">{t('noBlogsFound')}</div>
           <Button
             variant="outline"
             size="sm"
             onClick={() => handleOpenDialog()}
             className="mt-3"
           >
-            Create New Blog Post
+            {t('createNewBlogPost')}
           </Button>
         </div>
       )}
@@ -271,18 +275,18 @@ const AdminBlogList = () => {
       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to delete this blog post?</AlertDialogTitle>
+            <AlertDialogTitle>{t('confirmDeleteBlog')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the blog post.
+              {t('deleteWarning')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -67,8 +67,6 @@ const BlogPage = () => {
   );
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-grow">
         {/* Header */}
         <section className="bg-slate-900 text-white py-16">
@@ -142,8 +140,6 @@ const BlogPage = () => {
           </div>
         </section>
       </main>
-      <Footer />
-    </div>
   );
 };
 

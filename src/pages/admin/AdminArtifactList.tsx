@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
@@ -8,6 +7,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import ArtifactDialog from "@/components/admin/ArtifactDialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useTranslate } from "@/hooks/use-translate";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Define consistent type for artifacts
 type Artifact = {
@@ -79,6 +80,8 @@ type ArtifactInput = {
 };
 
 const AdminArtifactList = () => {
+  const { t } = useTranslate();
+  const { currentLanguage } = useLanguage();
   const [artifacts, setArtifacts] = useState<Artifact[]>(MOCK_ARTIFACTS);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -113,8 +116,8 @@ const AdminArtifactList = () => {
         } : artifact
       ));
       toast({
-        title: "Artifact Updated",
-        description: "The artifact has been successfully updated",
+        title: t('artifactUpdated'),
+        description: t('artifactUpdateSuccess'),
       });
     } else {
       // Create new artifact
@@ -125,8 +128,8 @@ const AdminArtifactList = () => {
       };
       setArtifacts([...artifacts, newArtifact]);
       toast({
-        title: "Artifact Created",
-        description: "The new artifact has been successfully created",
+        title: t('artifactCreated'),
+        description: t('artifactCreateSuccess'),
       });
     }
   };
@@ -140,8 +143,8 @@ const AdminArtifactList = () => {
     if (artifactToDelete) {
       setArtifacts(artifacts.filter(artifact => artifact.id !== artifactToDelete));
       toast({
-        title: "Artifact Deleted",
-        description: "The artifact has been successfully deleted",
+        title: t('artifactDeleted'),
+        description: t('artifactDeleteSuccess'),
       });
       setIsDeleteAlertOpen(false);
       setArtifactToDelete(null);
@@ -153,7 +156,7 @@ const AdminArtifactList = () => {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="relative w-full sm:w-64 md:w-96">
           <Input
-            placeholder="Search artifacts..."
+            placeholder={t('searchArtifacts')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -174,7 +177,7 @@ const AdminArtifactList = () => {
         </div>
         <Button className="w-full sm:w-auto" onClick={() => handleOpenDialog()}>
           <Plus className="mr-2 h-4 w-4" />
-          Add New Artifact
+          {t('addNewArtifact')}
         </Button>
       </div>
 
@@ -183,12 +186,12 @@ const AdminArtifactList = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Artifact</TableHead>
-                <TableHead>Period</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>3D Model</TableHead>
-                <TableHead>Date Added</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t('artifact')}</TableHead>
+                <TableHead>{t('period')}</TableHead>
+                <TableHead>{t('category')}</TableHead>
+                <TableHead>{t('3dModel')}</TableHead>
+                <TableHead>{t('dateAdded')}</TableHead>
+                <TableHead>{t('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -206,10 +209,10 @@ const AdminArtifactList = () => {
                     </TableCell>
                     <TableCell>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${artifact.hasModel
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-slate-100 text-slate-800'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-slate-100 text-slate-800'
                         }`}>
-                        {artifact.hasModel ? 'Yes' : 'No'}
+                        {artifact.hasModel ? t('yes') : t('no')}
                       </span>
                     </TableCell>
                     <TableCell className="text-sm text-slate-500">
@@ -223,7 +226,7 @@ const AdminArtifactList = () => {
                           onClick={() => handleOpenDialog(artifact)}
                         >
                           <Pencil className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
+                          <span className="sr-only">{t('edit')}</span>
                         </Button>
                         <Button
                           variant="ghost"
@@ -232,7 +235,7 @@ const AdminArtifactList = () => {
                           className="text-red-600 hover:text-red-800 hover:bg-red-100"
                         >
                           <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
+                          <span className="sr-only">{t('delete')}</span>
                         </Button>
                       </div>
                     </TableCell>
@@ -241,14 +244,14 @@ const AdminArtifactList = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="h-32 text-center">
-                    <div className="text-slate-500">No artifacts found</div>
+                    <div className="text-slate-500">{t('noArtifactsFound')}</div>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleOpenDialog()}
                       className="mt-3"
                     >
-                      Add New Artifact
+                      {t('addNewArtifact')}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -270,18 +273,18 @@ const AdminArtifactList = () => {
       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to delete this artifact?</AlertDialogTitle>
+            <AlertDialogTitle>{t('confirmDeleteArtifact')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the artifact.
+              {t('deleteArtifactWarning')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

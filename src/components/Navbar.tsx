@@ -29,7 +29,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-8 rtl:!gap-x-6">
             <Link to="/" className="hover:text-amber-400 transition duration-200">
               {t('home')}
             </Link>

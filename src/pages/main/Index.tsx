@@ -89,8 +89,6 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-grow">
         {/* Hero Section with Carousel */}
         <section className="bg-gradient-to-b from-slate-900 to-slate-800 text-white py-16 md:py-20">
@@ -357,8 +355,6 @@ const Index = () => {
           </div>
         </section>
       </main>
-      <Footer />
-    </div>
   );
 };
 

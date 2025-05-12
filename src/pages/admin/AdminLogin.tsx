@@ -13,7 +13,7 @@ const AdminLogin = () => {
   const navigate = useNavigate();
   const { t } = useTranslate();
   const { currentLanguage } = useLanguage();
-  const [credentials, setCredentials] = useState({ email: "", password: "" });
+  const [credentials, setCredentials] = useState({ email: "admin@example.com", password: "password" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 

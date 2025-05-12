@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
@@ -8,6 +7,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import ServiceDialog from "@/components/admin/ServiceDialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useTranslate } from "@/hooks/use-translate";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Define consistent type for services
 type Service = {
@@ -80,6 +81,8 @@ type ServiceInput = {
 };
 
 const AdminServiceList = () => {
+  const { t } = useTranslate();
+  const { currentLanguage } = useLanguage();
   const [services, setServices] = useState<Service[]>(MOCK_SERVICES);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -113,8 +116,8 @@ const AdminServiceList = () => {
         } : service
       ));
       toast({
-        title: "Service Updated",
-        description: "The service has been successfully updated",
+        title: t('serviceUpdated'),
+        description: t('serviceUpdateSuccess'),
       });
     } else {
       // Create new service
@@ -125,8 +128,8 @@ const AdminServiceList = () => {
       };
       setServices([...services, newService]);
       toast({
-        title: "Service Created",
-        description: "The new service has been successfully created",
+        title: t('serviceCreated'),
+        description: t('serviceCreateSuccess'),
       });
     }
   };
@@ -140,8 +143,8 @@ const AdminServiceList = () => {
     if (serviceToDelete) {
       setServices(services.filter(service => service.id !== serviceToDelete));
       toast({
-        title: "Service Deleted",
-        description: "The service has been successfully deleted",
+        title: t('serviceDeleted'),
+        description: t('serviceDeleteSuccess'),
       });
       setIsDeleteAlertOpen(false);
       setServiceToDelete(null);
@@ -153,7 +156,7 @@ const AdminServiceList = () => {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="relative w-full sm:w-64 md:w-96">
           <Input
-            placeholder="Search services..."
+            placeholder={t('searchServices')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -174,7 +177,7 @@ const AdminServiceList = () => {
         </div>
         <Button className="w-full sm:w-auto" onClick={() => handleOpenDialog()}>
           <Plus className="mr-2 h-4 w-4" />
-          Add New Service
+          {t('addNewService')}
         </Button>
       </div>
 
@@ -183,11 +186,11 @@ const AdminServiceList = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Service Name</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Total Bookings</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead >{t('serviceName')}</TableHead>
+                <TableHead>{t('duration')}</TableHead>
+                <TableHead>{t('price')}</TableHead>
+                <TableHead>{t('totalBookings')}</TableHead>
+                <TableHead>{t('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -214,7 +217,7 @@ const AdminServiceList = () => {
                           onClick={() => handleOpenDialog(service)}
                         >
                           <Pencil className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
+                          <span className="sr-only">{t('edit')}</span>
                         </Button>
                         <Button
                           variant="ghost"
@@ -223,7 +226,7 @@ const AdminServiceList = () => {
                           className="text-red-600 hover:text-red-800 hover:bg-red-100"
                         >
                           <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
+                          <span className="sr-only">{t('delete')}</span>
                         </Button>
                       </div>
                     </TableCell>
@@ -232,14 +235,14 @@ const AdminServiceList = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} className="h-32 text-center">
-                    <div className="text-slate-500">No services found</div>
+                    <div className="text-slate-500">{t('noServicesFound')}</div>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleOpenDialog()}
                       className="mt-3"
                     >
-                      Add New Service
+                      {t('addNewService')}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -261,18 +264,18 @@ const AdminServiceList = () => {
       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to delete this service?</AlertDialogTitle>
+            <AlertDialogTitle>{t('confirmDeleteService')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the service.
+              {t('deleteServiceWarning')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
