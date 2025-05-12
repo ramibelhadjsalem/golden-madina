@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { FileUploadField } from "@/components/ui/file-upload-field";
 import { toast } from "@/hooks/use-toast";
+import { useTranslate } from "@/hooks/use-translate";
 
 interface ArtifactDialogProps {
   isOpen: boolean;
@@ -15,49 +16,64 @@ interface ArtifactDialogProps {
     name: string;
     period: string;
     category: string;
-    hasModel: boolean;
+    model_url: string | null;
+    image_url: string;
     description: string;
+    location?: string | null;
+    discovery_date?: string | null;
+    additional_images?: string[] | null;
   };
   onSave: (artifact: {
     name: string;
     period: string;
     category: string;
-    hasModel: boolean;
+    model_url: string | null;
+    image_url: string;
     description: string;
+    location?: string | null;
+    discovery_date?: string | null;
+    additional_images?: string[] | null;
   }) => void;
 }
 
 const ArtifactDialog = ({ isOpen, onClose, artifact, onSave }: ArtifactDialogProps) => {
+  const { t } = useTranslate();
   const [name, setName] = useState(artifact?.name || "");
   const [period, setPeriod] = useState(artifact?.period || "");
   const [category, setCategory] = useState(artifact?.category || "");
-  const [hasModel, setHasModel] = useState(artifact?.hasModel || false);
+  const [modelUrl, setModelUrl] = useState(artifact?.model_url || "");
+  const [imageUrl, setImageUrl] = useState(artifact?.image_url || "");
   const [description, setDescription] = useState(artifact?.description || "");
+  const [location, setLocation] = useState(artifact?.location || "");
+  const [discoveryDate, setDiscoveryDate] = useState(artifact?.discovery_date || "");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!name || !period || !category) {
+
+    if (!name || !period || !category || !imageUrl) {
       toast({
-        title: "Missing Fields",
-        description: "Please fill in all required fields",
+        title: t('missingFields'),
+        description: t('fillRequiredFields'),
         variant: "destructive",
       });
       return;
     }
 
     setIsLoading(true);
-    
-    // Here we would normally save to Supabase
+
+    // Prepare the artifact data for saving
     onSave({
       name,
       period,
       category,
-      hasModel,
-      description: description || "" // Ensure description is never undefined
+      model_url: modelUrl || null,
+      image_url: imageUrl,
+      description: description || "",
+      location: location || null,
+      discovery_date: discoveryDate || null
     });
-    
+
     setIsLoading(false);
     onClose();
   };
@@ -66,63 +82,110 @@ const ArtifactDialog = ({ isOpen, onClose, artifact, onSave }: ArtifactDialogPro
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{artifact ? "Edit Artifact" : "Create New Artifact"}</DialogTitle>
+          <DialogTitle>{artifact ? t('editArtifact') : t('createNewArtifact')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="name">{t('name')}</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={t('enterArtifactName')}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="period">{t('period')}</Label>
+                <Input
+                  id="period"
+                  value={period}
+                  onChange={(e) => setPeriod(e.target.value)}
+                  placeholder={t('periodPlaceholder')}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="category">{t('category')}</Label>
+                <Input
+                  id="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  placeholder={t('categoryPlaceholder')}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="location">{t('location')}</Label>
+                <Input
+                  id="location"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder={t('locationPlaceholder')}
+                />
+              </div>
+            </div>
+
             <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="discoveryDate">{t('discoveryDate')}</Label>
               <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter artifact name"
+                id="discoveryDate"
+                type="date"
+                value={discoveryDate}
+                onChange={(e) => setDiscoveryDate(e.target.value)}
               />
             </div>
+
             <div className="grid gap-2">
-              <Label htmlFor="period">Period</Label>
-              <Input
-                id="period"
-                value={period}
-                onChange={(e) => setPeriod(e.target.value)}
-                placeholder="e.g., 5th Century BCE"
+              <FileUploadField
+                label={t('artifactImage')}
+                value={imageUrl}
+                onChange={setImageUrl}
+                placeholder={t('enterImageUrl')}
+                accept="image/*"
+                maxSizeMB={2}
+                bucket="artifacts"
+                folder="images"
+                showPreview={true}
+                description={t('recommendedImageSize')}
               />
             </div>
+
             <div className="grid gap-2">
-              <Label htmlFor="category">Category</Label>
-              <Input
-                id="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="e.g., Pottery, Jewelry"
+              <FileUploadField
+                label={t('3dModel')}
+                value={modelUrl}
+                onChange={setModelUrl}
+                placeholder={t('enter3dModelUrl')}
+                accept=".glb,.gltf"
+                maxSizeMB={10}
+                bucket="artifacts"
+                folder="models"
+                showPreview={false}
+                description={t('supported3dFormats')}
+                required={false}
               />
             </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="hasModel" 
-                checked={hasModel} 
-                onCheckedChange={(checked) => setHasModel(checked === true)}
-              />
-              <Label htmlFor="hasModel">Has 3D Model</Label>
-            </div>
+
             <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t('description')}</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Enter artifact description"
+                placeholder={t('enterArtifactDescription')}
                 className="h-40"
               />
             </div>
-            {/* In a real implementation, we would add file upload fields for images and 3D models */}
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+              {t('cancel')}
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Save"}
+            <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
+              {isLoading ? t('saving') : t('save')}
             </Button>
           </DialogFooter>
         </form>

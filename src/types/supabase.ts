@@ -18,7 +18,6 @@ export interface Database {
           period: string
           category: string
           image_url: string
-          has_model: boolean
           model_url: string | null
           location: string | null
           discovery_date: string | null
@@ -32,7 +31,6 @@ export interface Database {
           period: string
           category: string
           image_url: string
-          has_model?: boolean
           model_url?: string | null
           location?: string | null
           discovery_date?: string | null
@@ -46,7 +44,6 @@ export interface Database {
           period?: string
           category?: string
           image_url?: string
-          has_model?: boolean
           model_url?: string | null
           location?: string | null
           discovery_date?: string | null

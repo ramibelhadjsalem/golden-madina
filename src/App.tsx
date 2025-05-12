@@ -18,6 +18,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminBlogList from "./pages/admin/AdminBlogList";
 import AdminBlogEdit from "./pages/admin/AdminBlogEdit";
 import AdminArtifactList from "./pages/admin/AdminArtifactList";
+import AdminArtifactEdit from "./pages/admin/AdminArtifactEdit";
 import AdminServiceList from "./pages/admin/AdminServiceList";
 import AdminBookingList from "./pages/admin/AdminBookingList";
 import { useEffect } from "react";
@@ -73,6 +74,7 @@ const App = () => {
                   <Route path="blogs" element={<AdminBlogList />} />
                   <Route path="blogs/:id" element={<AdminBlogEdit />} />
                   <Route path="artifacts" element={<AdminArtifactList />} />
+                  <Route path="artifacts/:id" element={<AdminArtifactEdit />} />
                   <Route path="services" element={<AdminServiceList />} />
                   <Route path="bookings" element={<AdminBookingList />} />
                 </Route>
