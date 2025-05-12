@@ -1,12 +1,42 @@
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useBlogs } from "@/hooks/use-blogs-fixed";
 import { useTranslate } from "@/hooks/use-translate";
 import { useLanguage } from "@/context/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/lib/supabase";
+
+// Define the blog post interface
+interface BlogPost {
+  id: string;
+  title: string;
+  author: string;
+  content: string;
+  summary: string;
+  image: string;
+  status: 'published' | 'draft';
+  created_at: string;
+  published_at: string | null;
+  language?: string;
+  date: string;
+}
+
+// Define a type for the raw database row
+interface BlogRow {
+  id: string;
+  title: string;
+  author: string;
+  content: string;
+  summary: string;
+  image: string;
+  status: 'published' | 'draft';
+  created_at: string;
+  published_at: string | null;
+  language?: string;
+  [key: string]: unknown; // Allow for additional properties
+}
 
 // Blog card skeleton for loading state
 const BlogCardSkeleton = () => (
@@ -32,17 +62,70 @@ const BlogPage = () => {
   const { currentLanguage, languagesList } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<string>(currentLanguage.code);
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  // Create memoized filters object to prevent infinite re-renders
-  const filters = useMemo(() => ({
-    language: selectedLanguage === 'all' ? undefined : selectedLanguage,
-    status: 'published' as const, // Use const assertion to fix type issue
-    searchQuery: searchTerm.length > 2 ? searchTerm : undefined,
-    orderBy: { column: 'published_at', ascending: false }
-  }), [selectedLanguage, searchTerm]);
+  // Fetch blogs when filters change
+  useEffect(() => {
+    // Define the fetch function inside the effect to avoid dependency issues
+    async function fetchBlogs() {
+      try {
+        setLoading(true);
+        setError(null);
 
-  // Fetch blogs from Supabase with filters
-  const { blogs, loading, error } = useBlogs(filters);
+        // Start with a simple query
+        const { data, error } = await supabase
+          .from('blogs')
+          .select('*')
+          .eq('status', 'published')
+          .order('published_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Filter the data in JavaScript to avoid type instantiation issues
+        let filteredData = data || [];
+
+        // Apply language filter if not 'all'
+        if (selectedLanguage !== 'all') {
+          filteredData = filteredData.filter(blog => {
+            // Cast to BlogRow which has the language property defined
+            return (blog as BlogRow).language === selectedLanguage;
+          });
+        }
+
+        // Apply search filter if term is long enough
+        if (searchTerm.length > 2) {
+          const searchLower = searchTerm.toLowerCase();
+          filteredData = filteredData.filter(blog => {
+            const title = blog.title || '';
+            const summary = blog.summary || '';
+            return title.toLowerCase().includes(searchLower) ||
+              summary.toLowerCase().includes(searchLower);
+          });
+        }
+
+        // Transform the data to match the BlogPost interface
+        const transformedData = filteredData.map(blog => {
+          // Cast to BlogRow to access the properties safely
+          const typedBlog = blog as BlogRow;
+          return {
+            ...typedBlog,
+            date: typedBlog.published_at || typedBlog.created_at
+          } as BlogPost;
+        });
+
+        setBlogs(transformedData);
+      } catch (err) {
+        console.error('Error fetching blogs:', err);
+        setError(err instanceof Error ? err : new Error('Unknown error'));
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchBlogs();
+  }, [selectedLanguage, searchTerm]);
 
   // Update selected language when current language changes
   useEffect(() => {

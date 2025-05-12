@@ -162,6 +162,12 @@ export const ar = {
     tryAdjustingSearchCriteria: "حاول تعديل معايير البحث",
     readMore: "قراءة المزيد",
 
+    // Blog Detail Page
+    backToAllArticles: "العودة إلى جميع المقالات",
+    exploreMore: "استكشاف المزيد",
+    blogNotFound: "لم يتم العثور على المقال",
+    blogMayHaveBeenRemoved: "ربما تمت إزالة هذا المقال أو لم يعد متاحًا.",
+
     // Blog Editor
     editBlog: "تعديل مقال المدونة",
     createNewBlog: "إنشاء مقال مدونة جديد",

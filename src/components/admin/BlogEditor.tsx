@@ -10,8 +10,20 @@ import { Editor } from "@tiptap/react";
 import { useTranslate } from "@/hooks/use-translate";
 import { useLanguage } from "@/context/LanguageContext";
 
-// Import the BlogPost type from the hooks
-import { BlogPost } from "@/hooks/use-blogs-fixed";
+// Define the blog post interface
+interface BlogPost {
+  id?: string;
+  title: string;
+  author: string;
+  content: string;
+  summary: string;
+  image: string;
+  status: 'published' | 'draft';
+  created_at?: string;
+  published_at?: string | null;
+  language?: string;
+  date?: string;
+}
 
 // Simple component to preview files
 const FilePreview = ({ url, width, height, alt, className }: {

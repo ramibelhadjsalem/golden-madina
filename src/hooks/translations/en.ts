@@ -162,6 +162,12 @@ export const en = {
     tryAdjustingSearchCriteria: "Try adjusting your search criteria",
     readMore: "Read More",
 
+    // Blog Detail Page
+    backToAllArticles: "Back to All Articles",
+    exploreMore: "Explore More",
+    blogNotFound: "Blog Post Not Found",
+    blogMayHaveBeenRemoved: "This blog post may have been removed or is no longer available.",
+
     // Blog Editor
     editBlog: "Edit Blog Post",
     createNewBlog: "Create New Blog Post",

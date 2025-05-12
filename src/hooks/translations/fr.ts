@@ -162,6 +162,12 @@ export const fr = {
     tryAdjustingSearchCriteria: "Essayez d'ajuster vos critères de recherche",
     readMore: "Lire la Suite",
 
+    // Blog Detail Page
+    backToAllArticles: "Retour à Tous les Articles",
+    exploreMore: "Explorer Plus",
+    blogNotFound: "Article de Blog Non Trouvé",
+    blogMayHaveBeenRemoved: "Cet article de blog a peut-être été supprimé ou n'est plus disponible.",
+
     // Blog Editor
     editBlog: "Modifier l'Article de Blog",
     createNewBlog: "Créer un Nouvel Article de Blog",

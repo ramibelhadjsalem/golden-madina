@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Pencil, Trash2, Filter } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
 import { useLanguage } from "@/context/LanguageContext";
-import { useBlogs, deleteBlog } from "@/hooks/use-blogs-fixed";
+import { supabase } from "@/lib/supabase";
+
+// Define the blog post interface
+interface BlogPost {
+  id: string;
+  title: string;
+  author: string;
+  content: string;
+  summary: string;
+  image: string;
+  status: 'published' | 'draft';
+  created_at: string;
+  published_at: string | null;
+  language?: string;
+  date: string;
+}
 
 // Blog card skeleton for loading state
 const BlogCardSkeleton = () => (
@@ -42,17 +57,68 @@ const AdminBlogList = () => {
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  // Create memoized filters object to prevent infinite re-renders
-  const filters = useMemo(() => ({
-    language: selectedLanguage !== 'all' ? selectedLanguage : undefined,
-    status: selectedStatus !== 'all' ? selectedStatus : undefined,
-    searchQuery: searchTerm.length > 2 ? searchTerm : undefined,
-    orderBy: { column: 'created_at', ascending: false }
-  }), [selectedLanguage, selectedStatus, searchTerm]);
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   // Fetch blogs from Supabase with filters
-  const { blogs, loading, error } = useBlogs(filters);
+  useEffect(() => {
+    async function fetchBlogs() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Start with a simple query
+        const { data, error } = await supabase
+          .from('blogs')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Filter the data in JavaScript to avoid type instantiation issues
+        let filteredData = data || [];
+
+        // Apply status filter if not 'all'
+        if (selectedStatus !== 'all') {
+          filteredData = filteredData.filter(blog => blog.status === selectedStatus);
+        }
+
+        // Apply language filter if not 'all'
+        if (selectedLanguage !== 'all') {
+          filteredData = filteredData.filter(blog => {
+            // Type assertion to handle optional language property
+            const typedBlog = blog as { language?: string };
+            return typedBlog.language === selectedLanguage;
+          });
+        }
+
+        // Apply search filter if term is long enough
+        if (searchTerm.length > 2) {
+          const searchLower = searchTerm.toLowerCase();
+          filteredData = filteredData.filter(blog =>
+          (blog.title?.toLowerCase().includes(searchLower) ||
+            blog.summary?.toLowerCase().includes(searchLower))
+          );
+        }
+
+        // Transform the data to match the BlogPost interface
+        const transformedData = filteredData.map(blog => ({
+          ...blog,
+          date: blog.published_at || blog.created_at
+        }));
+
+        setBlogs(transformedData);
+      } catch (err) {
+        console.error('Error fetching blogs:', err);
+        setError(err instanceof Error ? err : new Error('Unknown error'));
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchBlogs();
+  }, [selectedLanguage, selectedStatus, searchTerm]);
 
   const handleDeleteClick = (id: string) => {
     setBlogToDelete(id);
@@ -63,16 +129,24 @@ const AdminBlogList = () => {
     if (blogToDelete) {
       setIsDeleting(true);
       try {
-        const success = await deleteBlog(blogToDelete);
-        if (success) {
-          toast({
-            title: t('blogDeleted'),
-            description: t('blogDeleteSuccess'),
-          });
-        } else {
-          throw new Error('Failed to delete blog');
-        }
+        // Delete the blog directly from Supabase
+        const { error } = await supabase
+          .from('blogs')
+          .delete()
+          .eq('id', blogToDelete);
+
+        if (error) throw error;
+
+        // Show success message
+        toast({
+          title: t('blogDeleted'),
+          description: t('blogDeleteSuccess'),
+        });
+
+        // Update the blogs list by removing the deleted blog
+        setBlogs(prevBlogs => prevBlogs.filter(blog => blog.id !== blogToDelete));
       } catch (error) {
+        console.error('Error deleting blog:', error);
         toast({
           title: t('error'),
           description: t('errorDeletingBlog'),
@@ -167,7 +241,7 @@ const AdminBlogList = () => {
         </div>
       ) : blogs.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {blogs.map((blog) => (
+          {blogs.map((blog: BlogPost) => (
             <Card key={blog.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <div className="aspect-video w-full overflow-hidden bg-slate-100 relative">
                 <img
