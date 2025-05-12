@@ -1,51 +1,25 @@
-
 import { useLanguage } from "@/context/LanguageContext";
+import { en } from "./translations/en";
+import { fr } from "./translations/fr";
+import { ar } from "./translations/ar";
 
-// This is a simplified translation function
-// In a real app, you would use i18next or similar
+// Combine translations into a single object
 const translations = {
-  en: {
-    welcome: "Welcome to our Museum",
-    explore: "Explore our collection",
-    learnMore: "Learn more",
-    about: "About",
-    contact: "Contact",
-    blog: "Blog",
-    artifacts: "Artifacts",
-    services: "Services",
-  },
-  fr: {
-    welcome: "Bienvenue à notre musée",
-    explore: "Explorez notre collection",
-    learnMore: "En savoir plus",
-    about: "À propos",
-    contact: "Contact",
-    blog: "Blog",
-    artifacts: "Artefacts",
-    services: "Services",
-  },
-  ar: {
-    welcome: "مرحبا بكم في متحفنا",
-    explore: "استكشف مجموعتنا",
-    learnMore: "اقرأ المزيد",
-    about: "حول",
-    contact: "اتصال",
-    blog: "مدونة",
-    artifacts: "القطع الأثرية",
-    services: "خدمات",
-  }
+  en,
+  fr,
+  ar,
 };
 
 export const useTranslate = () => {
   const { currentLanguage } = useLanguage();
-  
-  const t = (key: keyof typeof translations.en, fallback?: string) => {
+
+  const t = (key: string, fallback?: string) => {
     const langCode = currentLanguage.code as keyof typeof translations;
-    if (translations[langCode] && translations[langCode][key]) {
-      return translations[langCode][key];
+    if (translations[langCode] && translations[langCode][key as keyof typeof translations.en]) {
+      return translations[langCode][key as keyof typeof translations.en];
     }
     return fallback || key;
   };
-  
+
   return { t };
 };

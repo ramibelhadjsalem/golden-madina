@@ -3,9 +3,20 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useLanguage } from "@/context/LanguageContext";
+import { useTranslate } from "@/hooks/use-translate";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { languages } from "@/context/LanguageContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { currentLanguage, switchLanguage } = useLanguage();
+  const { t } = useTranslate();
 
   return (
     <header className="bg-slate-900 text-white">
@@ -20,20 +31,43 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link to="/" className="hover:text-amber-400 transition duration-200">
-              Home
+              {t('home')}
             </Link>
             <Link to="/blog" className="hover:text-amber-400 transition duration-200">
-              Blog
+              {t('blog')}
             </Link>
             <Link to="/artifacts" className="hover:text-amber-400 transition duration-200">
-              Artifacts
+              {t('artifacts')}
             </Link>
             <Link to="/services" className="hover:text-amber-400 transition duration-200">
-              Services
+              {t('services')}
             </Link>
+
+            {/* Language Selector */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 px-2 flex items-center">
+                  <span className="mr-1">{currentLanguage.flag}</span>
+                  <span className="hidden sm:inline">{currentLanguage.name}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {languages.map((language) => (
+                  <DropdownMenuItem
+                    key={language.code}
+                    onClick={() => switchLanguage(language)}
+                    className="cursor-pointer"
+                  >
+                    <span className="mr-2">{language.flag}</span>
+                    {language.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Link to="/admin">
               <Button variant="outline" className="border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white">
-                Admin Login
+                {t('adminLogin')}
               </Button>
             </Link>
           </nav>
@@ -93,35 +127,52 @@ const Navbar = () => {
               className="px-4 py-2 hover:bg-slate-800 rounded"
               onClick={() => setIsOpen(false)}
             >
-              Home
+              {t('home')}
             </Link>
             <Link
               to="/blog"
               className="px-4 py-2 hover:bg-slate-800 rounded"
               onClick={() => setIsOpen(false)}
             >
-              Blog
+              {t('blog')}
             </Link>
             <Link
               to="/artifacts"
               className="px-4 py-2 hover:bg-slate-800 rounded"
               onClick={() => setIsOpen(false)}
             >
-              Artifacts
+              {t('artifacts')}
             </Link>
             <Link
               to="/services"
               className="px-4 py-2 hover:bg-slate-800 rounded"
               onClick={() => setIsOpen(false)}
             >
-              Services
+              {t('services')}
             </Link>
+
+            {/* Mobile Language Selector */}
+            <div className="px-4 py-2 flex items-center">
+              <span className="mr-2">Language:</span>
+              {languages.map((language) => (
+                <Button
+                  key={language.code}
+                  variant="ghost"
+                  size="sm"
+                  className={`mr-2 ${currentLanguage.code === language.code ? 'bg-slate-700' : ''}`}
+                  onClick={() => switchLanguage(language)}
+                >
+                  <span className="mr-1">{language.flag}</span>
+                </Button>
+              ))}
+            </div>
+
             <Link
               to="/admin"
               className="px-4 py-2 hover:bg-slate-800 rounded"
               onClick={() => setIsOpen(false)}
             >
-              Admin Login
+              {t('adminLogin')}
             </Link>
           </CollapsibleContent>
         </Collapsible>

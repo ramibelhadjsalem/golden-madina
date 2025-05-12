@@ -6,9 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { useTranslate } from "@/hooks/use-translate";
+import { useLanguage } from "@/context/LanguageContext";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+  const { t } = useTranslate();
+  const { currentLanguage } = useLanguage();
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,30 +27,30 @@ const AdminLogin = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+
     try {
       // This is a placeholder for Supabase authentication
       // We're simulating a successful login for demo purposes
       if (credentials.email === "admin@example.com" && credentials.password === "password") {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         // Show success message
         toast({
-          title: "Login Successful",
-          description: "Welcome to the admin panel",
+          title: t('loginSuccessful'),
+          description: t('welcomeAdmin'),
         });
-        
+
         // Redirect to admin dashboard
         navigate("/admin/dashboard");
       } else {
         throw new Error("Invalid credentials");
       }
     } catch (error) {
-      setError("Invalid email or password. Please try again.");
+      setError(t('invalidEmailPassword'));
       toast({
-        title: "Login Failed",
-        description: "Invalid email or password",
+        title: t('loginFailed'),
+        description: t('invalidCredentials'),
         variant: "destructive",
       });
     } finally {
@@ -55,11 +59,11 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4" dir={currentLanguage.rtl ? "rtl" : "ltr"}>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-serif">Heritage Co. Admin</CardTitle>
-          <CardDescription>Sign in to access the admin panel</CardDescription>
+          <CardTitle className="text-2xl font-serif">{t('adminArea')}</CardTitle>
+          <CardDescription>{t('signInToAdmin')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -68,9 +72,9 @@ const AdminLogin = () => {
                 {error}
               </div>
             )}
-            
+
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 name="email"
@@ -81,12 +85,12 @@ const AdminLogin = () => {
                 onChange={handleChange}
               />
             </div>
-            
+
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('password')}</Label>
                 <a href="#" className="text-xs text-slate-500 hover:text-slate-800">
-                  Forgot password?
+                  {t('forgotPassword')}
                 </a>
               </div>
               <Input
@@ -98,15 +102,15 @@ const AdminLogin = () => {
                 onChange={handleChange}
               />
             </div>
-            
+
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? t('signingIn') : t('signIn')}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="text-center text-sm text-slate-500">
           <p className="w-full">
-            For demo purposes, use: admin@example.com / password
+            {t('demoCredentials')}
           </p>
         </CardFooter>
       </Card>
