@@ -3,16 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileUploadField } from "@/components/ui/file-upload-field";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
 import { supabase } from "@/lib/supabase";
-import ImageGalleryManager from "@/components/admin/ImageGalleryManager";
 
 // Define consistent type for artifacts
 type Artifact = {
@@ -51,7 +48,7 @@ const AdminArtifactEdit = () => {
   const [modelUrl, setModelUrl] = useState("");
   const [mainImage, setMainImage] = useState("");
   const [additionalImages, setAdditionalImages] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState("details");
+  const [showModel, setShowModel] = useState(false);
 
   // Define fetchArtifact function without useCallback to avoid dependency issues
   const fetchArtifact = async () => {
@@ -220,7 +217,6 @@ const AdminArtifactEdit = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             {t('backToArtifacts')}
           </Button>
-          <h1 className="text-2xl font-semibold">{artifact.name}</h1>
         </div>
         <Button
           onClick={handleSaveArtifact}
@@ -232,136 +228,245 @@ const AdminArtifactEdit = () => {
         </Button>
       </div>
 
-      {/* Artifact Form */}
-      <Card>
-        <CardContent className="p-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-6">
-              <TabsTrigger value="details">{t('details')}</TabsTrigger>
-              <TabsTrigger value="description">{t('description')}</TabsTrigger>
-              <TabsTrigger value="images">{t('images')}</TabsTrigger>
-              <TabsTrigger value="3dModel">{t('3dModel')}</TabsTrigger>
-            </TabsList>
-
-            {/* Details Tab */}
-            <TabsContent value="details" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">{t('name')}</Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder={t('enterArtifactName')}
-                  />
+      {/* Artifact Form - Layout similar to ArtifactDetail */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {/* Left: Images and 3D Model */}
+        <div>
+          <div className="bg-slate-100 rounded-lg overflow-hidden mb-4">
+            {showModel && modelUrl ? (
+              <div className="aspect-square w-full bg-slate-200 flex flex-col items-center justify-center p-8 text-center">
+                <div className="mb-4 text-slate-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+                    <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+                    <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+                  </svg>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="period">{t('period')}</Label>
+                <h3 className="text-xl font-medium text-slate-700 mb-2">{t('3dModelViewer')}</h3>
+                <p className="text-slate-500 mb-4">
+                  {t('3dModelViewerDescription')}
+                </p>
+                <div className="space-y-4 w-full max-w-md">
                   <Input
-                    id="period"
-                    value={period}
-                    onChange={(e) => setPeriod(e.target.value)}
-                    placeholder={t('periodPlaceholder')}
+                    value={modelUrl}
+                    onChange={(e) => setModelUrl(e.target.value)}
+                    placeholder={t('enter3dModelUrl')}
+                    className="bg-white"
                   />
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowModel(false)}
+                  >
+                    {t('viewImages')}
+                  </Button>
                 </div>
               </div>
+            ) : (
+              <div className="aspect-square w-full relative">
+                <div className="w-full h-full" onClick={() => {
+                  // Create a file input element and trigger it
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = 'image/*';
+                  input.onchange = async (e) => {
+                    const files = (e.target as HTMLInputElement).files;
+                    if (!files || files.length === 0) return;
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="category">{t('category')}</Label>
-                  <Input
-                    id="category"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    placeholder={t('categoryPlaceholder')}
+                    try {
+                      const file = files[0];
+                      const { uploadFile } = await import('@/lib/storage-utils');
+                      const fileUrl = await uploadFile(file, 'artifacts', 'images');
+                      if (fileUrl) {
+                        setMainImage(fileUrl);
+                      }
+                    } catch (error) {
+                      console.error('Error uploading file:', error);
+                    }
+                  };
+                  input.click();
+                }}>
+                  {mainImage ? (
+                    <img
+                      src={mainImage}
+                      alt=""
+                      className="w-full h-full object-contain cursor-pointer"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-slate-200 cursor-pointer">
+                      <p className="text-slate-500">{t('noFileSelected')}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-between">
+            <div className="flex gap-2 overflow-x-auto py-2">
+              {/* Main image thumbnail */}
+              {mainImage && (
+                <div
+                  className={`w-16 h-16 rounded-md overflow-hidden flex-shrink-0 border-2 ${!showModel ? "border-amber-500" : "border-transparent"}`}
+                >
+                  <img
+                    src={mainImage}
+                    alt="Main"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+                    }}
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="location">{t('location')}</Label>
+              )}
+
+              {/* Additional images thumbnails */}
+              {additionalImages.map((img, index) => (
+                <div key={index} className="relative group w-16 h-16">
+                  <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0 border-2 border-transparent">
+                    <img
+                      src={img}
+                      alt={`Additional ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+                      }}
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-white"
+                      onClick={() => {
+                        const newImages = [...additionalImages];
+                        newImages.splice(index, 1);
+                        setAdditionalImages(newImages);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+
+              {/* Add new image button */}
+              <div
+                className="w-16 h-16 rounded-md border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer"
+                onClick={() => {
+                  // Create a file input element and trigger it
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = 'image/*';
+                  input.onchange = async (e) => {
+                    const files = (e.target as HTMLInputElement).files;
+                    if (!files || files.length === 0) return;
+
+                    try {
+                      const file = files[0];
+                      const { uploadFile } = await import('@/lib/storage-utils');
+                      const fileUrl = await uploadFile(file, 'artifacts', 'images');
+                      if (fileUrl) {
+                        setAdditionalImages([...additionalImages, fileUrl]);
+                      }
+                    } catch (error) {
+                      console.error('Error uploading file:', error);
+                    }
+                  };
+                  input.click();
+                }}
+              >
+                <div className="text-slate-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {modelUrl && (
+              <Button
+                onClick={() => setShowModel(true)}
+                variant={showModel ? "default" : "outline"}
+                className={showModel ? "bg-amber-500 hover:bg-amber-600" : ""}
+              >
+                {t('3dView')}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Right: Artifact Details */}
+        <div>
+          <div className="mb-6">
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t('enterArtifactName')}
+              className="text-2xl font-bold mb-2"
+            />
+            <div className="flex gap-2">
+              <Input
+                value={period}
+                onChange={(e) => setPeriod(e.target.value)}
+                placeholder={t('periodPlaceholder')}
+                className="text-slate-500"
+              />
+              <Input
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder={t('categoryPlaceholder')}
+                className="text-slate-500"
+              />
+            </div>
+          </div>
+
+          <Tabs defaultValue="description" className="w-full">
+            <TabsList className="mb-6">
+              <TabsTrigger value="description">{t('description')}</TabsTrigger>
+              <TabsTrigger value="details">{t('details')}</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="description">
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={t('enterArtifactDescription')}
+                className="min-h-[300px] w-full"
+              />
+            </TabsContent>
+
+            <TabsContent value="details">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-slate-500">{t('location')}</h3>
                   <Input
-                    id="location"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder={t('locationPlaceholder')}
                   />
                 </div>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="discoveryDate">{t('discoveryDate')}</Label>
-                <Input
-                  id="discoveryDate"
-                  type="date"
-                  value={discoveryDate}
-                  onChange={(e) => setDiscoveryDate(e.target.value)}
-                />
-              </div>
-            </TabsContent>
-
-            {/* Description Tab */}
-            <TabsContent value="description">
-              <div className="grid gap-2">
-                <Label htmlFor="description">{t('description')}</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder={t('enterArtifactDescription')}
-                  className="min-h-[300px]"
-                />
-              </div>
-            </TabsContent>
-
-            {/* Images Tab */}
-            <TabsContent value="images">
-              <ImageGalleryManager
-                mainImage={mainImage}
-                additionalImages={additionalImages}
-                onMainImageChange={setMainImage}
-                onAdditionalImagesChange={setAdditionalImages}
-                bucket="artifacts"
-                folder="images"
-              />
-            </TabsContent>
-
-            {/* 3D Model Tab */}
-            <TabsContent value="3dModel">
-              <div className="grid gap-4">
-                <FileUploadField
-                  label={t('3dModel')}
-                  value={modelUrl}
-                  onChange={setModelUrl}
-                  placeholder={t('enter3dModelUrl')}
-                  accept=".glb,.gltf"
-                  maxSizeMB={10}
-                  bucket="artifacts"
-                  folder="models"
-                  showPreview={false}
-                  description={t('supported3dFormats')}
-                  required={false}
-                />
-
-                {modelUrl && (
-                  <div className="bg-slate-100 rounded-lg p-6 text-center">
-                    <div className="mb-4 text-slate-400">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
-                        <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
-                        <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-medium text-slate-700 mb-2">{t('3dModelViewer')}</h3>
-                    <p className="text-slate-500 mb-4">
-                      {t('3dModelViewerDescription')}
-                    </p>
-                    <p className="text-sm text-blue-600 break-all">{modelUrl}</p>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-500">{t('discoveryDate')}</h3>
+                  <Input
+                    type="date"
+                    value={discoveryDate}
+                    onChange={(e) => setDiscoveryDate(e.target.value)}
+                  />
+                </div>
+                {artifact.created_at && (
+                  <div>
+                    <h3 className="text-sm font-medium text-slate-500">{t('dateAdded')}</h3>
+                    <p>{new Date(artifact.created_at).toLocaleDateString()}</p>
                   </div>
                 )}
               </div>
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
