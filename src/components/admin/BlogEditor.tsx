@@ -202,8 +202,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
             placeholder={t('enterImageUrl')}
             accept="image/*"
             maxSizeMB={2}
-            bucket="blogs"
-            folder="covers"
+            bucket="artifacts"
+            folder="blog"
             showPreview={true}
             description={t('recommendedImageSize')}
           />

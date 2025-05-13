@@ -31,19 +31,19 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({
   const { t } = useTranslate();
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Handle URL input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
   };
-  
+
   // Handle file selection
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    
+
     const file = files[0];
-    
+
     // Validate file
     const allowedTypes = accept === '*' ? [] : accept.split(',').map(type => type.trim());
     if (!validateFile(file, { maxSizeMB, allowedTypes })) {
@@ -53,13 +53,13 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({
       }
       return;
     }
-    
+
     try {
       setIsUploading(true);
-      
+
       // Upload file to Supabase Storage
       const fileUrl = await uploadFile(file, bucket, folder);
-      
+
       if (fileUrl) {
         onChange(fileUrl);
         toast({
@@ -76,21 +76,24 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({
       });
     } finally {
       setIsUploading(false);
-      
+
       // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
   };
-  
+
   // Trigger file input click
-  const handleBrowseClick = () => {
+  const handleBrowseClick = (e: React.MouseEvent) => {
+    // Prevent default behavior to avoid form submission or navigation
+    e.preventDefault();
+
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
-  
+
   return (
     <div className={`relative flex items-center ${className}`}>
       <Input
@@ -101,10 +104,11 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({
         className="pr-24"
         disabled={disabled || isUploading}
       />
-      
+
       <div className="absolute right-1 flex items-center">
         {isUploading ? (
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             disabled
@@ -117,6 +121,7 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({
           </Button>
         ) : (
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             onClick={handleBrowseClick}
@@ -143,7 +148,7 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({
           </Button>
         )}
       </div>
-      
+
       <input
         ref={fileInputRef}
         type="file"

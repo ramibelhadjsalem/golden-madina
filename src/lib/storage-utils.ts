@@ -18,10 +18,10 @@ export async function uploadFile(
     // Generate a unique file name to avoid collisions
     const fileExt = file.name.split('.').pop();
     const fileName = `${uuidv4()}.${fileExt}`;
-    
+
     // Create the file path
     const filePath = folder ? `${folder}/${fileName}` : fileName;
-    
+
     // Upload the file to Supabase Storage
     const { data, error } = await supabase.storage
       .from(bucket)
@@ -29,16 +29,16 @@ export async function uploadFile(
         cacheControl: '3600',
         upsert: true,
       });
-    
+
     if (error) {
       throw error;
     }
-    
+
     // Get the public URL
     const { data: urlData } = supabase.storage
       .from(bucket)
       .getPublicUrl(data.path);
-    
+
     return urlData.publicUrl;
   } catch (error) {
     console.error('Error uploading file:', error);
@@ -66,16 +66,16 @@ export async function deleteFile(
     const urlObj = new URL(url);
     const pathSegments = urlObj.pathname.split('/');
     const filePath = pathSegments.slice(pathSegments.indexOf(bucket) + 1).join('/');
-    
+
     // Delete the file from Supabase Storage
     const { error } = await supabase.storage
       .from(bucket)
       .remove([filePath]);
-    
+
     if (error) {
       throw error;
     }
-    
+
     return true;
   } catch (error) {
     console.error('Error deleting file:', error);
@@ -102,7 +102,7 @@ export function validateFile(
   } = {}
 ): boolean {
   const { maxSizeMB = 5, allowedTypes = [] } = options;
-  
+
   // Check file size
   const fileSizeMB = file.size / (1024 * 1024);
   if (fileSizeMB > maxSizeMB) {
@@ -113,11 +113,23 @@ export function validateFile(
     });
     return false;
   }
-  
+
   // Check file type if allowedTypes is provided
   if (allowedTypes.length > 0) {
     const fileType = file.type;
-    if (!allowedTypes.includes(fileType)) {
+
+    // Check if the file type matches any of the allowed types
+    const isAllowed = allowedTypes.some(type => {
+      // Handle wildcard patterns like 'image/*'
+      if (type.endsWith('/*')) {
+        const typePrefix = type.split('/*')[0];
+        return fileType.startsWith(`${typePrefix}/`);
+      }
+      // Direct match
+      return type === fileType || type === '*';
+    });
+
+    if (!isAllowed) {
       toast({
         title: 'Invalid File Type',
         description: `File type ${fileType} is not allowed. Allowed types: ${allowedTypes.join(', ')}`,
@@ -126,6 +138,6 @@ export function validateFile(
       return false;
     }
   }
-  
+
   return true;
 }

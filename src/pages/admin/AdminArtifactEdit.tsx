@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Save, Trash2, GripVertical } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
 import { supabase } from "@/lib/supabase";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, useDroppable } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { handleImageError } from "@/lib/utils";
@@ -37,28 +37,29 @@ interface SortableImageProps {
   index: number;
   isActive: boolean;
   onSelect: () => void;
-  onDelete: () => void;
 }
 
-const SortableImage = ({ id, url, index, isActive, onSelect, onDelete }: SortableImageProps) => {
+const SortableImage = ({ id, url, index, isActive, onSelect }: SortableImageProps) => {
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
+    isDragging,
   } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    zIndex: isDragging ? 10 : 1,
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="relative group w-16 h-16"
+      className={`relative group w-16 h-16 ${isDragging ? 'opacity-70' : ''}`}
     >
       <div
         className={`w-16 h-16 rounded-md overflow-hidden flex-shrink-0 border-2 cursor-pointer ${isActive ? "border-amber-500" : "border-transparent"}`}
@@ -70,16 +71,6 @@ const SortableImage = ({ id, url, index, isActive, onSelect, onDelete }: Sortabl
           className="w-full h-full object-cover"
           onError={handleImageError}
         />
-      </div>
-      <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-white"
-          onClick={onDelete}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
       </div>
       <div
         {...attributes}
@@ -121,6 +112,12 @@ const AdminArtifactEdit = () => {
 
   // Combine main image and additional images for the gallery
   const allImages = mainImage ? [mainImage, ...additionalImages] : [...additionalImages];
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Create a droppable area for the trash
+  const { isOver, setNodeRef: setTrashDropRef } = useDroppable({
+    id: 'trash-drop-zone',
+  });
 
   // DnD sensors
   const sensors = useSensors(
@@ -134,8 +131,8 @@ const AdminArtifactEdit = () => {
     })
   );
 
-  // Define fetchArtifact function without useCallback to avoid dependency issues
-  const fetchArtifact = async () => {
+  // Define fetchArtifact function with useCallback
+  const fetchArtifact = useCallback(async () => {
     if (!id) {
       setError(t('invalidArtifactId'));
       setIsLoading(false);
@@ -183,7 +180,7 @@ const AdminArtifactEdit = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id, t]);
 
   // Fetch artifact on mount only if we haven't fetched it yet
   useEffect(() => {
@@ -198,10 +195,85 @@ const AdminArtifactEdit = () => {
     };
   }, [id]);
 
+  // Handle drag start event
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
   // Handle drag end event
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    setIsDragging(false);
 
+    // If dropped on trash zone, delete the image
+    if (over && over.id === 'trash-drop-zone') {
+      const imageToDelete = active.id as string;
+      const imageIndex = allImages.findIndex(url => url === imageToDelete);
+
+      if (imageIndex !== -1) {
+        // Create a copy of all images to work with
+        const newAllImages = [...allImages];
+        newAllImages.splice(imageIndex, 1);
+
+        // If we deleted the last image
+        if (newAllImages.length === 0) {
+          setMainImage("");
+          setAdditionalImages([]);
+          setActiveImageIndex(0);
+        }
+        // If we deleted the main image and there are other images
+        else if (imageIndex === 0) {
+          // Make the first remaining image the new main image
+          setMainImage(newAllImages[0]);
+          setAdditionalImages(newAllImages.slice(1));
+          setActiveImageIndex(0);
+        }
+        // If we deleted an additional image
+        else {
+          // Keep the main image the same, update additional images
+          setAdditionalImages(newAllImages.slice(1));
+
+          // Update active image index if needed
+          if (activeImageIndex === imageIndex) {
+            // If we deleted the active image, select the main image
+            setActiveImageIndex(0);
+          } else if (activeImageIndex > imageIndex) {
+            // If we deleted an image before the active one, adjust the index
+            setActiveImageIndex(activeImageIndex - 1);
+          }
+        }
+
+        // Show success message
+        toast({
+          title: t('success'),
+          description: t('imageDeleted'),
+        });
+
+        // Try to delete the file from storage (optional, can be removed if not needed)
+        try {
+          // Extract the file path from the URL
+          const url = new URL(imageToDelete);
+          const pathParts = url.pathname.split('/');
+          const fileName = pathParts[pathParts.length - 1];
+          const filePath = `images/${fileName}`;
+
+          // Delete the file from storage (don't await, let it happen in background)
+          supabase.storage
+            .from('artifacts')
+            .remove([filePath])
+            .then(({ error }) => {
+              if (error) {
+                console.error('Error deleting file from storage:', error);
+              }
+            });
+        } catch (error) {
+          console.error('Error parsing image URL:', error);
+        }
+      }
+      return;
+    }
+
+    // Handle reordering
     if (over && active.id !== over.id) {
       const oldIndex = allImages.findIndex(url => url === active.id);
       const newIndex = allImages.findIndex(url => url === over.id);
@@ -485,6 +557,7 @@ const AdminArtifactEdit = () => {
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
             >
               <SortableContext
@@ -503,30 +576,19 @@ const AdminArtifactEdit = () => {
                       setActiveImageIndex(index);
                       setShowModel(false);
                     }}
-                    onDelete={() => {
-                      // If it's the main image
-                      if (index === 0) {
-                        // If there are additional images, make the first one the main image
-                        if (additionalImages.length > 0) {
-                          setMainImage(additionalImages[0]);
-                          setAdditionalImages(additionalImages.slice(1));
-                        } else {
-                          setMainImage("");
-                        }
-                      } else {
-                        // It's an additional image
-                        const newImages = [...additionalImages];
-                        newImages.splice(index - 1, 1);
-                        setAdditionalImages(newImages);
-                      }
-                      // Reset active image index if needed
-                      if (activeImageIndex >= allImages.length - 1) {
-                        setActiveImageIndex(0);
-                      }
-                    }}
                   />
                 ))}
               </SortableContext>
+
+              {/* Trash drop zone - only visible when dragging */}
+              {isDragging && (
+                <div
+                  ref={setTrashDropRef}
+                  className={`w-16 h-16 rounded-md border-2 ${isOver ? 'border-red-500 bg-red-100' : 'border-dashed border-red-300'} flex items-center justify-center transition-colors duration-200`}
+                >
+                  <Trash2 className={`h-6 w-6 ${isOver ? 'text-red-500' : 'text-red-300'}`} />
+                </div>
+              )}
             </DndContext>
 
             {/* Add new image button */}
