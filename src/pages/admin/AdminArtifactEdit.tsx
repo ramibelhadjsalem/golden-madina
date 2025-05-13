@@ -68,7 +68,7 @@ const SortableImage = ({ id, url, index, isActive, onSelect, onDelete }: Sortabl
           alt={`Image ${index + 1}`}
           className="w-full h-full object-cover"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+            (e.target as HTMLImageElement).src = '/placeholder.jpg';
           }}
         />
       </div>
@@ -385,7 +385,7 @@ const AdminArtifactEdit = () => {
                         alt=""
                         className="w-full h-full object-contain"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+                          (e.target as HTMLImageElement).src = '/placeholder.jpg';
                         }}
                       />
                       {isSaving && (

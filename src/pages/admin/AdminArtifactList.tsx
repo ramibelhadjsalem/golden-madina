@@ -309,7 +309,7 @@ const AdminArtifactList = () => {
           )}
         </div>
         <Button
-          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
+          className="bg-primary"
           onClick={() => handleOpenDialog()}
         >
           <Plus className="mr-2 h-4 w-4" />
@@ -339,7 +339,7 @@ const AdminArtifactList = () => {
                   alt={artifact.name}
                   className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+                    (e.target as HTMLImageElement).src = '/placeholder.jpg';
                   }}
                 />
                 <div className="absolute top-2 right-2 flex gap-1">
