@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabase";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { handleImageError } from "@/lib/utils";
 
 // Define consistent type for artifacts
 type Artifact = {
@@ -67,9 +68,7 @@ const SortableImage = ({ id, url, index, isActive, onSelect, onDelete }: Sortabl
           src={url}
           alt={`Image ${index + 1}`}
           className="w-full h-full object-cover"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = '/placeholder.jpg';
-          }}
+          onError={handleImageError}
         />
       </div>
       <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
@@ -384,9 +383,7 @@ const AdminArtifactEdit = () => {
                         src={allImages[activeImageIndex]}
                         alt=""
                         className="w-full h-full object-contain"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/placeholder.jpg';
-                        }}
+                        onError={handleImageError}
                       />
                       {isSaving && (
                         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">

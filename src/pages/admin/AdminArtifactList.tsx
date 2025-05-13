@@ -12,6 +12,7 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
 import { useLanguage } from "@/context/LanguageContext";
 import { supabase } from "@/lib/supabase";
+import { handleImageError } from "@/lib/utils";
 
 // Define consistent type for artifacts
 type Artifact = {
@@ -338,9 +339,8 @@ const AdminArtifactList = () => {
                   src={artifact.image_url}
                   alt={artifact.name}
                   className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder.jpg';
-                  }}
+                  onError={handleImageError}
+                  
                 />
                 <div className="absolute top-2 right-2 flex gap-1">
                   <Button
