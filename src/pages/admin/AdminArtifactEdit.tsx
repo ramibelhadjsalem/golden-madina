@@ -7,9 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Trash2, GripVertical } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
 import { supabase } from "@/lib/supabase";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 // Define consistent type for artifacts
 type Artifact = {
@@ -24,6 +27,72 @@ type Artifact = {
   discovery_date: string | null;
   created_at: string;
   additional_images: string[] | null;
+};
+
+// Sortable Image component
+interface SortableImageProps {
+  id: string;
+  url: string;
+  index: number;
+  isActive: boolean;
+  onSelect: () => void;
+  onDelete: () => void;
+}
+
+const SortableImage = ({ id, url, index, isActive, onSelect, onDelete }: SortableImageProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative group w-16 h-16"
+    >
+      <div
+        className={`w-16 h-16 rounded-md overflow-hidden flex-shrink-0 border-2 cursor-pointer ${isActive ? "border-amber-500" : "border-transparent"}`}
+        onClick={onSelect}
+      >
+        <img
+          src={url}
+          alt={`Image ${index + 1}`}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+          }}
+        />
+      </div>
+      <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-white"
+          onClick={onDelete}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-0 left-0 w-full h-full cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-30"
+      >
+        <div className="absolute top-1 right-1">
+          <GripVertical className="h-4 w-4 text-white" />
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const AdminArtifactEdit = () => {
@@ -49,6 +118,22 @@ const AdminArtifactEdit = () => {
   const [mainImage, setMainImage] = useState("");
   const [additionalImages, setAdditionalImages] = useState<string[]>([]);
   const [showModel, setShowModel] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  // Combine main image and additional images for the gallery
+  const allImages = mainImage ? [mainImage, ...additionalImages] : [...additionalImages];
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Define fetchArtifact function without useCallback to avoid dependency issues
   const fetchArtifact = async () => {
@@ -113,6 +198,35 @@ const AdminArtifactEdit = () => {
       hasFetchedRef.current = false;
     };
   }, [id]);
+
+  // Handle drag end event
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = allImages.findIndex(url => url === active.id);
+      const newIndex = allImages.findIndex(url => url === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        // Create a new array with the reordered images
+        const newImages = [...allImages];
+        const [movedItem] = newImages.splice(oldIndex, 1);
+        newImages.splice(newIndex, 0, movedItem);
+
+        // Update state based on the new order
+        if (newImages.length > 0) {
+          setMainImage(newImages[0]);
+          setAdditionalImages(newImages.slice(1));
+        } else {
+          setMainImage("");
+          setAdditionalImages([]);
+        }
+
+        // Update active image index
+        setActiveImageIndex(0);
+      }
+    }
+  };
 
   const handleSaveArtifact = async () => {
     if (!artifact) return;
@@ -263,139 +377,264 @@ const AdminArtifactEdit = () => {
               </div>
             ) : (
               <div className="aspect-square w-full relative">
-                <div className="w-full h-full" onClick={() => {
-                  // Create a file input element and trigger it
-                  const input = document.createElement('input');
-                  input.type = 'file';
-                  input.accept = 'image/*';
-                  input.onchange = async (e) => {
-                    const files = (e.target as HTMLInputElement).files;
-                    if (!files || files.length === 0) return;
-
-                    try {
-                      const file = files[0];
-                      const { uploadFile } = await import('@/lib/storage-utils');
-                      const fileUrl = await uploadFile(file, 'artifacts', 'images');
-                      if (fileUrl) {
-                        setMainImage(fileUrl);
-                      }
-                    } catch (error) {
-                      console.error('Error uploading file:', error);
-                    }
-                  };
-                  input.click();
-                }}>
-                  {mainImage ? (
-                    <img
-                      src={mainImage}
-                      alt=""
-                      className="w-full h-full object-contain cursor-pointer"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
-                      }}
-                    />
+                <label className="w-full h-full block cursor-pointer" htmlFor="main-image-input">
+                  {allImages.length > 0 ? (
+                    <div className="relative w-full h-full">
+                      <img
+                        src={allImages[activeImageIndex]}
+                        alt=""
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+                        }}
+                      />
+                      {isSaving && (
+                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                          <div className="animate-spin h-10 w-10 border-4 border-white rounded-full border-t-transparent"></div>
+                        </div>
+                      )}
+                    </div>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-slate-200 cursor-pointer">
-                      <p className="text-slate-500">{t('noFileSelected')}</p>
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-slate-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 mb-2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                      </svg>
+                      <p className="text-slate-500">{t('clickToUploadImage')}</p>
                     </div>
                   )}
-                </div>
+                </label>
+                <input
+                  id="main-image-input"
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={async (e) => {
+                    const files = e.target.files;
+                    if (!files || files.length === 0) return;
+
+                    const file = files[0];
+
+                    // Reset the input value so the same file can be selected again
+                    e.target.value = '';
+
+                    // Validate file size (max 5MB)
+                    const fileSizeMB = file.size / (1024 * 1024);
+                    if (fileSizeMB > 5) {
+                      toast({
+                        title: t('fileTooLarge'),
+                        description: t('fileSizeExceedsLimit').replace('{size}', '5MB'),
+                        variant: 'destructive',
+                      });
+                      return;
+                    }
+
+                    try {
+                      setIsSaving(true);
+
+                      // Generate a unique file name
+                      const fileExt = file.name.split('.').pop();
+                      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+                      const filePath = `images/${fileName}`;
+
+                      // Upload the file to Supabase Storage
+                      const { data, error } = await supabase.storage
+                        .from('artifacts')
+                        .upload(filePath, file, {
+                          cacheControl: '3600',
+                          upsert: true,
+                        });
+
+                      if (error) throw error;
+
+                      // Get the public URL
+                      const { data: urlData } = supabase.storage
+                        .from('artifacts')
+                        .getPublicUrl(data.path);
+
+                      const fileUrl = urlData.publicUrl;
+
+                      // If there's already a main image, move it to additional images
+                      if (mainImage) {
+                        setAdditionalImages([mainImage, ...additionalImages]);
+                      }
+
+                      // Set the new image as main image
+                      setMainImage(fileUrl);
+                      setActiveImageIndex(0);
+
+                      toast({
+                        title: t('success'),
+                        description: t('mainImageUpdated'),
+                      });
+                    } catch (error) {
+                      console.error('Error uploading file:', error);
+                      toast({
+                        title: t('error'),
+                        description: error instanceof Error ? error.message : t('failedToUploadFile'),
+                        variant: 'destructive',
+                      });
+                    } finally {
+                      setIsSaving(false);
+                    }
+                  }}
+                />
               </div>
             )}
           </div>
 
-          <div className="flex justify-between">
-            <div className="flex gap-2 overflow-x-auto py-2">
-              {/* Main image thumbnail */}
-              {mainImage && (
-                <div
-                  className={`w-16 h-16 rounded-md overflow-hidden flex-shrink-0 border-2 ${!showModel ? "border-amber-500" : "border-transparent"}`}
-                >
-                  <img
-                    src={mainImage}
-                    alt="Main"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+          <div className="flex gap-2 overflow-x-auto py-2 ">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={allImages}
+                strategy={verticalListSortingStrategy}
+              >
+                {/* All images as sortable thumbnails */}
+                {allImages.map((img, index) => (
+                  <SortableImage
+                    key={img}
+                    id={img}
+                    url={img}
+                    index={index}
+                    isActive={index === activeImageIndex && !showModel}
+                    onSelect={() => {
+                      setActiveImageIndex(index);
+                      setShowModel(false);
+                    }}
+                    onDelete={() => {
+                      // If it's the main image
+                      if (index === 0) {
+                        // If there are additional images, make the first one the main image
+                        if (additionalImages.length > 0) {
+                          setMainImage(additionalImages[0]);
+                          setAdditionalImages(additionalImages.slice(1));
+                        } else {
+                          setMainImage("");
+                        }
+                      } else {
+                        // It's an additional image
+                        const newImages = [...additionalImages];
+                        newImages.splice(index - 1, 1);
+                        setAdditionalImages(newImages);
+                      }
+                      // Reset active image index if needed
+                      if (activeImageIndex >= allImages.length - 1) {
+                        setActiveImageIndex(0);
+                      }
                     }}
                   />
-                </div>
-              )}
+                ))}
+              </SortableContext>
+            </DndContext>
 
-              {/* Additional images thumbnails */}
-              {additionalImages.map((img, index) => (
-                <div key={index} className="relative group w-16 h-16">
-                  <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0 border-2 border-transparent">
-                    <img
-                      src={img}
-                      alt={`Additional ${index + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
-                      }}
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-white"
-                      onClick={() => {
-                        const newImages = [...additionalImages];
-                        newImages.splice(index, 1);
-                        setAdditionalImages(newImages);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-
-              {/* Add new image button */}
-              <div
-                className="w-16 h-16 rounded-md border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer"
-                onClick={() => {
-                  // Create a file input element and trigger it
-                  const input = document.createElement('input');
-                  input.type = 'file';
-                  input.accept = 'image/*';
-                  input.onchange = async (e) => {
-                    const files = (e.target as HTMLInputElement).files;
-                    if (!files || files.length === 0) return;
-
-                    try {
-                      const file = files[0];
-                      const { uploadFile } = await import('@/lib/storage-utils');
-                      const fileUrl = await uploadFile(file, 'artifacts', 'images');
-                      if (fileUrl) {
-                        setAdditionalImages([...additionalImages, fileUrl]);
-                      }
-                    } catch (error) {
-                      console.error('Error uploading file:', error);
-                    }
-                  };
-                  input.click();
-                }}
-              >
+            {/* Add new image button */}
+            <label
+              className="w-16 h-16 rounded-md border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer relative"
+              htmlFor="add-image-input"
+            >
+              {isSaving ? (
+                <div className="animate-spin h-5 w-5 border-2 border-slate-500 rounded-full border-t-transparent"></div>
+              ) : (
                 <div className="text-slate-400">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 5v14M5 12h14" />
                   </svg>
                 </div>
-              </div>
-            </div>
+              )}
+              <input
+                id="add-image-input"
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={async (e) => {
+                  const files = e.target.files;
+                  if (!files || files.length === 0) return;
 
-            {modelUrl && (
-              <Button
-                onClick={() => setShowModel(true)}
-                variant={showModel ? "default" : "outline"}
-                className={showModel ? "bg-amber-500 hover:bg-amber-600" : ""}
-              >
-                {t('3dView')}
-              </Button>
-            )}
+                  const file = files[0];
+
+                  // Reset the input value so the same file can be selected again
+                  e.target.value = '';
+
+                  // Validate file size (max 5MB)
+                  const fileSizeMB = file.size / (1024 * 1024);
+                  if (fileSizeMB > 5) {
+                    toast({
+                      title: t('fileTooLarge'),
+                      description: t('fileSizeExceedsLimit').replace('{size}', '5MB'),
+                      variant: 'destructive',
+                    });
+                    return;
+                  }
+
+                  try {
+                    setIsSaving(true);
+
+                    // Generate a unique file name
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+                    const filePath = `images/${fileName}`;
+
+                    // Upload the file to Supabase Storage
+                    const { data, error } = await supabase.storage
+                      .from('artifacts')
+                      .upload(filePath, file, {
+                        cacheControl: '3600',
+                        upsert: true,
+                      });
+
+                    if (error) throw error;
+
+                    // Get the public URL
+                    const { data: urlData } = supabase.storage
+                      .from('artifacts')
+                      .getPublicUrl(data.path);
+
+                    const fileUrl = urlData.publicUrl;
+
+                    // If there's no main image, set this as the main image
+                    if (!mainImage) {
+                      setMainImage(fileUrl);
+                      setActiveImageIndex(0);
+                      toast({
+                        title: t('success'),
+                        description: t('mainImageAdded'),
+                      });
+                    } else {
+                      setAdditionalImages([...additionalImages, fileUrl]);
+                      toast({
+                        title: t('success'),
+                        description: t('imageAdded'),
+                      });
+                    }
+                  } catch (error) {
+                    console.error('Error uploading file:', error);
+                    toast({
+                      title: t('error'),
+                      description: error instanceof Error ? error.message : t('failedToUploadFile'),
+                      variant: 'destructive',
+                    });
+                  } finally {
+                    setIsSaving(false);
+                  }
+                }}
+              />
+            </label>
           </div>
+
+          {modelUrl && (
+            <Button
+              onClick={() => setShowModel(true)}
+              variant={showModel ? "default" : "outline"}
+              className={showModel ? "bg-amber-500 hover:bg-amber-600" : ""}
+            >
+              {t('3dView')}
+            </Button>
+          )}
         </div>
 
         {/* Right: Artifact Details */}
@@ -430,12 +669,134 @@ const AdminArtifactEdit = () => {
             </TabsList>
 
             <TabsContent value="description">
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder={t('enterArtifactDescription')}
-                className="min-h-[300px] w-full"
-              />
+              <div className="space-y-6">
+                <Textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder={t('enterArtifactDescription')}
+                  className="min-h-[300px] w-full"
+                />
+
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-slate-500">{t('3dModel')}</h3>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={modelUrl}
+                      onChange={(e) => setModelUrl(e.target.value)}
+                      placeholder={t('enter3dModelUrl')}
+                      className="flex-1"
+                    />
+                    <label
+                      htmlFor="model-upload-input"
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 cursor-pointer"
+                    >
+                      {isSaving ? (
+                        <div className="animate-spin h-4 w-4 border-2 border-current rounded-full border-t-transparent mr-2"></div>
+                      ) : null}
+                      {t('upload')}
+                    </label>
+                    <input
+                      id="model-upload-input"
+                      type="file"
+                      accept=".glb,.gltf"
+                      className="sr-only"
+                      onChange={async (e) => {
+                        const files = e.target.files;
+                        if (!files || files.length === 0) return;
+
+                        const file = files[0];
+
+                        // Reset the input value so the same file can be selected again
+                        e.target.value = '';
+
+                        // Validate file size (max 10MB)
+                        const fileSizeMB = file.size / (1024 * 1024);
+                        if (fileSizeMB > 10) {
+                          toast({
+                            title: t('fileTooLarge'),
+                            description: t('fileSizeExceedsLimit').replace('{size}', '10MB'),
+                            variant: 'destructive',
+                          });
+                          return;
+                        }
+
+                        try {
+                          setIsSaving(true);
+
+                          // Generate a unique file name
+                          const fileExt = file.name.split('.').pop();
+                          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+                          const filePath = `models/${fileName}`;
+
+                          // Upload the file to Supabase Storage
+                          const { data, error } = await supabase.storage
+                            .from('artifacts')
+                            .upload(filePath, file, {
+                              cacheControl: '3600',
+                              upsert: true,
+                            });
+
+                          if (error) throw error;
+
+                          // Get the public URL
+                          const { data: urlData } = supabase.storage
+                            .from('artifacts')
+                            .getPublicUrl(data.path);
+
+                          const fileUrl = urlData.publicUrl;
+
+                          // Set the model URL
+                          setModelUrl(fileUrl);
+
+                          toast({
+                            title: t('success'),
+                            description: t('modelUploaded'),
+                          });
+                        } catch (error) {
+                          console.error('Error uploading file:', error);
+                          toast({
+                            title: t('error'),
+                            description: error instanceof Error ? error.message : t('failedToUploadFile'),
+                            variant: 'destructive',
+                          });
+                        } finally {
+                          setIsSaving(false);
+                        }
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500">{t('supported3dFormats')}</p>
+
+                  {modelUrl && (
+                    <div className="mt-4 p-4 bg-slate-100 rounded-md">
+                      <div className="flex items-center gap-2">
+                        <div className="text-slate-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+                            <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+                            <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+                          </svg>
+                        </div>
+                        <div className="flex-1 truncate">
+                          <p className="text-sm font-medium">{t('3dModelUploaded')}</p>
+                          <p className="text-xs text-slate-500 truncate">{modelUrl}</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => {
+                            setModelUrl('');
+                            setShowModel(false);
+                          }}
+                        >
+                          {t('remove')}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="details">
