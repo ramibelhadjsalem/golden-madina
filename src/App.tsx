@@ -58,7 +58,7 @@ const App = () => {
                   <Route path="/artifacts" element={<ArtifactsPage />} />
                   <Route path="/artifacts/:id" element={<ArtifactDetail />} />
                   <Route path="/services" element={<ServicesPage />} />
-                  <Route path="/not-found" element={<NotFound />} />
+                  <Route path="/404" element={<NotFound />} />
                 </Route>
 
                 {/* Admin Login */}

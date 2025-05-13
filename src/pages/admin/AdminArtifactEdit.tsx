@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { useTranslate } from "@/hooks/use-translate";
 import { supabase } from "@/lib/supabase";
 import ArtifactDialog from "@/components/admin/ArtifactDialog";
 
-// Define consistent type for artifacts
+// Define consistent type for artifacts (matches Supabase artifacts table)
 type Artifact = {
   id: string;
   name: string;
@@ -43,57 +43,55 @@ const AdminArtifactEdit = () => {
   const { t } = useTranslate();
   const [artifact, setArtifact] = useState<Artifact | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const isMounted = useRef(true);
 
-  // Fetch artifact by ID
+  // Memoize fetchArtifact to prevent redefinition
+  const fetchArtifact = useCallback(async () => {
+    if (!id) {
+      setError(t('invalidArtifactId'));
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const { data, error } = await supabase
+        .from("artifacts")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw new Error(error.message);
+      if (!data) throw new Error("Artifact not found");
+
+      setArtifact(data as Artifact);
+    } catch (err) {
+      console.error("Error fetching artifact:", err);
+      const errorMessage =
+        err instanceof Error && err.message.includes("not found")
+          ? t("artifactNotFound")
+          : t("errorFetchingArtifact");
+      setError(errorMessage);
+      toast({
+        title: t("error"),
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id, t]);
+
+  // Fetch artifact on mount and when id changes
   useEffect(() => {
-    const fetchArtifact = async () => {
-      if (!id) return;
-      
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const { data, error } = await supabase
-          .from('artifacts')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (error) throw error;
-        if (!isMounted.current) return;
-
-        if (data) {
-          setArtifact(data as Artifact);
-        } else {
-          throw new Error('Artifact not found');
-        }
-      } catch (err) {
-        console.error('Error fetching artifact:', err);
-        if (isMounted.current) {
-          setError(err instanceof Error ? err : new Error('Unknown error'));
-          toast({
-            title: t('error'),
-            description: t('errorFetchingArtifact'),
-            variant: "destructive",
-          });
-        }
-      } finally {
-        if (isMounted.current) {
-          setIsLoading(false);
-        }
-      }
-    };
-
     fetchArtifact();
 
-    return () => {
-      isMounted.current = false;
-    };
-  }, [id, t]);
+    // No cleanup needed since Supabase client handles request cancellation
+  }, [fetchArtifact]);
 
   const handleOpenDialog = () => {
     setIsDialogOpen(true);
@@ -105,34 +103,33 @@ const AdminArtifactEdit = () => {
 
   const handleSaveArtifact = async (artifactData: ArtifactInput) => {
     if (!artifact) return;
-    
+
     try {
       setIsSaving(true);
-      
+
       const { data, error } = await supabase
-        .from('artifacts')
+        .from("artifacts")
         .update(artifactData)
-        .eq('id', artifact.id)
+        .eq("id", artifact.id)
         .select()
         .single();
-        
-      if (error) throw error;
-      
+
+      if (error) throw new Error(error.message);
+
       if (data) {
         setArtifact(data as Artifact);
-        
         toast({
-          title: t('artifactUpdated'),
-          description: t('artifactUpdateSuccess'),
+          title: t("artifactUpdated"),
+          description: t("artifactUpdateSuccess"),
         });
       }
-      
+
       handleCloseDialog();
     } catch (err) {
-      console.error('Error saving artifact:', err);
+      console.error("Error saving artifact:", err);
       toast({
-        title: t('error'),
-        description: t('errorSavingArtifact'),
+        title: t("error"),
+        description: t("errorSavingArtifact"),
         variant: "destructive",
       });
     } finally {
@@ -166,16 +163,15 @@ const AdminArtifactEdit = () => {
   if (error || !artifact) {
     return (
       <div className="text-center py-12 bg-slate-50 rounded-lg">
-        <div className="text-slate-500">{t('artifactNotFound')}</div>
-        <p className="text-slate-400 mt-2">{error?.message || t('tryAgainLater')}</p>
+        <div className="text-slate-500">{error || t("artifactNotFound")}</div>
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate('/admin/artifacts')}
+          onClick={() => navigate("/admin/artifacts")}
           className="mt-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          {t('backToArtifacts')}
+          {t("backToArtifacts")}
         </Button>
       </div>
     );
@@ -189,20 +185,20 @@ const AdminArtifactEdit = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/admin/artifacts')}
+              onClick={() => navigate("/admin/artifacts")}
               className="mr-4"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              {t('backToArtifacts')}
+              {t("backToArtifacts")}
             </Button>
             <h1 className="text-2xl font-semibold">{artifact.name}</h1>
           </div>
-          <Button 
+          <Button
             onClick={handleOpenDialog}
             className="bg-blue-600 hover:bg-blue-700"
           >
             <Save className="mr-2 h-4 w-4" />
-            {t('editArtifact')}
+            {t("editArtifact")}
           </Button>
         </div>
 
@@ -217,7 +213,8 @@ const AdminArtifactEdit = () => {
                     alt={artifact.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+                      (e.target as HTMLImageElement).src =
+                        "https://via.placeholder.com/400?text=Image+Not+Found";
                     }}
                   />
                   {artifact.model_url && (
@@ -229,37 +226,41 @@ const AdminArtifactEdit = () => {
               </div>
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-lg font-semibold">{t('details')}</h2>
+                  <h2 className="text-lg font-semibold">{t("details")}</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
                     <div>
-                      <p className="text-sm text-slate-500">{t('name')}</p>
+                      <p className="text-sm text-slate-500">{t("name")}</p>
                       <p className="font-medium">{artifact.name}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-slate-500">{t('period')}</p>
+                      <p className="text-sm text-slate-500">{t("period")}</p>
                       <p className="font-medium">{artifact.period}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-slate-500">{t('category')}</p>
+                      <p className="text-sm text-slate-500">{t("category")}</p>
                       <p className="font-medium">{artifact.category}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-slate-500">{t('location')}</p>
-                      <p className="font-medium">{artifact.location || '-'}</p>
+                      <p className="text-sm text-slate-500">{t("location")}</p>
+                      <p className="font-medium">{artifact.location || "-"}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-slate-500">{t('discoveryDate')}</p>
-                      <p className="font-medium">{artifact.discovery_date || '-'}</p>
+                      <p className="text-sm text-slate-500">{t("discoveryDate")}</p>
+                      <p className="font-medium">{artifact.discovery_date || "-"}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-slate-500">{t('dateAdded')}</p>
-                      <p className="font-medium">{new Date(artifact.created_at).toLocaleDateString()}</p>
+                      <p className="text-sm text-slate-500">{t("dateAdded")}</p>
+                      <p className="font-medium">
+                        {new Date(artifact.created_at).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold">{t('description')}</h2>
-                  <p className="mt-2 text-slate-700 whitespace-pre-line">{artifact.description}</p>
+                  <h2 className="text-lg font-semibold">{t("description")}</h2>
+                  <p className="mt-2 text-slate-700 whitespace-pre-line">
+                    {artifact.description}
+                  </p>
                 </div>
               </div>
             </div>
@@ -267,13 +268,14 @@ const AdminArtifactEdit = () => {
         </Card>
       </div>
 
-      {/* Artifact Dialog */}
+      {/* Artifact Dialog
       <ArtifactDialog
         isOpen={isDialogOpen}
         onClose={handleCloseDialog}
         artifact={artifact}
         onSave={handleSaveArtifact}
-      />
+        isSaving={isSaving}
+      /> */}
     </>
   );
 };

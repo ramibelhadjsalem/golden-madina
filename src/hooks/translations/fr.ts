@@ -208,7 +208,6 @@ export const fr = {
     summaryRequired: "Le résumé est requis",
     contentRequired: "Le contenu est requis",
     errorSavingBlog: "Une erreur s'est produite lors de l'enregistrement du blog",
-    blogNotFound: "Article de blog non trouvé",
 
     // Artifact Management
     searchArtifacts: "Rechercher des artefacts...",
@@ -253,12 +252,6 @@ export const fr = {
     unauthorizedMessage: "Vous n'avez pas la permission d'accéder à cette page.",
     backToHome: "Retour à l'Accueil",
     goBack: "Retour",
-    loginFailed: "Échec de Connexion",
-    loginSuccessful: "Connexion Réussie",
-    welcomeAdmin: "Bienvenue sur le tableau de bord administrateur",
-    invalidCredentials: "Email ou mot de passe invalide",
-    invalidEmailPassword: "L'email ou le mot de passe que vous avez saisi est incorrect",
-    logout: "Déconnexion",
     loggingOut: "Déconnexion en cours...",
     logoutSuccessful: "Déconnecté",
     logoutSuccessMessage: "Vous avez été déconnecté avec succès",

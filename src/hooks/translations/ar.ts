@@ -208,7 +208,6 @@ export const ar = {
     summaryRequired: "الملخص مطلوب",
     contentRequired: "المحتوى مطلوب",
     errorSavingBlog: "حدث خطأ أثناء حفظ المدونة",
-    blogNotFound: "لم يتم العثور على مقال المدونة",
 
     // Artifact Management
     searchArtifacts: "البحث عن القطع الأثرية...",
@@ -252,13 +251,6 @@ export const ar = {
     unauthorized: "غير مصرح",
     unauthorizedMessage: "ليس لديك إذن للوصول إلى هذه الصفحة.",
     backToHome: "العودة إلى الصفحة الرئيسية",
-    goBack: "رجوع",
-    loginFailed: "فشل تسجيل الدخول",
-    loginSuccessful: "تم تسجيل الدخول بنجاح",
-    welcomeAdmin: "مرحبًا بك في لوحة تحكم المسؤول",
-    invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صالحة",
-    invalidEmailPassword: "البريد الإلكتروني أو كلمة المرور التي أدخلتها غير صحيحة",
-    logout: "تسجيل الخروج",
     loggingOut: "جاري تسجيل الخروج...",
     logoutSuccessful: "تم تسجيل الخروج",
     logoutSuccessMessage: "تم تسجيل خروجك بنجاح",
