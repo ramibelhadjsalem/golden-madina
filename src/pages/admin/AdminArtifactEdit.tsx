@@ -1,15 +1,20 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileUploadField } from "@/components/ui/file-upload-field";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Save } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
 import { supabase } from "@/lib/supabase";
-import ArtifactDialog from "@/components/admin/ArtifactDialog";
+import ImageGalleryManager from "@/components/admin/ImageGalleryManager";
 
-// Define consistent type for artifacts (matches Supabase artifacts table)
+// Define consistent type for artifacts
 type Artifact = {
   id: string;
   name: string;
@@ -24,19 +29,6 @@ type Artifact = {
   additional_images: string[] | null;
 };
 
-// Define the input type for the dialog
-type ArtifactInput = {
-  name: string;
-  period: string;
-  category: string;
-  image_url: string;
-  model_url: string | null;
-  description: string;
-  location?: string | null;
-  discovery_date?: string | null;
-  additional_images?: string[] | null;
-};
-
 const AdminArtifactEdit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -44,11 +36,25 @@ const AdminArtifactEdit = () => {
   const [artifact, setArtifact] = useState<Artifact | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Memoize fetchArtifact to prevent redefinition
-  const fetchArtifact = useCallback(async () => {
+  // Use a ref to track if we've already fetched the data
+  const hasFetchedRef = useRef(false);
+
+  // Form state
+  const [name, setName] = useState("");
+  const [period, setPeriod] = useState("");
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [discoveryDate, setDiscoveryDate] = useState("");
+  const [modelUrl, setModelUrl] = useState("");
+  const [mainImage, setMainImage] = useState("");
+  const [additionalImages, setAdditionalImages] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState("details");
+
+  // Define fetchArtifact function without useCallback to avoid dependency issues
+  const fetchArtifact = async () => {
     if (!id) {
       setError(t('invalidArtifactId'));
       setIsLoading(false);
@@ -68,7 +74,19 @@ const AdminArtifactEdit = () => {
       if (error) throw new Error(error.message);
       if (!data) throw new Error("Artifact not found");
 
-      setArtifact(data as Artifact);
+      const artifactData = data as Artifact;
+      setArtifact(artifactData);
+
+      // Populate form state
+      setName(artifactData.name);
+      setPeriod(artifactData.period);
+      setCategory(artifactData.category);
+      setDescription(artifactData.description);
+      setLocation(artifactData.location || "");
+      setDiscoveryDate(artifactData.discovery_date || "");
+      setModelUrl(artifactData.model_url || "");
+      setMainImage(artifactData.image_url);
+      setAdditionalImages(artifactData.additional_images || []);
     } catch (err) {
       console.error("Error fetching artifact:", err);
       const errorMessage =
@@ -84,28 +102,39 @@ const AdminArtifactEdit = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [id, t]);
+  };
 
-  // Fetch artifact on mount and when id changes
+  // Fetch artifact on mount only if we haven't fetched it yet
   useEffect(() => {
-    fetchArtifact();
+    if (!hasFetchedRef.current && id) {
+      fetchArtifact();
+      hasFetchedRef.current = true;
+    }
 
-    // No cleanup needed since Supabase client handles request cancellation
-  }, [fetchArtifact]);
+    // Reset the ref when the id changes
+    return () => {
+      hasFetchedRef.current = false;
+    };
+  }, [id]);
 
-  const handleOpenDialog = () => {
-    setIsDialogOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false);
-  };
-
-  const handleSaveArtifact = async (artifactData: ArtifactInput) => {
+  const handleSaveArtifact = async () => {
     if (!artifact) return;
 
     try {
       setIsSaving(true);
+
+      // Prepare the artifact data for saving
+      const artifactData = {
+        name,
+        period,
+        category,
+        description,
+        location: location || null,
+        discovery_date: discoveryDate || null,
+        model_url: modelUrl || null,
+        image_url: mainImage,
+        additional_images: additionalImages.length > 0 ? additionalImages : null
+      };
 
       const { data, error } = await supabase
         .from("artifacts")
@@ -117,14 +146,13 @@ const AdminArtifactEdit = () => {
       if (error) throw new Error(error.message);
 
       if (data) {
+        // Update the artifact state directly without triggering a refetch
         setArtifact(data as Artifact);
         toast({
           title: t("artifactUpdated"),
           description: t("artifactUpdateSuccess"),
         });
       }
-
-      handleCloseDialog();
     } catch (err) {
       console.error("Error saving artifact:", err);
       toast({
@@ -164,6 +192,7 @@ const AdminArtifactEdit = () => {
     return (
       <div className="text-center py-12 bg-slate-50 rounded-lg">
         <div className="text-slate-500">{error || t("artifactNotFound")}</div>
+        <p className="text-slate-400 mt-2">{t('tryAgainLater')}</p>
         <Button
           variant="outline"
           size="sm"
@@ -178,105 +207,162 @@ const AdminArtifactEdit = () => {
   }
 
   return (
-    <>
-      <div className="flex flex-col space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/admin/artifacts")}
-              className="mr-4"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              {t("backToArtifacts")}
-            </Button>
-            <h1 className="text-2xl font-semibold">{artifact.name}</h1>
-          </div>
+    <div className="flex flex-col space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center">
           <Button
-            onClick={handleOpenDialog}
-            className="bg-blue-600 hover:bg-blue-700"
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/admin/artifacts')}
+            className="mr-4"
           >
-            <Save className="mr-2 h-4 w-4" />
-            {t("editArtifact")}
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {t('backToArtifacts')}
           </Button>
+          <h1 className="text-2xl font-semibold">{artifact.name}</h1>
         </div>
-
-        {/* Artifact Details */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <div className="aspect-square w-full overflow-hidden rounded-lg relative">
-                  <img
-                    src={artifact.image_url}
-                    alt={artifact.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        "https://via.placeholder.com/400?text=Image+Not+Found";
-                    }}
-                  />
-                  {artifact.model_url && (
-                    <div className="absolute bottom-3 right-3 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-md">
-                      3D Model
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <h2 className="text-lg font-semibold">{t("details")}</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
-                    <div>
-                      <p className="text-sm text-slate-500">{t("name")}</p>
-                      <p className="font-medium">{artifact.name}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-500">{t("period")}</p>
-                      <p className="font-medium">{artifact.period}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-500">{t("category")}</p>
-                      <p className="font-medium">{artifact.category}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-500">{t("location")}</p>
-                      <p className="font-medium">{artifact.location || "-"}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-500">{t("discoveryDate")}</p>
-                      <p className="font-medium">{artifact.discovery_date || "-"}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-500">{t("dateAdded")}</p>
-                      <p className="font-medium">
-                        {new Date(artifact.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold">{t("description")}</h2>
-                  <p className="mt-2 text-slate-700 whitespace-pre-line">
-                    {artifact.description}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <Button
+          onClick={handleSaveArtifact}
+          className="bg-blue-600 hover:bg-blue-700"
+          disabled={isSaving}
+        >
+          <Save className="mr-2 h-4 w-4" />
+          {isSaving ? t('saving') : t('save')}
+        </Button>
       </div>
 
-      {/* Artifact Dialog
-      <ArtifactDialog
-        isOpen={isDialogOpen}
-        onClose={handleCloseDialog}
-        artifact={artifact}
-        onSave={handleSaveArtifact}
-        isSaving={isSaving}
-      /> */}
-    </>
+      {/* Artifact Form */}
+      <Card>
+        <CardContent className="p-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="mb-6">
+              <TabsTrigger value="details">{t('details')}</TabsTrigger>
+              <TabsTrigger value="description">{t('description')}</TabsTrigger>
+              <TabsTrigger value="images">{t('images')}</TabsTrigger>
+              <TabsTrigger value="3dModel">{t('3dModel')}</TabsTrigger>
+            </TabsList>
+
+            {/* Details Tab */}
+            <TabsContent value="details" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">{t('name')}</Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={t('enterArtifactName')}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="period">{t('period')}</Label>
+                  <Input
+                    id="period"
+                    value={period}
+                    onChange={(e) => setPeriod(e.target.value)}
+                    placeholder={t('periodPlaceholder')}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="category">{t('category')}</Label>
+                  <Input
+                    id="category"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    placeholder={t('categoryPlaceholder')}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="location">{t('location')}</Label>
+                  <Input
+                    id="location"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder={t('locationPlaceholder')}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="discoveryDate">{t('discoveryDate')}</Label>
+                <Input
+                  id="discoveryDate"
+                  type="date"
+                  value={discoveryDate}
+                  onChange={(e) => setDiscoveryDate(e.target.value)}
+                />
+              </div>
+            </TabsContent>
+
+            {/* Description Tab */}
+            <TabsContent value="description">
+              <div className="grid gap-2">
+                <Label htmlFor="description">{t('description')}</Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder={t('enterArtifactDescription')}
+                  className="min-h-[300px]"
+                />
+              </div>
+            </TabsContent>
+
+            {/* Images Tab */}
+            <TabsContent value="images">
+              <ImageGalleryManager
+                mainImage={mainImage}
+                additionalImages={additionalImages}
+                onMainImageChange={setMainImage}
+                onAdditionalImagesChange={setAdditionalImages}
+                bucket="artifacts"
+                folder="images"
+              />
+            </TabsContent>
+
+            {/* 3D Model Tab */}
+            <TabsContent value="3dModel">
+              <div className="grid gap-4">
+                <FileUploadField
+                  label={t('3dModel')}
+                  value={modelUrl}
+                  onChange={setModelUrl}
+                  placeholder={t('enter3dModelUrl')}
+                  accept=".glb,.gltf"
+                  maxSizeMB={10}
+                  bucket="artifacts"
+                  folder="models"
+                  showPreview={false}
+                  description={t('supported3dFormats')}
+                  required={false}
+                />
+
+                {modelUrl && (
+                  <div className="bg-slate-100 rounded-lg p-6 text-center">
+                    <div className="mb-4 text-slate-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+                        <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+                        <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-medium text-slate-700 mb-2">{t('3dModelViewer')}</h3>
+                    <p className="text-slate-500 mb-4">
+                      {t('3dModelViewerDescription')}
+                    </p>
+                    <p className="text-sm text-blue-600 break-all">{modelUrl}</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
