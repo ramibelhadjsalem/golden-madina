@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FileUploadField } from "@/components/ui/file-upload-field";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Trash2, Plus, ArrowUp, ArrowDown, Edit, AlertTriangle, Star } from "lucide-react";
+import { Trash2, Plus, ArrowUp, ArrowDown, AlertTriangle, Star } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
 
 interface ImageGalleryManagerProps {
@@ -28,13 +25,12 @@ const ImageGalleryManager = ({
   const { t } = useTranslate();
   const [imageToDelete, setImageToDelete] = useState<number | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [editingImageIndex, setEditingImageIndex] = useState<number | null>(null);
-  const [editingImageUrl, setEditingImageUrl] = useState("");
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [imageErrors, setImageErrors] = useState<Record<number, string>>({});
   const [mainImageError, setMainImageError] = useState<string | null>(null);
 
+  // Add a new empty image slot and focus on it
   const handleAddImage = () => {
+    // Add an empty string to the additional images array
     onAdditionalImagesChange([...additionalImages, ""]);
   };
 
@@ -92,51 +88,12 @@ const ImageGalleryManager = ({
     onAdditionalImagesChange(newAdditionalImages);
   };
 
-  // Handle image error for main image
-  const handleMainImageError = (error: string) => {
-    setMainImageError(error);
-  };
-
   // Handle image error for additional images
   const handleImageError = (index: number, error: string) => {
     setImageErrors(prev => ({
       ...prev,
       [index]: error
     }));
-  };
-
-  // Open edit URL dialog
-  const handleEditClick = (index: number) => {
-    setEditingImageIndex(index);
-    setEditingImageUrl(additionalImages[index]);
-    setIsEditDialogOpen(true);
-  };
-
-  // Save edited URL
-  const handleSaveUrl = () => {
-    if (editingImageIndex !== null) {
-      handleImageChange(editingImageIndex, editingImageUrl);
-      setIsEditDialogOpen(false);
-      setEditingImageIndex(null);
-      setEditingImageUrl("");
-    }
-  };
-
-  // Edit main image URL
-  const handleEditMainImageClick = () => {
-    setEditingImageIndex(-1); // Use -1 to indicate main image
-    setEditingImageUrl(mainImage);
-    setIsEditDialogOpen(true);
-  };
-
-  // Save main image URL
-  const handleSaveMainUrl = () => {
-    if (editingImageIndex === -1) {
-      onMainImageChange(editingImageUrl);
-      setIsEditDialogOpen(false);
-      setEditingImageIndex(null);
-      setEditingImageUrl("");
-    }
   };
 
   return (
@@ -168,19 +125,6 @@ const ImageGalleryManager = ({
                 {mainImageError}
               </div>
             )}
-          </div>
-
-          <div className="flex justify-end mt-3 pt-2 border-t">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleEditMainImageClick}
-              className="flex items-center text-blue-600 hover:bg-blue-50"
-            >
-              <Edit className="h-4 w-4 mr-1" />
-              {t('editUrl')}
-            </Button>
           </div>
         </div>
       </div>
@@ -237,7 +181,6 @@ const ImageGalleryManager = ({
                     title={t('setAsMainImage')}
                   >
                     <Star className="h-4 w-4 mr-1 fill-blue-600" />
-                    {/* {t('setAsMainImage')} */}
                   </Button>
                 </div>
                 <div className="flex space-x-1">
@@ -263,16 +206,7 @@ const ImageGalleryManager = ({
                   >
                     <ArrowDown className="h-4 w-4" />
                   </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEditClick(index)}
-                    className="h-8 w-8 hover:bg-slate-100 text-blue-600"
-                    title={t('editUrl')}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
+
                   <Button
                     type="button"
                     variant="ghost"
@@ -326,40 +260,6 @@ const ImageGalleryManager = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Edit URL Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('editImageUrl')}</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <Label htmlFor="image-url" className="mb-2 block">{t('imageUrlLabel')}</Label>
-            <Input
-              id="image-url"
-              value={editingImageUrl}
-              onChange={(e) => setEditingImageUrl(e.target.value)}
-              placeholder={t('enterImageUrlGallery')}
-              className="w-full"
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsEditDialogOpen(false)}
-            >
-              {t('cancel')}
-            </Button>
-            <Button
-              type="button"
-              onClick={editingImageIndex === -1 ? handleSaveMainUrl : handleSaveUrl}
-            >
-              {t('save')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

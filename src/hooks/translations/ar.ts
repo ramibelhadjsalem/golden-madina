@@ -316,7 +316,7 @@ export const ar = {
     editUrl: "تعديل الرابط",
     editImageUrl: "تعديل رابط الصورة",
     imageUrlLabel: "رابط الصورة",
-    enterImageUrlGallery: "أدخل رابط الصورة",
+    enterImageUrl: "أدخل رابط الصورة",
     noAdditionalImages: "لا توجد صور إضافية",
     confirmDeleteImage: "تأكيد حذف الصورة",
     deleteImageWarning: "هل أنت متأكد من رغبتك في حذف هذه الصورة؟ لا يمكن التراجع عن هذا الإجراء.",
