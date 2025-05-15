@@ -6,6 +6,13 @@ import { useTranslate } from "@/hooks/use-translate";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 
+// Define the comment interface
+interface Comment {
+  id: string;
+  text: string;
+  isValidated: boolean;
+}
+
 // Define the blog post interface
 interface BlogPost {
   id?: string;
@@ -19,6 +26,7 @@ interface BlogPost {
   published_at?: string | null;
   language?: string;
   date?: string;
+  comments?: Comment[] | null;
 }
 
 const AdminBlogEdit = () => {
@@ -156,6 +164,7 @@ const AdminBlogEdit = () => {
         image: blogData.image,
         status: blogData.status,
         language: blogData.language,
+        comments: blogData.comments, // Include comments for validation/deletion
         // Set published_at if status is published
         published_at: isPublished ? (blogData.published_at || now) : null
       };

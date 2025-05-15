@@ -5,6 +5,16 @@ import { useEffect, useState } from "react";
 import { useTranslate } from "@/hooks/use-translate";
 import { useLanguage } from "@/context/LanguageContext";
 import { supabase } from "@/lib/supabase";
+import { toast } from "@/hooks/use-toast";
+import { MessageSquare, Share2 } from "lucide-react";
+import CommentSheet from "@/components/CommentSheet";
+
+// Define the comment interface
+interface Comment {
+  id: string;
+  text: string;
+  isValidated: boolean;
+}
 
 // Define the blog post interface
 interface BlogPost {
@@ -19,6 +29,7 @@ interface BlogPost {
   published_at: string | null;
   language?: string;
   date: string;
+  comments?: Comment[] | null;
 }
 
 const BlogDetail = () => {
@@ -29,6 +40,37 @@ const BlogDetail = () => {
   const [blog, setBlog] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  // Comment sheet state
+  const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(false);
+
+  // Share functionality
+  const copyLinkToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => {
+        toast({
+          title: t('linkCopied'),
+          description: t('linkCopiedToClipboard'),
+        });
+      })
+      .catch(() => {
+        toast({
+          title: t('error'),
+          description: t('failedToCopyLink'),
+          variant: 'destructive',
+        });
+      });
+  };
+
+  // Handle comment updates
+  const handleCommentsChange = (updatedComments: Comment[]) => {
+    if (blog) {
+      setBlog({
+        ...blog,
+        comments: updatedComments
+      });
+    }
+  };
 
   // Fetch blog data
   useEffect(() => {
@@ -165,7 +207,26 @@ const BlogDetail = () => {
           </div>
 
           {/* Article Content */}
-          <article className="container mx-auto px-4 py-12">
+          <article className="container mx-auto px-4 pb-12">
+            {/* Comment and Share Buttons */}
+            <div className="max-w-6xl mx-auto gap-4 flex py-6">
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => setIsCommentSheetOpen(true)}
+              >
+                <MessageSquare className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={copyLinkToClipboard}
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
+            </div>
             <div className="max-w-6xl mx-auto">
               <div
                 className="rich-text-content prose prose-slate lg:prose-lg max-w-none"
@@ -173,8 +234,10 @@ const BlogDetail = () => {
               />
             </div>
 
+
+
             {/* Navigation */}
-            <div className="max-w-3xl mx-auto mt-12 pt-8 border-t border-slate-200">
+            <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-slate-200">
               <div className="flex flex-wrap justify-between gap-4">
                 <Link to="/blog">
                   <Button variant="outline">
@@ -188,6 +251,17 @@ const BlogDetail = () => {
                 </Link>
               </div>
             </div>
+
+            {/* Comments Sheet */}
+            {blog && (
+              <CommentSheet
+                isOpen={isCommentSheetOpen}
+                onOpenChange={setIsCommentSheetOpen}
+                blogId={blog.id}
+                comments={blog.comments || []}
+                onCommentsChange={handleCommentsChange}
+              />
+            )}
           </article>
         </>
       ) : (

@@ -1,4 +1,32 @@
 export const ar = {
+    // Blog Comments and Share
+    leaveComment: "اترك تعليقًا",
+    share: "مشاركة",
+    comment: "تعليق",
+    comments: "التعليقات",
+    enterYourComment: "أدخل تعليقك هنا...",
+    submitComment: "إرسال التعليق",
+    submitting: "جاري الإرسال...",
+    commentSubmitted: "تم إرسال التعليق",
+    commentAwaitingValidation: "تم إرسال تعليقك وهو في انتظار التحقق.",
+    pleaseEnterComment: "الرجاء إدخال تعليق.",
+    failedToSubmitComment: "فشل في إرسال التعليق. يرجى المحاولة مرة أخرى.",
+    cancel: "إلغاء",
+    linkCopied: "تم نسخ الرابط",
+    linkCopiedToClipboard: "تم نسخ الرابط إلى الحافظة.",
+    failedToCopyLink: "فشل في نسخ الرابط إلى الحافظة.",
+    commentDescription: "شارك أفكارك حول هذا المقال. ستكون التعليقات مرئية بعد الموافقة عليها.",
+
+    // Admin Comment Management
+    manageComments: "إدارة التعليقات",
+    noCommentsYet: "لا توجد تعليقات حتى الآن.",
+    markAsValid: "وضع علامة كصالح",
+    markAsInvalid: "وضع علامة كغير صالح",
+    deleteComment: "حذف التعليق",
+    deleteCommentConfirmation: "هل أنت متأكد أنك تريد حذف هذا التعليق؟ لا يمكن التراجع عن هذا الإجراء.",
+    delete: "حذف",
+    validated: "تم التحقق",
+    pending: "قيد الانتظار",
     // 3D Model Viewer
     loadingModel: "جاري تحميل النموذج ثلاثي الأبعاد...",
     modelLoadError: "فشل في تحميل النموذج ثلاثي الأبعاد",

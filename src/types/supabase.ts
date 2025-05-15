@@ -63,6 +63,12 @@ export interface Database {
           status: 'draft' | 'published'
           published_at: string | null
           tags: string[] | null
+          language: string | null
+          comments: {
+            id: string
+            text: string
+            isValidated: boolean
+          }[] | null
         }
         Insert: {
           id?: string
@@ -75,6 +81,12 @@ export interface Database {
           status?: 'draft' | 'published'
           published_at?: string | null
           tags?: string[] | null
+          language?: string | null
+          comments?: {
+            id: string
+            text: string
+            isValidated: boolean
+          }[] | null
         }
         Update: {
           id?: string
@@ -87,6 +99,12 @@ export interface Database {
           status?: 'draft' | 'published'
           published_at?: string | null
           tags?: string[] | null
+          language?: string | null
+          comments?: {
+            id: string
+            text: string
+            isValidated: boolean
+          }[] | null
         }
         Relationships: []
       }

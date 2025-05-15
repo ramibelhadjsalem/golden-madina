@@ -1,4 +1,32 @@
 export const fr = {
+    // Blog Comments and Share
+    leaveComment: "Laisser un Commentaire",
+    share: "Partager",
+    comment: "Commentaire",
+    comments: "Commentaires",
+    enterYourComment: "Entrez votre commentaire ici...",
+    submitComment: "Soumettre le Commentaire",
+    submitting: "Soumission...",
+    commentSubmitted: "Commentaire Soumis",
+    commentAwaitingValidation: "Votre commentaire a été soumis et est en attente de validation.",
+    pleaseEnterComment: "Veuillez entrer un commentaire.",
+    failedToSubmitComment: "Échec de la soumission du commentaire. Veuillez réessayer.",
+    cancel: "Annuler",
+    linkCopied: "Lien Copié",
+    linkCopiedToClipboard: "Le lien a été copié dans le presse-papiers.",
+    failedToCopyLink: "Échec de la copie du lien dans le presse-papiers.",
+    commentDescription: "Partagez vos réflexions sur cet article. Les commentaires seront visibles après approbation.",
+
+    // Admin Comment Management
+    manageComments: "Gérer les Commentaires",
+    noCommentsYet: "Pas encore de commentaires.",
+    markAsValid: "Marquer comme Valide",
+    markAsInvalid: "Marquer comme Invalide",
+    deleteComment: "Supprimer le Commentaire",
+    deleteCommentConfirmation: "Êtes-vous sûr de vouloir supprimer ce commentaire? Cette action ne peut pas être annulée.",
+    delete: "Supprimer",
+    validated: "Validé",
+    pending: "En attente",
     // 3D Model Viewer
     loadingModel: "Chargement du modèle 3D...",
     modelLoadError: "Échec du Chargement du Modèle 3D",

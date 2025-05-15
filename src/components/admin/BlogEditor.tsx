@@ -12,7 +12,18 @@ import { useLanguage } from "@/context/LanguageContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Eye } from "lucide-react";
+import { Eye, Check, X, Mail } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+
+// Define the comment interface
+interface Comment {
+  id: string;
+  text: string;
+  isValidated: boolean;
+}
 
 // Define the blog post interface
 interface BlogPost {
@@ -27,6 +38,7 @@ interface BlogPost {
   published_at?: string | null;
   language?: string;
   date?: string;
+  comments?: Comment[] | null;
 }
 
 // Simple component to preview files
@@ -77,6 +89,9 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [language, setLanguage] = useState(currentLanguage.code);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState("content");
+  const [comments, setComments] = useState<Comment[]>([]);
+
 
   // Initialize form with blog data if editing
   useEffect(() => {
@@ -88,11 +103,29 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
       setImage(blog.image || "");
       setStatus(blog.status || 'draft');
       setLanguage(blog.language || currentLanguage.code);
+      setComments(blog.comments || []);
     }
   }, [blog, currentLanguage.code]);
 
   const handleContentChange = (newContent: string) => {
     setContent(newContent);
+  };
+
+  // Comment management functions
+  const handleToggleCommentValidation = (commentId: string) => {
+    setComments(prevComments =>
+      prevComments.map(comment =>
+        comment.id === commentId
+          ? { ...comment, isValidated: !comment.isValidated }
+          : comment
+      )
+    );
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    setComments(prevComments =>
+      prevComments.filter(comment => comment.id !== commentId)
+    );
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -147,7 +180,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
       content,
       image,
       status,
-      language
+      language,
+      comments
     };
 
     // Save blog
@@ -279,17 +313,88 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
           />
         </div>
 
-        {/* Content */}
-        <div>
-          <Label htmlFor="content">{t('content')}</Label>
-          <div className="mt-1">
-            <SimpleEditor
-              initContent={content}
-              onChange={handleContentChange}
-              setEditor={setEditor}
-            />
-          </div>
-        </div>
+        {/* Tabs for Content and Comments */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+          <TabsList className="mb-4">
+            <TabsTrigger value="content">{t('content')}</TabsTrigger>
+            <TabsTrigger value="comments">{t('comments')}</TabsTrigger>
+          </TabsList>
+
+          {/* Content Tab */}
+          <TabsContent value="content">
+            <div>
+              <Label htmlFor="content">{t('content')}</Label>
+              <div className="mt-1">
+                <SimpleEditor
+                  initContent={content}
+                  onChange={handleContentChange}
+                  setEditor={setEditor}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Comments Tab */}
+          <TabsContent value="comments">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">{t('manageComments')}</h3>
+                <Badge variant="outline">
+                  {comments.length} {t('comments')}
+                </Badge>
+              </div>
+
+              {comments.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  {t('noCommentsYet')}
+                </div>
+              ) : (
+                <div className="h-[400px] border rounded-md p-4">
+                  <div className="space-y-4">
+                    {comments.map(comment => (
+                      <div key={comment.id} className="border rounded-md p-4 relative">
+                        <div className="absolute top-2 right-2 flex space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={comment.isValidated ? "text-green-500" : "text-gray-400"}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleToggleCommentValidation(comment.id);
+                            }}
+                            title={comment.isValidated ? t('markAsInvalid') : t('markAsValid')}
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-red-500"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleDeleteComment(comment.id);
+                            }}
+                            title={t('deleteComment')}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        <div className="mb-2 flex items-center">
+                          <Badge variant={comment.isValidated ? "default" : "secondary"} className="mr-2">
+                            {comment.isValidated ? t('validated') : t('pending')}
+                          </Badge>
+                        </div>
+
+                        <p className="text-sm mt-2">{comment.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Preview Dialog */}

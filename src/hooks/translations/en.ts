@@ -1,4 +1,32 @@
 export const en = {
+    // Blog Comments and Share
+    leaveComment: "Leave a Comment",
+    share: "Share",
+    comment: "Comment",
+    comments: "Comments",
+    enterYourComment: "Enter your comment here...",
+    submitComment: "Submit Comment",
+    submitting: "Submitting...",
+    commentSubmitted: "Comment Submitted",
+    commentAwaitingValidation: "Your comment has been submitted and is awaiting validation.",
+    pleaseEnterComment: "Please enter a comment.",
+    failedToSubmitComment: "Failed to submit comment. Please try again.",
+    cancel: "Cancel",
+    linkCopied: "Link Copied",
+    linkCopiedToClipboard: "Link has been copied to clipboard.",
+    failedToCopyLink: "Failed to copy link to clipboard.",
+    commentDescription: "Share your thoughts on this article. Comments will be visible after approval.",
+
+    // Admin Comment Management
+    manageComments: "Manage Comments",
+    noCommentsYet: "No comments yet.",
+    markAsValid: "Mark as Valid",
+    markAsInvalid: "Mark as Invalid",
+    deleteComment: "Delete Comment",
+    deleteCommentConfirmation: "Are you sure you want to delete this comment? This action cannot be undone.",
+    delete: "Delete",
+    validated: "Validated",
+    pending: "Pending",
     // 3D Model Viewer
     loadingModel: "Loading 3D model...",
     modelLoadError: "Failed to Load 3D Model",

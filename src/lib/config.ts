@@ -35,12 +35,12 @@ export const CAROUSEL_IMAGES = [
     caption: "Our preservation site in the mountains, circa 1923"
   },
   {
-    src: "https://images.unsplash.com/photo-1433086966358-54859d0ed716",
-    alt: "Ancient stone bridge over waterfall",
-    caption: "The Heritage Bridge, restored in 1967"
+    src: "https://scontent.ftun10-2.fna.fbcdn.net/v/t39.30808-6/484583121_495487693632055_4157865217247624157_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=127cfc&_nc_ohc=oEO8Z4pFQnwQ7kNvwHJ060s&_nc_oc=AdnEKJw6eXao7bX1rzURHw98CSwl6B4x4dOIxdXwwb3xJNigAdAE5CX9fyCcIOcoTgc&_nc_zt=23&_nc_ht=scontent.ftun10-2.fna&_nc_gid=_RU7qJtjH25UjjSYqh77PA&oh=00_AfJwIbEezYw1iLyevfeHnFRXqplHr6IiYBnOzGuArnwIrQ&oe=682B236F",
+    alt: "History is alive here!",
+    caption: "History is alive here!"
   },
   {
-    src: "https://images.unsplash.com/photo-1466442929976-97f336a657be",
+    src: "https://scontent.ftun10-1.fna.fbcdn.net/v/t39.30808-6/481781870_488993204281504_3842935024160584440_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=127cfc&_nc_ohc=IqTNwYEHFYwQ7kNvwGKmoKy&_nc_oc=AdmYTkizVdfj03eB1oNYLP2vRkyp9wxELZBJMWWeW9Ksm-0OzAWNXtBkpfmxR2YPlSk&_nc_zt=23&_nc_ht=scontent.ftun10-1.fna&_nc_gid=ufIBs8dfHmpSxVzY9I7jNw&oh=00_AfIfceXW9GLWsAqGmeitUH5HQPE62ZVmmuvcKLxCQXb8bw&oe=682B2300",
     alt: "Traditional architectural buildings",
     caption: "Cultural heritage buildings preserved by our foundation"
   },
@@ -48,7 +48,7 @@ export const CAROUSEL_IMAGES = [
 
 // Our Rich History Section
 export const RICH_HISTORY = {
-  image: "https://images.unsplash.com/photo-1579281455196-f8ab9f4d7f13",
+  image: "https://scontent.ftun10-1.fna.fbcdn.net/v/t39.30808-6/481781870_488993204281504_3842935024160584440_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=127cfc&_nc_ohc=IqTNwYEHFYwQ7kNvwGKmoKy&_nc_oc=AdmYTkizVdfj03eB1oNYLP2vRkyp9wxELZBJMWWeW9Ksm-0OzAWNXtBkpfmxR2YPlSk&_nc_zt=23&_nc_ht=scontent.ftun10-1.fna&_nc_gid=ufIBs8dfHmpSxVzY9I7jNw&oh=00_AfIfceXW9GLWsAqGmeitUH5HQPE62ZVmmuvcKLxCQXb8bw&oe=682B2300",
   alt: "Historical museum building",
   paragraphs: [
     "Founded in 1895, our institution has been at the forefront of preserving and showcasing the rich cultural heritage of our region. Through careful conservation, research, and education, we connect the past with the present for future generations.",
