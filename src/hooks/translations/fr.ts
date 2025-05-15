@@ -311,6 +311,7 @@ export const fr = {
     mainImageDescription: "Cette image sera affichée comme image principale pour cet élément",
     additionalImages: "Images Supplémentaires",
     addImage: "Ajouter une Image",
+    clickToAddImage: "Cliquez pour ajouter une nouvelle image",
     setAsMainImage: "Définir comme Principale",
     moveUp: "Déplacer vers le Haut",
     moveDown: "Déplacer vers le Bas",

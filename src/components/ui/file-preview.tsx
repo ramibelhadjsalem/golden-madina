@@ -58,7 +58,8 @@ const FilePreview: React.FC<FilePreviewProps> = ({
     }
   };
 
-  if (!url) {
+  // Handle empty URLs or placeholder URLs
+  if (!url || url.startsWith('placeholder-')) {
     return (
       <div className={`flex items-center justify-center bg-slate-100 rounded-md ${className}`} style={{ width, height }}>
         <span className="text-slate-400 text-sm">{t('noFileSelected')}</span>

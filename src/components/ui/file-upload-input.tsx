@@ -34,6 +34,7 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({
 
   // Handle URL input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Update the value, replacing any placeholder
     onChange(e.target.value);
   };
 
@@ -61,6 +62,7 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({
       const fileUrl = await uploadFile(file, bucket, folder);
 
       if (fileUrl) {
+        // Replace the value, even if it's a placeholder
         onChange(fileUrl);
         toast({
           title: t('uploadSuccess'),
@@ -98,9 +100,9 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({
     <div className={`relative flex items-center ${className}`}>
       <Input
         type="text"
-        value={value}
+        value={value.startsWith('placeholder-') ? '' : value}
         onChange={handleInputChange}
-        placeholder={placeholder}
+        placeholder={value.startsWith('placeholder-') ? t('enterImageUrl') : placeholder}
         className="pr-24"
         disabled={disabled || isUploading}
       />

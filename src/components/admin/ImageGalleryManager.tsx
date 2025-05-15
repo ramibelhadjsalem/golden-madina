@@ -28,10 +28,21 @@ const ImageGalleryManager = ({
   const [imageErrors, setImageErrors] = useState<Record<number, string>>({});
   const [mainImageError, setMainImageError] = useState<string | null>(null);
 
-  // Add a new empty image slot and focus on it
+  // Add a new empty image slot
   const handleAddImage = () => {
-    // Add an empty string to the additional images array
-    onAdditionalImagesChange([...additionalImages, ""]);
+    // Create a copy of the current array to avoid direct state mutation
+    const newImages = [...additionalImages];
+
+    // Add a placeholder URL to the additional images array
+    // Using a placeholder instead of empty string to prevent it from being filtered out
+    const placeholderUrl = "placeholder-" + Date.now();
+    newImages.push(placeholderUrl);
+
+    // Update the state with the new array
+    onAdditionalImagesChange(newImages);
+
+    // Log for debugging
+    console.log("Added new image slot. New array:", newImages);
   };
 
   const handleImageChange = (index: number, url: string) => {
@@ -221,8 +232,22 @@ const ImageGalleryManager = ({
               </div>
             </div>
           ))}
+
+          {/* Add Image Card */}
+          <div
+            className="border border-dashed rounded-md p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors"
+            onClick={handleAddImage}
+            style={{ minHeight: '300px' }}
+          >
+            <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+              <Plus className="h-8 w-8 text-slate-400" />
+            </div>
+            <p className="text-slate-600 font-medium">{t('addImage')}</p>
+            <p className="text-slate-400 text-sm text-center mt-2">{t('clickToAddImage')}</p>
+          </div>
         </div>
 
+        {/* Show empty state only when there are no images */}
         {additionalImages.length === 0 && (
           <div className="text-center py-8 bg-slate-50 rounded-md">
             <p className="text-slate-500">{t('noAdditionalImages')}</p>

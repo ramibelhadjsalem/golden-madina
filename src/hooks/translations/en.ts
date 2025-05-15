@@ -282,6 +282,7 @@ export const en = {
     mainImageDescription: "This image will be displayed as the primary image for this artifact",
     additionalImages: "Additional Images",
     addImage: "Add Image",
+    clickToAddImage: "Click to add a new image",
     setAsMainImage: "Set as Main Image",
     moveUp: "Move Up",
     moveDown: "Move Down",

@@ -309,6 +309,7 @@ export const ar = {
     mainImageDescription: "سيتم عرض هذه الصورة كصورة رئيسية لهذا العنصر",
     additionalImages: "صور إضافية",
     addImage: "إضافة صورة",
+    clickToAddImage: "انقر لإضافة صورة جديدة",
     setAsMainImage: "تعيين كصورة رئيسية",
     moveUp: "تحريك لأعلى",
     moveDown: "تحريك لأسفل",

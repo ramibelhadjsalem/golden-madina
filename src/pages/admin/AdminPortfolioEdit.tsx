@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -43,7 +44,7 @@ const AdminPortfolioEdit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTranslate();
-  const { currentLanguage, languagesList } = useLanguage();
+  const { languagesList } = useLanguage();
   const isNewPortfolio = id === "new";
 
   // Form state
@@ -98,7 +99,7 @@ const AdminPortfolioEdit = () => {
     };
 
     fetchPortfolio();
-  }, [id, isNewPortfolio, navigate, t, currentLanguage.code]);
+  }, [id]);
 
   const handleSave = async () => {
     if (!name || !description || !mainImage || !category) {
@@ -119,7 +120,10 @@ const AdminPortfolioEdit = () => {
         content,
         category,
         image_url: mainImage,
-        additional_images: additionalImages.length > 0 ? additionalImages : null,
+        // Filter out placeholder URLs before saving
+        additional_images: additionalImages.length > 0
+          ? additionalImages.filter(url => !url.startsWith("placeholder-") && url.trim() !== "")
+          : null,
         language: language === "none" ? null : language,
       };
 
