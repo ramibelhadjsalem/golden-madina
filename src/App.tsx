@@ -25,6 +25,7 @@ import { useEffect } from "react";
 import AdminLayout from "./components/admin/AdminLayout";
 import MainLayout from "./components/main/MainLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { setDocumentTitle } from "@/lib/document-utils";
 
 // Add Google Fonts
 const loadFonts = () => {
@@ -39,6 +40,7 @@ const queryClient = new QueryClient();
 const App = () => {
   useEffect(() => {
     loadFonts();
+    setDocumentTitle(); // Set default document title
   }, []);
 
   return (
