@@ -5,8 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SimpleEditor } from "@/components/editor";
-import { FileUploadField } from "@/components/ui/file-upload-field";
-
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Save } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
@@ -55,7 +53,7 @@ const AdminPortfolioEdit = () => {
   const [category, setCategory] = useState(PORTFOLIO_CATEGORIES[0]);
   const [mainImage, setMainImage] = useState("");
   const [additionalImages, setAdditionalImages] = useState<string[]>([]);
-  const [language, setLanguage] = useState(currentLanguage.code);
+  const [language, setLanguage] = useState<string>("none");
   const [editor, setEditor] = useState<Editor | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(!isNewPortfolio);
@@ -84,7 +82,7 @@ const AdminPortfolioEdit = () => {
           setCategory(portfolio.category);
           setMainImage(portfolio.image_url);
           setAdditionalImages(portfolio.additional_images || []);
-          setLanguage(portfolio.language || currentLanguage.code);
+          setLanguage(portfolio.language || "none");
         }
       } catch (error) {
         console.error("Error fetching portfolio:", error);
@@ -122,10 +120,10 @@ const AdminPortfolioEdit = () => {
         category,
         image_url: mainImage,
         additional_images: additionalImages.length > 0 ? additionalImages : null,
-        language: language || null,
+        language: language === "none" ? null : language,
       };
 
-      let result;
+      let result: { data: any; error: any };
 
       if (isNewPortfolio) {
         result = await supabase
@@ -263,9 +261,10 @@ const AdminPortfolioEdit = () => {
                       <SelectValue placeholder={t("selectLanguage")} />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none">{t("noLanguage")}</SelectItem>
                       {languagesList.map((lang) => (
                         <SelectItem key={lang.code} value={lang.code}>
-                          {lang.flag} {lang.name}
+                          {`${lang.flag} ${lang.name}`}
                         </SelectItem>
                       ))}
                     </SelectContent>

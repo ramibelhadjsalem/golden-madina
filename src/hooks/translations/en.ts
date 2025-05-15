@@ -400,4 +400,5 @@ export const en = {
     portfolioUpdated: "Portfolio Item Updated",
     portfolioUpdateSuccess: "The portfolio item has been successfully updated",
     couldNotLoadPortfolio: "Could not load portfolio item details",
+    noLanguage: "No Language",
 };

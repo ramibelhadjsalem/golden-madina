@@ -354,4 +354,5 @@ export const ar = {
     couldNotLoadPortfolio: "تعذر تحميل تفاصيل عنصر المعرض",
     portfolioItems: "عناصر المعرض",
     viewDetails: "عرض التفاصيل",
+    noLanguage: "بدون لغة",
 }

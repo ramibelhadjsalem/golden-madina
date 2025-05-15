@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Pencil, Plus, Search, Trash2, Filter } from "lucide-react";
+import { Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
 import { supabase } from "@/lib/supabase";
 import { handleImageError } from "@/lib/utils";
@@ -143,21 +143,20 @@ const AdminPortfolioList = () => {
                 placeholder={t("searchPortfolio")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 w-full"
               />
             </div>
 
-            <div className="w-full md:w-64 flex items-center gap-2">
-              <Filter className="text-gray-400" size={18} />
+            <div className="w-full md:w-48 flex-shrink-0">
               <Select
-                value={selectedCategory || ""}
-                onValueChange={(value) => setSelectedCategory(value || null)}
+                value={selectedCategory || "all"}
+                onValueChange={(value) => setSelectedCategory(value === "all" ? null : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t("filterByCategory")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("allCategories")}</SelectItem>
+                  <SelectItem value="all">{t("allCategories")}</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category}

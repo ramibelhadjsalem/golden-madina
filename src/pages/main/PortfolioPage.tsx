@@ -2,10 +2,13 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslate } from "@/hooks/use-translate";
 import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/context/LanguageContext";
 import { handleImageError } from "@/lib/utils";
+import { Search } from "lucide-react";
 
 // Define portfolio item type
 type Portfolio = {
@@ -22,13 +25,15 @@ type Portfolio = {
 
 const PortfolioPage = () => {
   const { t } = useTranslate();
-  const { currentLanguage } = useLanguage();
+  const { currentLanguage, languagesList } = useLanguage();
   const [portfolioItems, setPortfolioItems] = useState<Portfolio[]>([]);
   const [filteredItems, setFilteredItems] = useState<Portfolio[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>();
 
   useEffect(() => {
     const fetchPortfolioItems = async () => {
@@ -36,15 +41,10 @@ const PortfolioPage = () => {
         setLoading(true);
         setError(null);
 
-        // Fetch portfolio items from Supabase
-        let query = supabase
+        // Fetch all portfolio items from Supabase
+        const query = supabase
           .from("portfolios")
           .select("*");
-
-        // // Filter by language if available
-        // if (currentLanguage.code) {
-        //   query = query.eq("language", currentLanguage.code);
-        // }
 
         const { data, error } = await query;
 
@@ -65,16 +65,35 @@ const PortfolioPage = () => {
     };
 
     fetchPortfolioItems();
-  }, [currentLanguage.code]);
+  }, []);
 
-  // Filter items when category selection changes
+  // Apply all filters (category, language, search)
   useEffect(() => {
+    let filtered = [...portfolioItems];
+
+    // Apply category filter
     if (selectedCategory) {
-      setFilteredItems(portfolioItems.filter(item => item.category === selectedCategory));
-    } else {
-      setFilteredItems(portfolioItems);
+      filtered = filtered.filter(item => item.category === selectedCategory);
     }
-  }, [selectedCategory, portfolioItems]);
+
+    // Apply language filter
+    if (selectedLanguage) {
+      filtered = filtered.filter(item => item.language === selectedLanguage);
+    }
+
+    // Apply search filter
+    if (searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        item =>
+          item.name.toLowerCase().includes(query) ||
+          item.description.toLowerCase().includes(query) ||
+          item.category.toLowerCase().includes(query)
+      );
+    }
+
+    setFilteredItems(filtered);
+  }, [selectedCategory, selectedLanguage, searchQuery, portfolioItems]);
 
   return (
     <main className="flex-grow">
@@ -88,15 +107,47 @@ const PortfolioPage = () => {
         </div>
       </section>
 
-      {/* Category Filter */}
+      {/* Search and Filters */}
       <section className="py-8 bg-slate-50">
         <div className="container mx-auto px-4">
+          {/* Search Bar and Language Filter */}
+          <div className="mb-6 max-w-3xl mx-auto flex flex-col md:flex-row gap-3 items-center">
+            <div className="relative flex-grow w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Input
+                placeholder={t("searchPortfolio")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-white w-full"
+              />
+            </div>
+            <div className="w-full md:w-40 flex-shrink-0">
+              <Select
+                value={selectedLanguage || "all"}
+                onValueChange={(value) => setSelectedLanguage(value === "all" ? null : value)}
+              >
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder={t("selectLanguage")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("allLanguages")}</SelectItem>
+                  {languagesList.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      {`${lang.flag} ${lang.name}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Category Pills */}
           <div className="flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={() => setSelectedCategory(null)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedCategory === null
-                  ? "bg-amber-500 text-white"
-                  : "bg-white text-slate-700 hover:bg-slate-100"
+                ? "bg-amber-500 text-white"
+                : "bg-white text-slate-700 hover:bg-slate-100"
                 }`}
             >
               {t('allCategories')}
@@ -107,14 +158,30 @@ const PortfolioPage = () => {
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedCategory === category
-                    ? "bg-amber-500 text-white"
-                    : "bg-white text-slate-700 hover:bg-slate-100"
+                  ? "bg-amber-500 text-white"
+                  : "bg-white text-slate-700 hover:bg-slate-100"
                   }`}
               >
                 {category}
               </button>
             ))}
           </div>
+
+          {/* Clear Filters Button */}
+          {(selectedCategory || selectedLanguage || searchQuery) && (
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => {
+                  setSelectedCategory(null);
+                  setSelectedLanguage(null);
+                  setSearchQuery("");
+                }}
+                className="text-sm text-slate-600 hover:text-amber-600 flex items-center gap-1"
+              >
+                {t("clearFilters")}
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -181,17 +248,23 @@ const PortfolioPage = () => {
           ) : (
             <div className="text-center py-20 bg-slate-50 rounded-lg">
               <h3 className="text-2xl font-semibold text-slate-700 mb-2">
-                {selectedCategory
-                  ? t('noPortfolioItemsInCategory').replace('{category}', selectedCategory)
-                  : t('noPortfolioItems')}
+                {searchQuery
+                  ? t('noSearchResults')
+                  : selectedCategory
+                    ? t('noPortfolioItemsInCategory').replace('{category}', selectedCategory)
+                    : t('noPortfolioItems')}
               </h3>
               <p className="text-slate-500">{t('checkBackLater')}</p>
-              {selectedCategory && (
+              {(selectedCategory || selectedLanguage || searchQuery) && (
                 <button
-                  onClick={() => setSelectedCategory(null)}
+                  onClick={() => {
+                    setSelectedCategory(null);
+                    setSelectedLanguage(null);
+                    setSearchQuery("");
+                  }}
                   className="mt-4 px-4 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors"
                 >
-                  {t('viewAllCategories')}
+                  {t('clearFilters')}
                 </button>
               )}
             </div>

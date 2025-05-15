@@ -357,4 +357,5 @@ export const fr = {
     couldNotLoadPortfolio: "Impossible de charger les détails de l'élément de portfolio",
     portfolioItems: "Éléments de Portfolio",
     viewDetails: "Voir les Détails",
+    noLanguage: "Aucune Langue",
 };
