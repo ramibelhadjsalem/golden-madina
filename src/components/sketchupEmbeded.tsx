@@ -6,7 +6,7 @@ interface SketchfabEmbedProps {
     modelUrl: string;
 }
 
-const SketchfabEmbed: React.FC<SketchfabEmbedProps> = ({ modelUrl = "014bab740f934d4697701fdadf5e94bc" }) => {
+const SketchfabEmbed: React.FC<SketchfabEmbedProps> = ({ modelUrl = "https://sketchfab.com/models/014bab740f934d4697701fdadf5e94bc/embed" }) => {
     const { t } = useTranslate();
     const [error, setError] = useState(false);
 
@@ -37,7 +37,7 @@ const SketchfabEmbed: React.FC<SketchfabEmbedProps> = ({ modelUrl = "014bab740f9
                 frameBorder="0"
                 allow="autoplay; fullscreen; xr-spatial-tracking"
                 allowFullScreen
-                src={`https://sketchfab.com/models/${modelUrl}/embed`}
+                src={modelUrl}
                 className='h-full w-full'
                 onError={handleIframeError}
 

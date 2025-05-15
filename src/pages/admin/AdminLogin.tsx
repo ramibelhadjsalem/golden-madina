@@ -117,11 +117,11 @@ const AdminLogin = () => {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="text-center text-sm text-slate-500">
+        {/* <CardFooter className="text-center text-sm text-slate-500">
           <p className="w-full">
             {t('demoCredentials')}
           </p>
-        </CardFooter>
+        </CardFooter> */}
       </Card>
     </div>
   );

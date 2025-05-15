@@ -166,7 +166,6 @@ export const ar = {
     // Blog Management
     searchBlogs: "البحث في المدونات...",
     edit: "تعديل",
-    delete: "حذف",
     deleting: "جاري الحذف...",
     noBlogsFound: "لم يتم العثور على مقالات",
     createNewBlogPost: "إنشاء مقال مدونة جديد",
@@ -175,7 +174,6 @@ export const ar = {
     allStatus: "جميع الحالات",
     errorDeletingBlog: "حدث خطأ أثناء حذف مقال المدونة",
     deleteWarning: "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف مقال المدونة نهائيًا.",
-    cancel: "إلغاء",
     blogUpdated: "تم تحديث المدونة",
     blogUpdateSuccess: "تم تحديث مقال المدونة بنجاح",
     blogCreated: "تم إنشاء المدونة",
@@ -316,7 +314,6 @@ export const ar = {
     view: "عرض",
     noBookingsFound: "لم يتم العثور على حجوزات",
     all: "الكل",
-    pending: "قيد الانتظار",
     confirmed: "مؤكد",
     canceled: "ملغي",
     bookingUpdated: "تم تحديث الحجز",

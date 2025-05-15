@@ -108,8 +108,8 @@ export const en = {
     address: "123 Heritage Street",
     city: "Historic District, HT 12345",
     phone: "Phone: (123) 456-7890",
-    email: "Email: info@heritageco.example",
-    copyright: "© {year} Heritage Company. All rights reserved.",
+    email: "Email",
+    copyright: "© {year} Golden Madina Company. All rights reserved.",
 
     // Social media
     facebook: "Facebook",
@@ -122,7 +122,7 @@ export const en = {
     contact: "Contact",
 
     // Admin Login
-    adminArea: "Heritage Co. Admin",
+    adminArea: "Golden Madina. Admin",
     signInToAdmin: "Sign in to access the admin panel",
     password: "Password",
     forgotPassword: "Forgot password?",
@@ -142,7 +142,7 @@ export const en = {
     language: "Language",
     bookings: "Bookings",
     logout: "Logout",
-    heritageAdmin: "Heritage Admin",
+    heritageAdmin: "Golden Madina Admin",
     totalItemsInCollection: "Total items in collection",
     publishedArticles: "Published articles",
     activeServices: "Active services",
@@ -166,7 +166,6 @@ export const en = {
     // Blog Management
     searchBlogs: "Search blogs...",
     edit: "Edit",
-    delete: "Delete",
     deleting: "Deleting...",
     noBlogsFound: "No blog posts found",
     createNewBlogPost: "Create New Blog Post",
@@ -175,7 +174,6 @@ export const en = {
     allStatus: "All Status",
     errorDeletingBlog: "There was an error deleting the blog post",
     deleteWarning: "This action cannot be undone. This will permanently delete the blog post.",
-    cancel: "Cancel",
     blogUpdated: "Blog Updated",
     blogUpdateSuccess: "The blog post has been successfully updated",
     blogCreated: "Blog Created",

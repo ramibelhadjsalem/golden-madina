@@ -14,6 +14,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { handleImageError } from "@/lib/utils";
+import SketchfabEmbed from "@/components/sketchupEmbeded";
 
 // Define consistent type for artifacts
 type Artifact = {
@@ -419,32 +420,8 @@ const AdminArtifactEdit = () => {
         <div>
           <div className="bg-slate-100 rounded-lg overflow-hidden mb-4">
             {showModel && modelUrl ? (
-              <div className="aspect-square w-full bg-slate-200 flex flex-col items-center justify-center p-8 text-center">
-                <div className="mb-4 text-slate-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
-                    <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
-                    <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-medium text-slate-700 mb-2">{t('3dModelViewer')}</h3>
-                <p className="text-slate-500 mb-4">
-                  {t('3dModelViewerDescription')}
-                </p>
-                <div className="space-y-4 w-full max-w-md">
-                  <Input
-                    value={modelUrl}
-                    onChange={(e) => setModelUrl(e.target.value)}
-                    placeholder={t('enter3dModelUrl')}
-                    className="bg-white"
-                  />
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowModel(false)}
-                  >
-                    {t('viewImages')}
-                  </Button>
-                </div>
+              <div className="aspect-square w-full bg-slate-200 flex flex-col items-center justify-center text-center">
+                <SketchfabEmbed modelUrl={artifact.model_url} />
               </div>
             ) : (
               <div className="aspect-square w-full relative">
@@ -687,7 +664,7 @@ const AdminArtifactEdit = () => {
 
           {modelUrl && (
             <Button
-              onClick={() => setShowModel(true)}
+              onClick={() => setShowModel(!showModel)}
               variant={showModel ? "default" : "outline"}
               className={showModel ? "bg-amber-500 hover:bg-amber-600" : ""}
             >
