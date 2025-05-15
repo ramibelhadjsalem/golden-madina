@@ -13,6 +13,8 @@ import BlogDetail from "./pages/main/BlogDetail";
 import ArtifactsPage from "./pages/main/ArtifactsPage";
 import ArtifactDetail from "./pages/main/ArtifactDetail";
 import ServicesPage from "./pages/main/ServicesPage";
+import PortfolioPage from "./pages/main/PortfolioPage";
+import PortfolioDetail from "./pages/main/PortfolioDetail";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminBlogList from "./pages/admin/AdminBlogList";
@@ -21,6 +23,8 @@ import AdminArtifactList from "./pages/admin/AdminArtifactList";
 import AdminArtifactEdit from "./pages/admin/AdminArtifactEdit";
 import AdminServiceList from "./pages/admin/AdminServiceList";
 import AdminBookingList from "./pages/admin/AdminBookingList";
+import AdminPortfolioList from "./pages/admin/AdminPortfolioList";
+import AdminPortfolioEdit from "./pages/admin/AdminPortfolioEdit";
 import { useEffect } from "react";
 import AdminLayout from "./components/admin/AdminLayout";
 import MainLayout from "./components/main/MainLayout";
@@ -60,6 +64,8 @@ const App = () => {
                   <Route path="/artifacts" element={<ArtifactsPage />} />
                   <Route path="/artifacts/:id" element={<ArtifactDetail />} />
                   <Route path="/services" element={<ServicesPage />} />
+                  <Route path="/portfolio" element={<PortfolioPage />} />
+                  <Route path="/portfolio/:id" element={<PortfolioDetail />} />
                   <Route path="/404" element={<NotFound />} />
                 </Route>
 
@@ -77,6 +83,8 @@ const App = () => {
                   <Route path="blogs/:id" element={<AdminBlogEdit />} />
                   <Route path="artifacts" element={<AdminArtifactList />} />
                   <Route path="artifacts/:id" element={<AdminArtifactEdit />} />
+                  <Route path="portfolio" element={<AdminPortfolioList />} />
+                  <Route path="portfolio/:id" element={<AdminPortfolioEdit />} />
                   <Route path="services" element={<AdminServiceList />} />
                   <Route path="bookings" element={<AdminBookingList />} />
                 </Route>

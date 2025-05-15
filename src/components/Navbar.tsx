@@ -42,6 +42,9 @@ const Navbar = () => {
             <Link to="/services" className="hover:text-amber-400 transition duration-200">
               {t('services')}
             </Link>
+            <Link to="/portfolio" className="hover:text-amber-400 transition duration-200">
+              {t('portfolio')}
+            </Link>
 
             {/* Language Selector */}
             <DropdownMenu>
@@ -149,6 +152,13 @@ const Navbar = () => {
               onClick={() => setIsOpen(false)}
             >
               {t('services')}
+            </Link>
+            <Link
+              to="/portfolio"
+              className="px-4 py-2 hover:bg-slate-800 rounded"
+              onClick={() => setIsOpen(false)}
+            >
+              {t('portfolio')}
             </Link>
 
             {/* Mobile Language Selector */}

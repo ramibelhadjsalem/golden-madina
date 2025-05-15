@@ -217,6 +217,42 @@ export interface Database {
         }
         Relationships: []
       }
+      portfolios: {
+        Row: {
+          id: string
+          created_at: string
+          name: string
+          description: string
+          content: string
+          image_url: string
+          additional_images: string[] | null
+          category: string
+          language: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          name: string
+          description: string
+          content: string
+          image_url: string
+          category: string
+          additional_images?: string[] | null
+          language?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          name?: string
+          description?: string
+          content?: string
+          image_url?: string
+          category?: string
+          additional_images?: string[] | null
+          language?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
