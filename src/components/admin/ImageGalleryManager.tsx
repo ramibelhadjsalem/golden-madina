@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FileUploadField } from "@/components/ui/file-upload-field";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Trash2, Plus, ArrowUp, ArrowDown } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Trash2, Plus, ArrowUp, ArrowDown, Edit, AlertTriangle, Star } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
 
 interface ImageGalleryManagerProps {
@@ -25,6 +28,11 @@ const ImageGalleryManager = ({
   const { t } = useTranslate();
   const [imageToDelete, setImageToDelete] = useState<number | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editingImageIndex, setEditingImageIndex] = useState<number | null>(null);
+  const [editingImageUrl, setEditingImageUrl] = useState("");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Record<number, string>>({});
+  const [mainImageError, setMainImageError] = useState<string | null>(null);
 
   const handleAddImage = () => {
     onAdditionalImagesChange([...additionalImages, ""]);
@@ -70,47 +78,121 @@ const ImageGalleryManager = ({
   const handlePromoteToMain = (index: number) => {
     const imageToPromote = additionalImages[index];
     const newAdditionalImages = [...additionalImages];
-    
+
     // Remove the image from additional images
     newAdditionalImages.splice(index, 1);
-    
+
     // Add the current main image to additional images if it exists
     if (mainImage) {
       newAdditionalImages.unshift(mainImage);
     }
-    
+
     // Set the selected image as the main image
     onMainImageChange(imageToPromote);
     onAdditionalImagesChange(newAdditionalImages);
+  };
+
+  // Handle image error for main image
+  const handleMainImageError = (error: string) => {
+    setMainImageError(error);
+  };
+
+  // Handle image error for additional images
+  const handleImageError = (index: number, error: string) => {
+    setImageErrors(prev => ({
+      ...prev,
+      [index]: error
+    }));
+  };
+
+  // Open edit URL dialog
+  const handleEditClick = (index: number) => {
+    setEditingImageIndex(index);
+    setEditingImageUrl(additionalImages[index]);
+    setIsEditDialogOpen(true);
+  };
+
+  // Save edited URL
+  const handleSaveUrl = () => {
+    if (editingImageIndex !== null) {
+      handleImageChange(editingImageIndex, editingImageUrl);
+      setIsEditDialogOpen(false);
+      setEditingImageIndex(null);
+      setEditingImageUrl("");
+    }
+  };
+
+  // Edit main image URL
+  const handleEditMainImageClick = () => {
+    setEditingImageIndex(-1); // Use -1 to indicate main image
+    setEditingImageUrl(mainImage);
+    setIsEditDialogOpen(true);
+  };
+
+  // Save main image URL
+  const handleSaveMainUrl = () => {
+    if (editingImageIndex === -1) {
+      onMainImageChange(editingImageUrl);
+      setIsEditDialogOpen(false);
+      setEditingImageIndex(null);
+      setEditingImageUrl("");
+    }
   };
 
   return (
     <div className="space-y-6">
       {/* Main Image */}
       <div>
-        <h3 className="text-lg font-medium mb-2">{t('mainImage')}</h3>
-        <FileUploadField
-          value={mainImage}
-          onChange={onMainImageChange}
-          accept="image/*"
-          maxSizeMB={2}
-          bucket={bucket}
-          folder={folder}
-          showPreview={true}
-          previewWidth="100%"
-          previewHeight={300}
-          description={t('mainImageDescription')}
-        />
+        <div className="mb-2">
+          <h3 className="text-lg font-medium">{t('mainImage')}</h3>
+        </div>
+        <div className="relative border rounded-md p-4">
+          <div className="relative">
+            <FileUploadField
+              value={mainImage}
+              onChange={onMainImageChange}
+              accept="image/*"
+              maxSizeMB={2}
+              bucket={bucket}
+              folder={folder}
+              showPreview={true}
+              previewWidth="100%"
+              previewHeight={300}
+              description={t('mainImageDescription')}
+              error={mainImageError}
+              onError={(error) => setMainImageError(error)}
+            />
+            {mainImageError && (
+              <div className="mt-2 flex items-center text-red-500 text-sm">
+                <AlertTriangle className="h-4 w-4 mr-1" />
+                {mainImageError}
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end mt-3 pt-2 border-t">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleEditMainImageClick}
+              className="flex items-center text-blue-600 hover:bg-blue-50"
+            >
+              <Edit className="h-4 w-4 mr-1" />
+              {t('editUrl')}
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Additional Images */}
       <div>
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-lg font-medium">{t('additionalImages')}</h3>
-          <Button 
-            type="button" 
-            variant="outline" 
-            size="sm" 
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
             onClick={handleAddImage}
             className="flex items-center"
           >
@@ -118,77 +200,102 @@ const ImageGalleryManager = ({
             {t('addImage')}
           </Button>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {additionalImages.map((image, index) => (
             <div key={index} className="relative border rounded-md p-4">
-              <div className="absolute top-2 right-2 flex space-x-1">
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => handlePromoteToMain(index)}
-                  className="h-8 w-8 bg-white/80 hover:bg-white text-blue-600"
-                  title={t('setAsMainImage')}
-                >
-                  <ArrowUp className="h-4 w-4" />
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => handleMoveUp(index)}
-                  disabled={index === 0}
-                  className="h-8 w-8 bg-white/80 hover:bg-white"
-                  title={t('moveUp')}
-                >
-                  <ArrowUp className="h-4 w-4" />
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => handleMoveDown(index)}
-                  disabled={index === additionalImages.length - 1}
-                  className="h-8 w-8 bg-white/80 hover:bg-white"
-                  title={t('moveDown')}
-                >
-                  <ArrowDown className="h-4 w-4" />
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => handleDeleteClick(index)}
-                  className="h-8 w-8 bg-white/80 hover:bg-white text-red-600"
-                  title={t('deleteImage')}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+              <div className="relative">
+                <FileUploadField
+                  value={image}
+                  onChange={(url) => handleImageChange(index, url)}
+                  accept="image/*"
+                  maxSizeMB={2}
+                  bucket={bucket}
+                  folder={folder}
+                  showPreview={true}
+                  previewWidth="100%"
+                  previewHeight={200}
+                  error={imageErrors[index]}
+                  onError={(error) => handleImageError(index, error)}
+                />
+                {imageErrors[index] && (
+                  <div className="mt-2 flex items-center text-red-500 text-sm">
+                    <AlertTriangle className="h-4 w-4 mr-1" />
+                    {imageErrors[index]}
+                  </div>
+                )}
               </div>
-              
-              <FileUploadField
-                value={image}
-                onChange={(url) => handleImageChange(index, url)}
-                accept="image/*"
-                maxSizeMB={2}
-                bucket={bucket}
-                folder={folder}
-                showPreview={true}
-                previewWidth="100%"
-                previewHeight={200}
-              />
+
+              <div className="flex justify-between mt-3 pt-2 border-t">
+                <div className="flex space-x-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handlePromoteToMain(index)}
+                    className="flex items-center text-blue-600 hover:bg-blue-50"
+                    title={t('setAsMainImage')}
+                  >
+                    <Star className="h-4 w-4 mr-1 fill-blue-600" />
+                    {/* {t('setAsMainImage')} */}
+                  </Button>
+                </div>
+                <div className="flex space-x-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleMoveUp(index)}
+                    disabled={index === 0}
+                    className="h-8 w-8 hover:bg-slate-100"
+                    title={t('moveUp')}
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleMoveDown(index)}
+                    disabled={index === additionalImages.length - 1}
+                    className="h-8 w-8 hover:bg-slate-100"
+                    title={t('moveDown')}
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleEditClick(index)}
+                    className="h-8 w-8 hover:bg-slate-100 text-blue-600"
+                    title={t('editUrl')}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDeleteClick(index)}
+                    className="h-8 w-8 hover:bg-slate-100 text-red-600"
+                    title={t('deleteImage')}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
           ))}
         </div>
-        
+
         {additionalImages.length === 0 && (
           <div className="text-center py-8 bg-slate-50 rounded-md">
             <p className="text-slate-500">{t('noAdditionalImages')}</p>
-            <Button 
-              type="button" 
-              variant="outline" 
-              size="sm" 
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
               onClick={handleAddImage}
               className="mt-2"
             >
@@ -219,6 +326,40 @@ const ImageGalleryManager = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit URL Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('editImageUrl')}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="image-url" className="mb-2 block">{t('imageUrlLabel')}</Label>
+            <Input
+              id="image-url"
+              value={editingImageUrl}
+              onChange={(e) => setEditingImageUrl(e.target.value)}
+              placeholder={t('enterImageUrlGallery')}
+              className="w-full"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
+              {t('cancel')}
+            </Button>
+            <Button
+              type="button"
+              onClick={editingImageIndex === -1 ? handleSaveMainUrl : handleSaveUrl}
+            >
+              {t('save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -306,6 +306,23 @@ export const fr = {
     viewPdf: "Voir le PDF",
     viewFile: "Voir le fichier",
 
+    // Image Gallery
+    mainImage: "Image Principale",
+    mainImageDescription: "Cette image sera affichée comme image principale pour cet élément",
+    additionalImages: "Images Supplémentaires",
+    addImage: "Ajouter une Image",
+    setAsMainImage: "Définir comme Principale",
+    moveUp: "Déplacer vers le Haut",
+    moveDown: "Déplacer vers le Bas",
+    deleteImage: "Supprimer l'Image",
+    editUrl: "Modifier l'URL",
+    editImageUrl: "Modifier l'URL de l'Image",
+    imageUrlLabel: "URL de l'Image",
+    enterImageUrl: "Entrez l'URL de l'image",
+    noAdditionalImages: "Aucune image supplémentaire",
+    confirmDeleteImage: "Confirmer la Suppression de l'Image",
+    deleteImageWarning: "Êtes-vous sûr de vouloir supprimer cette image ? Cette action ne peut pas être annulée.",
+
     // Booking Management
     searchBookings: "Rechercher des réservations...",
     bookingId: "ID de Réservation",

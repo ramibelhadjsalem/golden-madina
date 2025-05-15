@@ -7,6 +7,7 @@ interface FilePreviewProps {
   width?: number | string;
   height?: number | string;
   alt?: string;
+  onError?: (error: string) => void;
 }
 
 const FilePreview: React.FC<FilePreviewProps> = ({
@@ -15,6 +16,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
   width = 200,
   height = 'auto',
   alt = 'File preview',
+  onError,
 }) => {
   const { t } = useTranslate();
   const [fileType, setFileType] = useState<'image' | 'video' | 'audio' | 'pdf' | 'other'>('other');
@@ -31,7 +33,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
 
     // Determine file type based on URL extension or content type
     const extension = url.split('.').pop()?.toLowerCase();
-    
+
     if (/\.(jpg|jpeg|png|gif|webp|svg|avif)$/i.test(url)) {
       setFileType('image');
     } else if (/\.(mp4|webm|ogg|mov)$/i.test(url)) {
@@ -51,6 +53,9 @@ const FilePreview: React.FC<FilePreviewProps> = ({
 
   const handleImageError = () => {
     setError(true);
+    if (onError) {
+      onError(t('failedToLoadPreview'));
+    }
   };
 
   if (!url) {
@@ -80,7 +85,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
           onError={handleImageError}
         />
       );
-    
+
     case 'video':
       return (
         <video
@@ -92,7 +97,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
           {t('browserDoesNotSupportVideo')}
         </video>
       );
-    
+
     case 'audio':
       return (
         <audio
@@ -103,7 +108,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
           {t('browserDoesNotSupportAudio')}
         </audio>
       );
-    
+
     case 'pdf':
       return (
         <div className={`flex flex-col items-center justify-center ${className}`} style={{ width, height }}>
@@ -135,7 +140,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
           </a>
         </div>
       );
-    
+
     default:
       return (
         <div className={`flex flex-col items-center justify-center bg-slate-100 rounded-md ${className}`} style={{ width, height }}>

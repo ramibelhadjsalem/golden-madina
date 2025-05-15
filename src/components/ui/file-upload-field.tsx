@@ -22,6 +22,7 @@ interface FileUploadFieldProps {
   required?: boolean;
   description?: string;
   error?: string;
+  onError?: (error: string) => void;
 }
 
 const FileUploadField: React.FC<FileUploadFieldProps> = ({
@@ -42,9 +43,10 @@ const FileUploadField: React.FC<FileUploadFieldProps> = ({
   required = false,
   description,
   error,
+  onError,
 }) => {
   const { t } = useTranslate();
-  
+
   return (
     <div className={`space-y-2 ${className}`}>
       {label && (
@@ -53,7 +55,7 @@ const FileUploadField: React.FC<FileUploadFieldProps> = ({
           {required && <span className="text-red-500 ml-1">*</span>}
         </Label>
       )}
-      
+
       <FileUploadInput
         value={value}
         onChange={onChange}
@@ -65,15 +67,15 @@ const FileUploadField: React.FC<FileUploadFieldProps> = ({
         disabled={disabled}
         className={error ? 'border-red-500' : ''}
       />
-      
+
       {description && (
         <p className="text-sm text-slate-500">{description}</p>
       )}
-      
+
       {error && (
         <p className="text-sm text-red-500">{error}</p>
       )}
-      
+
       {showPreview && value && (
         <div className="mt-4">
           <FilePreview
@@ -81,6 +83,7 @@ const FileUploadField: React.FC<FileUploadFieldProps> = ({
             width={previewWidth}
             height={previewHeight}
             alt={previewAlt || label || t('filePreview')}
+            onError={onError}
           />
         </div>
       )}

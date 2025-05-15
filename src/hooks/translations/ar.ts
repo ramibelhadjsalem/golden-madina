@@ -304,6 +304,23 @@ export const ar = {
     viewPdf: "عرض PDF",
     viewFile: "عرض الملف",
 
+    // Image Gallery
+    mainImage: "الصورة الرئيسية",
+    mainImageDescription: "سيتم عرض هذه الصورة كصورة رئيسية لهذا العنصر",
+    additionalImages: "صور إضافية",
+    addImage: "إضافة صورة",
+    setAsMainImage: "تعيين كصورة رئيسية",
+    moveUp: "تحريك لأعلى",
+    moveDown: "تحريك لأسفل",
+    deleteImage: "حذف الصورة",
+    editUrl: "تعديل الرابط",
+    editImageUrl: "تعديل رابط الصورة",
+    imageUrlLabel: "رابط الصورة",
+    enterImageUrlGallery: "أدخل رابط الصورة",
+    noAdditionalImages: "لا توجد صور إضافية",
+    confirmDeleteImage: "تأكيد حذف الصورة",
+    deleteImageWarning: "هل أنت متأكد من رغبتك في حذف هذه الصورة؟ لا يمكن التراجع عن هذا الإجراء.",
+
     // Booking Management
     searchBookings: "البحث عن الحجوزات...",
     bookingId: "رقم الحجز",

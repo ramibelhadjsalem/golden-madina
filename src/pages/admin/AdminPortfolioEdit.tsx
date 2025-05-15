@@ -216,8 +216,8 @@ const AdminPortfolioEdit = () => {
               additionalImages={additionalImages}
               onMainImageChange={setMainImage}
               onAdditionalImagesChange={setAdditionalImages}
-              bucket="portfolios"
-              folder="images"
+              bucket="artifacts"
+              folder="porfilios"
             />
           </div>
         </div>
