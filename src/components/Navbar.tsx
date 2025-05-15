@@ -23,7 +23,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center">
             <Link to="/" className="font-serif text-2xl font-bold">
-              Heritage Co.
+              Golden Madina
             </Link>
           </div>
 

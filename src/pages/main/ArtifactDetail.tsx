@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/lib/supabase";
 import { useTranslate } from "@/hooks/use-translate";
+import SketchfabEmbed from "@/components/sketchupEmbeded";
 
 // Define artifact type
 type Artifact = {
@@ -171,24 +172,8 @@ const ArtifactDetail = () => {
           <div>
             <div className="bg-slate-100 rounded-lg overflow-hidden mb-4">
               {showModel && artifact.model_url ? (
-                <div className="aspect-square w-full bg-slate-200 flex flex-col items-center justify-center p-8 text-center">
-                  <div className="mb-4 text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
-                      <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
-                      <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-medium text-slate-700 mb-2">3D Model Viewer</h3>
-                  <p className="text-slate-500 mb-4">
-                    This is where the interactive 3D model would appear after connecting to Supabase for storage.
-                  </p>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowModel(false)}
-                  >
-                    View Images
-                  </Button>
+                <div className="aspect-square w-full bg-slate-200 flex flex-col items-center justify-center text-center">
+                  <SketchfabEmbed modelUrl={artifact.model_url} />
                 </div>
               ) : (
                 <img

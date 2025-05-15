@@ -1,4 +1,9 @@
 export const ar = {
+    // 3D Model Viewer
+    loadingModel: "جاري تحميل النموذج ثلاثي الأبعاد...",
+    modelLoadError: "فشل في تحميل النموذج ثلاثي الأبعاد",
+    modelNotFoundOrUnavailable: "تعذر تحميل النموذج ثلاثي الأبعاد. قد يكون غير متاح أو معرف النموذج غير صحيح.",
+    modelId: "معرف النموذج",
     // Navbar
     home: "الرئيسية",
     blog: "المدونة",

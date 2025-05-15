@@ -1,4 +1,9 @@
 export const en = {
+    // 3D Model Viewer
+    loadingModel: "Loading 3D model...",
+    modelLoadError: "Failed to Load 3D Model",
+    modelNotFoundOrUnavailable: "The 3D model could not be loaded. It may be unavailable or the model ID is incorrect.",
+    modelId: "Model ID",
     // Navbar
     home: "Home",
     blog: "Blog",

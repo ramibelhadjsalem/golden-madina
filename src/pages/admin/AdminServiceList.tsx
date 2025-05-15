@@ -1,136 +1,173 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import ServiceDialog from "@/components/admin/ServiceDialog";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
-import { useLanguage } from "@/context/LanguageContext";
+import { supabase } from "@/lib/supabase";
+import { Badge } from "@/components/ui/badge";
 
-// Define consistent type for services
-type Service = {
+// Define the Service type based on our Supabase schema
+interface Service {
   id: string;
   name: string;
-  duration: string;
-  price: string;
-  bookingCount: number;
-  description: string; // Make it non-optional here to match MOCK_SERVICES
+  description: string;
+  duration: number;
+  price: number;
+  image_url: string;
+  available: boolean;
+  max_capacity: number | null;
+  created_at: string;
+}
+
+// Helper function to format duration
+const formatDuration = (minutes: number): string => {
+  if (minutes < 60) {
+    return `${minutes} minutes`;
+  } else if (minutes === 60) {
+    return `1 hour`;
+  } else if (minutes % 60 === 0) {
+    return `${minutes / 60} hours`;
+  } else {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours} hour${hours > 1 ? 's' : ''} ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}`;
+  }
 };
 
-// Temporary mock data until we connect to Supabase
-const MOCK_SERVICES: Service[] = [
-  {
-    id: "1",
-    name: "Guided Museum Tour",
-    duration: "90 minutes",
-    price: "$20",
-    bookingCount: 157,
-    description: "Explore our museum's highlights with an expert guide who will provide fascinating insights into the artifacts and their historical context."
-  },
-  {
-    id: "2",
-    name: "Conservation Workshop",
-    duration: "3 hours",
-    price: "$45",
-    bookingCount: 42,
-    description: "Learn about conservation techniques used to preserve historical artifacts, with hands-on demonstrations and activities."
-  },
-  {
-    id: "3",
-    name: "Historical Research Assistance",
-    duration: "By appointment",
-    price: "$60/hour",
-    bookingCount: 18,
-    description: "Get personalized assistance from our research team for academic projects, genealogy searches, or historical investigations."
-  },
-  {
-    id: "4",
-    name: "Private Artifact Viewing",
-    duration: "60 minutes",
-    price: "$75",
-    bookingCount: 36,
-    description: "Enjoy an exclusive, private viewing of selected artifacts not currently on public display, with expert commentary."
-  },
-  {
-    id: "5",
-    name: "Educational School Program",
-    duration: "2 hours",
-    price: "$10 per student",
-    bookingCount: 28,
-    description: "Specially designed interactive programs for school groups, tailored to different age ranges and curriculum requirements."
-  },
-  {
-    id: "6",
-    name: "Heritage Lecture Series",
-    duration: "120 minutes",
-    price: "$15",
-    bookingCount: 93,
-    description: "Attend fascinating lectures by renowned historians and researchers on various topics related to our collections and cultural heritage."
-  }
-];
-
-// Define the input type for the dialog
-type ServiceInput = {
-  name: string;
-  duration: string;
-  price: string;
-  description: string; // Make it required here to match the Service type
+// Helper function to format price
+const formatPrice = (price: number): string => {
+  return `$${price}`;
 };
 
 const AdminServiceList = () => {
   const { t } = useTranslate();
-  const { currentLanguage } = useLanguage();
-  const [services, setServices] = useState<Service[]>(MOCK_SERVICES);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<Service | undefined>(undefined);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch services from Supabase
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const { data, error } = await supabase
+          .from('services')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          throw error;
+        }
+
+        setServices(data || []);
+      } catch (err) {
+        console.error('Error fetching services:', err);
+        setError(t('errorFetchingServices'));
+        toast({
+          title: t('error'),
+          description: t('errorFetchingServices'),
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []); // Add dependency array with t
 
   const filteredServices = services.filter(service =>
     service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.duration.toLowerCase().includes(searchTerm.toLowerCase())
+    formatDuration(service.duration).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleOpenDialog = (service?: Service) => {
-    setSelectedService(service);
+    setSelectedService(service || null);
     setIsDialogOpen(true);
   };
 
   const handleCloseDialog = () => {
-    setSelectedService(undefined);
+    setSelectedService(null);
     setIsDialogOpen(false);
   };
 
-  const handleSaveService = (serviceData: ServiceInput) => {
-    if (selectedService) {
-      // Update existing service
-      setServices(services.map(service =>
-        service.id === selectedService.id ? {
-          ...service,
-          ...serviceData,
-          bookingCount: service.bookingCount // Preserve original count
-        } : service
-      ));
+  const handleSaveService = async (serviceData: {
+    name: string;
+    description: string;
+    duration: number;
+    price: number;
+    image_url: string;
+    available: boolean;
+    max_capacity: number | null;
+  }) => {
+    setIsSubmitting(true);
+
+    try {
+      if (selectedService) {
+        // Update existing service
+        const { error } = await supabase
+          .from('services')
+          .update(serviceData)
+          .eq('id', selectedService.id);
+
+        if (error) throw error;
+
+        // Update local state
+        setServices(prevServices =>
+          prevServices.map(service =>
+            service.id === selectedService.id ? { ...service, ...serviceData } : service
+          )
+        );
+
+        toast({
+          title: t('serviceUpdated'),
+          description: t('serviceUpdateSuccess'),
+        });
+      } else {
+        // Create new service
+        const { data, error } = await supabase
+          .from('services')
+          .insert(serviceData)
+          .select();
+
+        if (error) throw error;
+
+        // Update local state
+        if (data && data.length > 0) {
+          setServices(prevServices => [data[0], ...prevServices]);
+        }
+
+        toast({
+          title: t('serviceCreated'),
+          description: t('serviceCreateSuccess'),
+        });
+      }
+
+      // Close the dialog
+      handleCloseDialog();
+    } catch (error) {
+      console.error('Error saving service:', error);
       toast({
-        title: t('serviceUpdated'),
-        description: t('serviceUpdateSuccess'),
+        title: t('error'),
+        description: error instanceof Error ? error.message : t('errorSavingService'),
+        variant: 'destructive',
       });
-    } else {
-      // Create new service
-      const newService: Service = {
-        id: (services.length + 1).toString(),
-        ...serviceData,
-        bookingCount: 0
-      };
-      setServices([...services, newService]);
-      toast({
-        title: t('serviceCreated'),
-        description: t('serviceCreateSuccess'),
-      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -139,15 +176,42 @@ const AdminServiceList = () => {
     setIsDeleteAlertOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
-    if (serviceToDelete) {
-      setServices(services.filter(service => service.id !== serviceToDelete));
+  const handleDeleteConfirm = async () => {
+    if (!serviceToDelete) return;
+
+    setIsSubmitting(true);
+
+    try {
+      // Delete from Supabase
+      const { error } = await supabase
+        .from('services')
+        .delete()
+        .eq('id', serviceToDelete);
+
+      if (error) throw error;
+
+      // Update local state using functional update pattern
+      setServices(prevServices =>
+        prevServices.filter(service => service.id !== serviceToDelete)
+      );
+
       toast({
         title: t('serviceDeleted'),
         description: t('serviceDeleteSuccess'),
       });
+
+      // Close the dialog
       setIsDeleteAlertOpen(false);
       setServiceToDelete(null);
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      toast({
+        title: t('error'),
+        description: error instanceof Error ? error.message : t('errorDeletingService'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -181,82 +245,112 @@ const AdminServiceList = () => {
         </Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead >{t('serviceName')}</TableHead>
-                <TableHead>{t('duration')}</TableHead>
-                <TableHead>{t('price')}</TableHead>
-                <TableHead>{t('totalBookings')}</TableHead>
-                <TableHead>{t('actions')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredServices.length > 0 ? (
-                filteredServices.map((service) => (
-                  <TableRow key={service.id} className="hover:bg-slate-50 transition-colors">
-                    <TableCell>
-                      <div className="font-medium text-slate-900">{service.name}</div>
-                    </TableCell>
-                    <TableCell className="text-sm text-slate-500">
-                      {service.duration}
-                    </TableCell>
-                    <TableCell className="text-sm text-slate-500">
-                      {service.price}
-                    </TableCell>
-                    <TableCell className="text-sm font-medium text-slate-900">
-                      {service.bookingCount}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleOpenDialog(service)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                          <span className="sr-only">{t('edit')}</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteClick(service.id)}
-                          className="text-red-600 hover:text-red-800 hover:bg-red-100"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">{t('delete')}</span>
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center">
-                    <div className="text-slate-500">{t('noServicesFound')}</div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleOpenDialog()}
-                      className="mt-3"
-                    >
-                      {t('addNewService')}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+      {loading ? (
+        // Loading skeleton
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="overflow-hidden">
+              <div className="aspect-video w-full">
+                <Skeleton className="w-full h-full" />
+              </div>
+              <CardHeader>
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-3/4" />
+              </CardContent>
+              <CardFooter>
+                <Skeleton className="h-10 w-full" />
+              </CardFooter>
+            </Card>
+          ))}
         </div>
-      </div>
+      ) : error ? (
+        // Error message
+        <div className="text-center py-12 bg-white rounded-lg shadow">
+          <h3 className="text-xl font-medium text-red-600 mb-2">{t('somethingWentWrong')}</h3>
+          <p className="text-slate-600 mb-4">{error}</p>
+          <Button
+            onClick={() => window.location.reload()}
+            variant="outline"
+          >
+            {t('tryAgain')}
+          </Button>
+        </div>
+      ) : filteredServices.length === 0 ? (
+        // No services found
+        <div className="text-center py-12 bg-white rounded-lg shadow">
+          <h3 className="text-xl font-medium mb-2">{t('noServicesFound')}</h3>
+          <p className="text-slate-600 mb-4">{t('noServicesDescription')}</p>
+          <Button onClick={() => handleOpenDialog()}>
+            <Plus className="mr-2 h-4 w-4" />
+            {t('addNewService')}
+          </Button>
+        </div>
+      ) : (
+        // Services grid
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredServices.map((service) => (
+            <Card key={service.id} className="overflow-hidden h-full hover:shadow-lg transition-shadow">
+              <div className="aspect-video w-full overflow-hidden relative group">
+                <img
+                  src={service.image_url}
+                  alt={service.name}
+                  className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
+                />
+                {!service.available && (
+                  <div className="absolute top-2 right-2 bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                    {t('unavailable')}
+                  </div>
+                )}
+                <div className="absolute top-2 right-2">
+                  <Badge variant={service.available ? 'secondary' : 'destructive'}>
+                    {service.available ? t('available') : t('unavailable')}
+                  </Badge>
+                </div>
+              </div>
+              <CardHeader>
+                <CardTitle className="font-serif">{service.name}</CardTitle>
+                <CardDescription>
+                  {t('duration')}: {formatDuration(service.duration)} • {formatPrice(service.price)}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <p className="text-slate-600 line-clamp-3">{service.description}</p>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleOpenDialog(service)}
+                  className="flex-1 mr-2"
+                >
+                  <Pencil className="h-4 w-4 mr-2" />
+                  {t('edit')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDeleteClick(service.id)}
+                  className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {t('delete')}
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Service Dialog */}
       <ServiceDialog
         isOpen={isDialogOpen}
         onClose={handleCloseDialog}
-        service={selectedService}
+        service={selectedService || undefined}
         onSave={handleSaveService}
       />
 
@@ -270,12 +364,20 @@ const AdminServiceList = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogCancel disabled={isSubmitting}>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
+              disabled={isSubmitting}
             >
-              {t('delete')}
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin h-4 w-4 mr-2 border-2 border-white rounded-full border-t-transparent"></div>
+                  {t('deleting')}
+                </>
+              ) : (
+                t('delete')
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

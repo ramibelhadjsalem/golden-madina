@@ -1,4 +1,9 @@
 export const fr = {
+    // 3D Model Viewer
+    loadingModel: "Chargement du modèle 3D...",
+    modelLoadError: "Échec du Chargement du Modèle 3D",
+    modelNotFoundOrUnavailable: "Le modèle 3D n'a pas pu être chargé. Il peut être indisponible ou l'identifiant du modèle est incorrect.",
+    modelId: "ID du Modèle",
     // Navbar
     home: "Accueil",
     blog: "Blog",
