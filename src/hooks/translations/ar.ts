@@ -373,4 +373,6 @@ export const ar = {
     portfolioItems: "عناصر المعرض",
     viewDetails: "عرض التفاصيل",
     noLanguage: "بدون لغة",
+    portfolioImages: "صور المعرض",
+    portfolioImagesDescription: "أضف صورًا لعرض عنصر المعرض الخاص بك. سيتم عرض الصورة الأولى كصورة رئيسية في العرض المتحرك.",
 }

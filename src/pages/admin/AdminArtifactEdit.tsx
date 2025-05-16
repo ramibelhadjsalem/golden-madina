@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 
 import SketchfabEmbed from "@/components/sketchupEmbeded";
 import ImageGalleryManager from "@/components/admin/ImageGalleryManager";
-import { ArtifactComment } from "@/components/ArtifactCommentSheet";
+import { Comment } from "@/components/CommentSheet";
 
 // Define consistent type for artifacts
 type Artifact = {
@@ -29,7 +29,7 @@ type Artifact = {
   discovery_date: string | null;
   created_at: string;
   additional_images: string[] | null;
-  comments?: ArtifactComment[] | null;
+  comments?: Comment[] | null;
 };
 
 
@@ -56,7 +56,7 @@ const AdminArtifactEdit = () => {
   const [modelUrl, setModelUrl] = useState("");
   const [mainImage, setMainImage] = useState("");
   const [additionalImages, setAdditionalImages] = useState<string[]>([]);
-  const [comments, setComments] = useState<ArtifactComment[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [activeTab, setActiveTab] = useState("description");
 
   // Define fetchArtifact function with useCallback

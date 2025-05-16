@@ -406,6 +406,8 @@ export const en = {
     portfolioUpdateSuccess: "The portfolio item has been successfully updated",
     couldNotLoadPortfolio: "Could not load portfolio item details",
     noLanguage: "No Language",
+    portfolioImages: "Portfolio Images",
+    portfolioImagesDescription: "Add images to showcase your portfolio item. The first image will be displayed as the main image in the carousel.",
 
     // Comments
     artifactComments: "Comments",

@@ -19,7 +19,7 @@ import { SendHorizontal } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 // Define the comment interface
-interface Comment {
+export interface Comment {
   id: string;
   text: string;
   isValidated: boolean;
@@ -28,7 +28,8 @@ interface Comment {
 interface CommentSheetProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  blogId: string;
+  blogId?: string;
+  artifactId?: string;
   comments?: Comment[];
   onCommentsChange?: (comments: Comment[]) => void;
 }
@@ -37,6 +38,7 @@ const CommentSheet = ({
   isOpen,
   onOpenChange,
   blogId,
+  artifactId,
   comments = [],
   onCommentsChange
 }: CommentSheetProps) => {
@@ -73,11 +75,26 @@ const CommentSheet = ({
       // Add the new comment
       const updatedComments = [...currentComments, newComment];
 
-      // Update the blog with the new comment
-      const { error } = await supabase
-        .from('blogs')
-        .update({ comments: updatedComments })
-        .eq('id', blogId);
+      // Determine which table to update based on the provided IDs
+      let error;
+
+      if (blogId) {
+        // Update the blog with the new comment
+        const result = await supabase
+          .from('blogs')
+          .update({ comments: updatedComments })
+          .eq('id', blogId);
+        error = result.error;
+      } else if (artifactId) {
+        // Update the artifact with the new comment
+        const result = await supabase
+          .from('artifacts')
+          .update({ comments: updatedComments })
+          .eq('id', artifactId);
+        error = result.error;
+      } else {
+        throw new Error('Either blogId or artifactId must be provided');
+      }
 
       if (error) throw error;
 

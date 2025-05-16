@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/lib/supabase";
 import { useTranslate } from "@/hooks/use-translate";
-import { handleImageError } from "@/lib/utils";
+import PortfolioCardCarousel from "@/components/PortfolioCardCarousel";
 
 // Define portfolio type
 type Portfolio = {
@@ -12,11 +12,14 @@ type Portfolio = {
   name: string;
   description: string;
   content: string;
-  image_url: string;
-  additional_images: string[] | null;
   category: string;
   created_at: string;
   language: string | null;
+
+  // Support both old and new formats
+  images?: string[];
+  image_url?: string;
+  additional_images?: string[] | null;
 };
 
 const PortfolioDetail = () => {
@@ -25,7 +28,6 @@ const PortfolioDetail = () => {
   const { t } = useTranslate();
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchPortfolio = async () => {
@@ -100,7 +102,9 @@ const PortfolioDetail = () => {
     return null;
   }
 
-  const allImages = [portfolio.image_url, ...(portfolio.additional_images || [])];
+  // Get all images from either the new or old format
+  const allImages = portfolio.images ||
+    (portfolio.image_url ? [portfolio.image_url, ...(portfolio.additional_images || [])] : []);
 
   return (
     <main className="flex-grow py-12">
@@ -128,32 +132,11 @@ const PortfolioDetail = () => {
           {/* Left: Images */}
           <div>
             <div className="bg-slate-100 rounded-lg overflow-hidden mb-4">
-              <img
-                src={allImages[activeImageIndex]}
-                alt={portfolio.name}
-                className="w-full h-full object-contain aspect-square"
-                onError={handleImageError}
+              <PortfolioCardCarousel
+                images={allImages}
+                name={portfolio.name}
+                className="aspect-square"
               />
-            </div>
-
-            <div className="flex justify-between">
-              <div className="flex gap-2 overflow-x-auto py-2">
-                {allImages.map((img, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setActiveImageIndex(index)}
-                    className={`w-16 h-16 rounded-md overflow-hidden flex-shrink-0 border-2 ${activeImageIndex === index ? "border-amber-500" : "border-transparent"
-                      }`}
-                  >
-                    <img
-                      src={img}
-                      alt={`View ${index + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={handleImageError}
-                    />
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
 

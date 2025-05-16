@@ -9,7 +9,9 @@ import { useTranslate } from "@/hooks/use-translate";
 import { MessageSquare, Share2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import SketchfabEmbed from "@/components/sketchupEmbeded";
-import ArtifactCommentSheet, { ArtifactComment } from "@/components/ArtifactCommentSheet";
+import CommentSheet from "@/components/CommentSheet";
+
+import { Comment } from "@/components/CommentSheet";
 
 // Define artifact type
 type Artifact = {
@@ -24,7 +26,7 @@ type Artifact = {
   discovery_date: string | null;
   created_at: string;
   additional_images: string[] | null;
-  comments?: ArtifactComment[] | null;
+  comments?: Comment[] | null;
 };
 
 const ArtifactDetail = () => {
@@ -57,7 +59,7 @@ const ArtifactDetail = () => {
   };
 
   // Handle comment updates
-  const handleCommentsChange = (updatedComments: ArtifactComment[]) => {
+  const handleCommentsChange = (updatedComments: Comment[]) => {
     if (artifact) {
       setArtifact({
         ...artifact,
@@ -325,7 +327,7 @@ const ArtifactDetail = () => {
 
         {/* Comments Sheet */}
         {artifact && (
-          <ArtifactCommentSheet
+          <CommentSheet
             isOpen={isCommentSheetOpen}
             onOpenChange={setIsCommentSheetOpen}
             artifactId={artifact.id}

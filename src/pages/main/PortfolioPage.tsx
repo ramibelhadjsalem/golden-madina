@@ -7,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useTranslate } from "@/hooks/use-translate";
 import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/context/LanguageContext";
-import { handleImageError } from "@/lib/utils";
 import { Search } from "lucide-react";
+import PortfolioCardCarousel from "@/components/PortfolioCardCarousel";
 
 // Define portfolio item type
 type Portfolio = {
@@ -16,11 +16,14 @@ type Portfolio = {
   name: string;
   description: string;
   content: string;
-  image_url: string;
-  additional_images: string[] | null;
   category: string;
   created_at: string;
   language: string | null;
+
+  // Support both old and new formats
+  images?: string[];
+  image_url?: string;
+  additional_images?: string[] | null;
 };
 
 const PortfolioPage = () => {
@@ -217,14 +220,13 @@ const PortfolioPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredItems.map((item) => (
                 <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="aspect-square w-full overflow-hidden relative">
-                    <img
-                      src={item.image_url}
-                      alt={item.name}
-                      className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
-                      onError={handleImageError}
+                  <div className="relative">
+                    {/* Convert from old format to new format if needed */}
+                    <PortfolioCardCarousel
+                      images={item.images || (item.image_url ? [item.image_url, ...(item.additional_images || [])] : [])}
+                      name={item.name}
                     />
-                    <div className="absolute top-3 right-3 bg-slate-800 text-white text-xs font-bold px-2 py-1 rounded-md">
+                    <div className="absolute top-3 right-3 bg-slate-800 text-white text-xs font-bold px-2 py-1 rounded-md z-10">
                       {item.category}
                     </div>
                   </div>

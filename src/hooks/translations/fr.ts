@@ -376,4 +376,6 @@ export const fr = {
     portfolioItems: "Éléments de Portfolio",
     viewDetails: "Voir les Détails",
     noLanguage: "Aucune Langue",
+    portfolioImages: "Images du Portfolio",
+    portfolioImagesDescription: "Ajoutez des images pour présenter votre élément de portfolio. La première image sera affichée comme image principale dans le carrousel.",
 };

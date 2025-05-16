@@ -13,7 +13,7 @@ import { supabase } from "@/lib/supabase";
 import { Editor } from "@tiptap/react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from "@/context/LanguageContext";
-import ImageGalleryManager from "@/components/admin/ImageGalleryManager";
+import PortfolioImageManager from "@/components/admin/PortfolioImageManager";
 
 // Define portfolio type
 type Portfolio = {
@@ -21,8 +21,7 @@ type Portfolio = {
   name: string;
   description: string;
   content: string;
-  image_url: string;
-  additional_images: string[] | null;
+  images: string[];
   category: string;
   created_at: string;
   language: string | null;
@@ -52,8 +51,7 @@ const AdminPortfolioEdit = () => {
   const [description, setDescription] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState(PORTFOLIO_CATEGORIES[0]);
-  const [mainImage, setMainImage] = useState("");
-  const [additionalImages, setAdditionalImages] = useState<string[]>([]);
+  const [images, setImages] = useState<string[]>([]);
   const [language, setLanguage] = useState<string>("none");
   const [editor, setEditor] = useState<Editor | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -76,14 +74,31 @@ const AdminPortfolioEdit = () => {
         if (error) throw error;
 
         if (data) {
-          const portfolio = data as Portfolio;
-          setName(portfolio.name);
-          setDescription(portfolio.description);
-          setContent(portfolio.content);
-          setCategory(portfolio.category);
-          setMainImage(portfolio.image_url);
-          setAdditionalImages(portfolio.additional_images || []);
-          setLanguage(portfolio.language || "none");
+          // Convert from old format to new format if needed
+          const rawData = data as any;
+
+          setName(rawData.name);
+          setDescription(rawData.description);
+          setContent(rawData.content);
+          setCategory(rawData.category);
+
+          // Handle both old and new data formats
+          if (rawData.images) {
+            // New format
+            setImages(rawData.images);
+          } else if (rawData.image_url) {
+            // Old format - convert to new format
+            const allImages = [rawData.image_url];
+            if (rawData.additional_images && Array.isArray(rawData.additional_images)) {
+              allImages.push(...rawData.additional_images);
+            }
+            setImages(allImages);
+          } else {
+            // No images
+            setImages([]);
+          }
+
+          setLanguage(rawData.language || "none");
         }
       } catch (error) {
         console.error("Error fetching portfolio:", error);
@@ -102,7 +117,7 @@ const AdminPortfolioEdit = () => {
   }, [id]);
 
   const handleSave = async () => {
-    if (!name || !description || !mainImage || !category) {
+    if (!name || !description || images.length === 0 || !category) {
       toast({
         title: t("missingFields"),
         description: t("fillRequiredFields"),
@@ -114,16 +129,20 @@ const AdminPortfolioEdit = () => {
     try {
       setIsSaving(true);
 
+      // Filter out placeholder URLs before saving
+      const filteredImages = images.filter(url =>
+        !url.startsWith("placeholder-") && url.trim() !== ""
+      );
+
+      // For now, we need to maintain backward compatibility with the database schema
+      // The first image becomes the main image, the rest become additional_images
       const portfolioData = {
         name,
         description,
         content,
         category,
-        image_url: mainImage,
-        // Filter out placeholder URLs before saving
-        additional_images: additionalImages.length > 0
-          ? additionalImages.filter(url => !url.startsWith("placeholder-") && url.trim() !== "")
-          : null,
+        image_url: filteredImages.length > 0 ? filteredImages[0] : "",
+        additional_images: filteredImages.length > 1 ? filteredImages.slice(1) : null,
         language: language === "none" ? null : language,
       };
 
@@ -215,13 +234,11 @@ const AdminPortfolioEdit = () => {
         {/* Left Column: Images */}
         <div>
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <ImageGalleryManager
-              mainImage={mainImage}
-              additionalImages={additionalImages}
-              onMainImageChange={setMainImage}
-              onAdditionalImagesChange={setAdditionalImages}
+            <PortfolioImageManager
+              images={images}
+              onImagesChange={setImages}
               bucket="artifacts"
-              folder="porfilios"
+              folder="portfolios"
             />
           </div>
         </div>
