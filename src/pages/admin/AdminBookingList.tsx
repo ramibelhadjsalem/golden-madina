@@ -136,35 +136,35 @@ const AdminBookingList = () => {
           </div>
 
           <div className="flex items-center gap-2 font-medium text-sm text-slate-700">
-            <span>{t('status')}:</span>
+            <span>{t('bookingStatus')}:</span>
             <div className="flex gap-2">
               <Button
                 variant={statusFilter === "all" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setStatusFilter("all")}
               >
-                {t('all')}
+                {t('allBookings')}
               </Button>
               <Button
                 variant={statusFilter === "pending" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setStatusFilter("pending")}
               >
-                {t('pending')}
+                {t('pendingStatus')}
               </Button>
               <Button
                 variant={statusFilter === "confirmed" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setStatusFilter("confirmed")}
               >
-                {t('confirmed')}
+                {t('confirmedStatus')}
               </Button>
               <Button
                 variant={statusFilter === "canceled" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setStatusFilter("canceled")}
               >
-                {t('canceled')}
+                {t('canceledStatus')}
               </Button>
             </div>
           </div>
@@ -177,10 +177,10 @@ const AdminBookingList = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>{t('bookingId')}</TableHead>
-                <TableHead>{t('service')}</TableHead>
+                <TableHead>{t('bookingService')}</TableHead>
                 <TableHead>{t('customer')}</TableHead>
-                <TableHead>{t('date')}</TableHead>
-                <TableHead>{t('status')}</TableHead>
+                <TableHead>{t('bookingDate')}</TableHead>
+                <TableHead>{t('bookingStatus')}</TableHead>
                 <TableHead>{t('bookingActions')}</TableHead>
               </TableRow>
             </TableHeader>
@@ -214,7 +214,7 @@ const AdminBookingList = () => {
                         onClick={() => handleViewDetails(booking)}
                       >
                         <Eye className="h-4 w-4 mr-1" />
-                        {t('view')}
+                        {t('viewBooking')}
                       </Button>
                     </TableCell>
                   </TableRow>

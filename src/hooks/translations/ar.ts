@@ -317,7 +317,7 @@ export const ar = {
     editUrl: "تعديل الرابط",
     editImageUrl: "تعديل رابط الصورة",
     imageUrlLabel: "رابط الصورة",
-    enterImageUrl: "أدخل رابط الصورة",
+    enterImageUrlField: "أدخل رابط الصورة",
     noAdditionalImages: "لا توجد صور إضافية",
     confirmDeleteImage: "تأكيد حذف الصورة",
     deleteImageWarning: "هل أنت متأكد من رغبتك في حذف هذه الصورة؟ لا يمكن التراجع عن هذا الإجراء.",
@@ -325,16 +325,17 @@ export const ar = {
     // Booking Management
     searchBookings: "البحث عن الحجوزات...",
     bookingId: "رقم الحجز",
-    service: "الخدمة",
+    bookingService: "الخدمة",
     customer: "العميل",
-    date: "التاريخ",
-    status: "الحالة",
+    bookingDate: "التاريخ",
+    bookingStatus: "الحالة",
     bookingActions: "الإجراءات",
-    view: "عرض",
+    viewBooking: "عرض",
     noBookingsFound: "لم يتم العثور على حجوزات",
-    all: "الكل",
-    confirmed: "مؤكد",
-    canceled: "ملغي",
+    allBookings: "الكل",
+    pendingStatus: "قيد الانتظار",
+    confirmedStatus: "مؤكد",
+    canceledStatus: "ملغي",
     bookingUpdated: "تم تحديث الحجز",
     bookingStatusChanged: "تم تغيير حالة الحجز إلى {{status}}",
 
@@ -375,4 +376,9 @@ export const ar = {
     noLanguage: "بدون لغة",
     portfolioImages: "صور المعرض",
     portfolioImagesDescription: "أضف صورًا لعرض عنصر المعرض الخاص بك. سيتم عرض الصورة الأولى كصورة رئيسية في العرض المتحرك.",
+
+    // Carousel
+    previousImage: "الصورة السابقة",
+    nextImage: "الصورة التالية",
+    goToImage: "الانتقال إلى الصورة {index}",
 }

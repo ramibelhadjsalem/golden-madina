@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { handleImageError } from "@/lib/utils";
+import { useTranslate } from "@/hooks/use-translate";
 
 interface PortfolioCardCarouselProps {
   images: string[];
@@ -9,6 +10,7 @@ interface PortfolioCardCarouselProps {
 }
 
 const PortfolioCardCarousel = ({ images, name, className = "" }: PortfolioCardCarouselProps) => {
+  const { t } = useTranslate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -33,7 +35,7 @@ const PortfolioCardCarousel = ({ images, name, className = "" }: PortfolioCardCa
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isHovering) return;
-      
+
       if (e.key === "ArrowLeft") {
         setCurrentIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
       } else if (e.key === "ArrowRight") {
@@ -60,7 +62,7 @@ const PortfolioCardCarousel = ({ images, name, className = "" }: PortfolioCardCa
   }
 
   return (
-    <div 
+    <div
       className={`aspect-square w-full overflow-hidden relative ${className}`}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
@@ -79,14 +81,14 @@ const PortfolioCardCarousel = ({ images, name, className = "" }: PortfolioCardCa
         <button
           onClick={goToPrevious}
           className="bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
-          aria-label="Previous image"
+          aria-label={t('previousImage')}
         >
           <ChevronLeft className="h-6 w-6" />
         </button>
         <button
           onClick={goToNext}
           className="bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
-          aria-label="Next image"
+          aria-label={t('nextImage')}
         >
           <ChevronRight className="h-6 w-6" />
         </button>
@@ -98,12 +100,11 @@ const PortfolioCardCarousel = ({ images, name, className = "" }: PortfolioCardCa
           <button
             key={index}
             onClick={(e) => goToIndex(index, e)}
-            className={`h-1.5 rounded-full transition-all ${
-              currentIndex === index 
-                ? 'w-6 bg-white' 
-                : 'w-1.5 bg-white/60 hover:bg-white/80'
-            }`}
-            aria-label={`Go to image ${index + 1}`}
+            className={`h-1.5 rounded-full transition-all ${currentIndex === index
+              ? 'w-6 bg-white'
+              : 'w-1.5 bg-white/60 hover:bg-white/80'
+              }`}
+            aria-label={t('goToImage').replace('{index}', (index + 1).toString())}
           />
         ))}
       </div>

@@ -451,7 +451,7 @@ const AdminArtifactEdit = () => {
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center">
                             <Badge variant={comment.isValidated ? "default" : "outline"} className="mr-2">
-                              {comment.isValidated ? t('validated') : t('pending')}
+                              {comment.isValidated ? t('artifactValidated') : t('pendingStatus')}
                             </Badge>
                           </div>
                           <div className="flex space-x-2">

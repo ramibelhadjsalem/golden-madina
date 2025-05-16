@@ -233,7 +233,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
             label={t('blogImage')}
             value={image}
             onChange={setImage}
-            placeholder={t('enterImageUrl')}
+            placeholder={t('enterImageUrlField')}
             accept="image/*"
             maxSizeMB={2}
             bucket="artifacts"
@@ -382,7 +382,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onSave, onCancel }) => {
 
                         <div className="mb-2 flex items-center">
                           <Badge variant={comment.isValidated ? "default" : "secondary"} className="mr-2">
-                            {comment.isValidated ? t('validated') : t('pending')}
+                            {comment.isValidated ? t('validated') : t('pendingStatus')}
                           </Badge>
                         </div>
 
