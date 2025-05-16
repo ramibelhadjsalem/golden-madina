@@ -6,7 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/lib/supabase";
 import { useTranslate } from "@/hooks/use-translate";
+import { MessageSquare, Share2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import SketchfabEmbed from "@/components/sketchupEmbeded";
+import ArtifactCommentSheet, { ArtifactComment } from "@/components/ArtifactCommentSheet";
 
 // Define artifact type
 type Artifact = {
@@ -21,6 +24,7 @@ type Artifact = {
   discovery_date: string | null;
   created_at: string;
   additional_images: string[] | null;
+  comments?: ArtifactComment[] | null;
 };
 
 const ArtifactDetail = () => {
@@ -31,7 +35,36 @@ const ArtifactDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [showModel, setShowModel] = useState(false);
+  const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(false);
   const isMounted = useRef(true);
+
+  // Share functionality
+  const copyLinkToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => {
+        toast({
+          title: t('linkCopied'),
+          description: t('linkCopiedToClipboard'),
+        });
+      })
+      .catch(() => {
+        toast({
+          title: t('error'),
+          description: t('failedToCopyLink'),
+          variant: 'destructive',
+        });
+      });
+  };
+
+  // Handle comment updates
+  const handleCommentsChange = (updatedComments: ArtifactComment[]) => {
+    if (artifact) {
+      setArtifact({
+        ...artifact,
+        comments: updatedComments
+      });
+    }
+  };
 
   // Fetch artifact from Supabase
   useEffect(() => {
@@ -230,6 +263,28 @@ const ArtifactDetail = () => {
             <h1 className="text-3xl font-serif font-bold mb-2">{artifact.name}</h1>
             <p className="text-slate-500 mb-6">{artifact.period} • {artifact.category}</p>
 
+            {/* Comment and Share Buttons */}
+            <div className="flex gap-4 mb-6">
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => setIsCommentSheetOpen(true)}
+              >
+                <MessageSquare className="h-4 w-4" />
+                {t('comments')}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={copyLinkToClipboard}
+              >
+                <Share2 className="h-4 w-4" />
+                {t('share')}
+              </Button>
+            </div>
+
             <Tabs defaultValue="description" className="w-full">
               <TabsList className="mb-6">
                 <TabsTrigger value="description">Description</TabsTrigger>
@@ -267,6 +322,17 @@ const ArtifactDetail = () => {
             </Tabs>
           </div>
         </div>
+
+        {/* Comments Sheet */}
+        {artifact && (
+          <ArtifactCommentSheet
+            isOpen={isCommentSheetOpen}
+            onOpenChange={setIsCommentSheetOpen}
+            artifactId={artifact.id}
+            comments={artifact.comments || []}
+            onCommentsChange={handleCommentsChange}
+          />
+        )}
       </div>
     </main>
   );

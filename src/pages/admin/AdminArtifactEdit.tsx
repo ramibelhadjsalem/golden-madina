@@ -7,12 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Check, X } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
 import { supabase } from "@/lib/supabase";
+import { Badge } from "@/components/ui/badge";
 
 import SketchfabEmbed from "@/components/sketchupEmbeded";
 import ImageGalleryManager from "@/components/admin/ImageGalleryManager";
+import { ArtifactComment } from "@/components/ArtifactCommentSheet";
 
 // Define consistent type for artifacts
 type Artifact = {
@@ -27,6 +29,7 @@ type Artifact = {
   discovery_date: string | null;
   created_at: string;
   additional_images: string[] | null;
+  comments?: ArtifactComment[] | null;
 };
 
 
@@ -53,6 +56,8 @@ const AdminArtifactEdit = () => {
   const [modelUrl, setModelUrl] = useState("");
   const [mainImage, setMainImage] = useState("");
   const [additionalImages, setAdditionalImages] = useState<string[]>([]);
+  const [comments, setComments] = useState<ArtifactComment[]>([]);
+  const [activeTab, setActiveTab] = useState("description");
 
   // Define fetchArtifact function with useCallback
   const fetchArtifact = useCallback(async () => {
@@ -88,6 +93,7 @@ const AdminArtifactEdit = () => {
       setModelUrl(artifactData.model_url || "");
       setMainImage(artifactData.image_url);
       setAdditionalImages(artifactData.additional_images || []);
+      setComments(artifactData.comments || []);
     } catch (err) {
       console.error("Error fetching artifact:", err);
       const errorMessage =
@@ -136,7 +142,8 @@ const AdminArtifactEdit = () => {
         discovery_date: discoveryDate || null,
         model_url: modelUrl || null,
         image_url: mainImage,
-        additional_images: additionalImages.length > 0 ? additionalImages : null
+        additional_images: additionalImages.length > 0 ? additionalImages : null,
+        comments: comments.length > 0 ? comments : null
       };
 
       const { data, error } = await supabase
@@ -276,10 +283,11 @@ const AdminArtifactEdit = () => {
             </div>
           </div>
 
-          <Tabs defaultValue="description" className="w-full">
+          <Tabs defaultValue="description" className="w-full" onValueChange={setActiveTab} value={activeTab}>
             <TabsList className="mb-6">
               <TabsTrigger value="description">{t('description')}</TabsTrigger>
               <TabsTrigger value="details">{t('details')}</TabsTrigger>
+              <TabsTrigger value="comments">{t('comments')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="description">
@@ -390,10 +398,7 @@ const AdminArtifactEdit = () => {
                         variant="ghost"
                         size="sm"
                         className="text-red-500 hover:text-red-700"
-                        onClick={() => {
-                          setModelUrl('');
-                          setShowModel(false);
-                        }}
+                        onClick={() => setModelUrl('')}
                       >
                         {t('remove')}
                       </Button>
@@ -426,6 +431,61 @@ const AdminArtifactEdit = () => {
                   <div>
                     <h3 className="text-sm font-medium text-slate-500">{t('dateAdded')}</h3>
                     <p>{new Date(artifact.created_at).toLocaleDateString()}</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="comments">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">{t('commentsManagement')}</h3>
+
+                {comments.length === 0 ? (
+                  <div className="text-center py-8 bg-slate-50 rounded-md">
+                    <p className="text-slate-500">{t('noComments')}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {comments.map((comment) => (
+                      <div key={comment.id} className="border rounded-md p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex items-center">
+                            <Badge variant={comment.isValidated ? "default" : "outline"} className="mr-2">
+                              {comment.isValidated ? t('validated') : t('pending')}
+                            </Badge>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const updatedComments = comments.map(c =>
+                                  c.id === comment.id ? { ...c, isValidated: !c.isValidated } : c
+                                );
+                                setComments(updatedComments);
+                              }}
+                              className={comment.isValidated ? "text-slate-500" : "text-green-600"}
+                            >
+                              <Check className="h-4 w-4 mr-1" />
+                              {comment.isValidated ? t('unvalidate') : t('validate')}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const updatedComments = comments.filter(c => c.id !== comment.id);
+                                setComments(updatedComments);
+                              }}
+                              className="text-red-600"
+                            >
+                              <X className="h-4 w-4 mr-1" />
+                              {t('delete')}
+                            </Button>
+                          </div>
+                        </div>
+                        <p className="text-sm">{comment.text}</p>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

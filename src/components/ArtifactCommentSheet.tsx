@@ -19,27 +19,27 @@ import { SendHorizontal } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 // Define the comment interface
-interface Comment {
+export interface ArtifactComment {
   id: string;
   text: string;
   isValidated: boolean;
 }
 
-interface CommentSheetProps {
+interface ArtifactCommentSheetProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  blogId: string;
-  comments?: Comment[];
-  onCommentsChange?: (comments: Comment[]) => void;
+  artifactId: string;
+  comments?: ArtifactComment[];
+  onCommentsChange?: (comments: ArtifactComment[]) => void;
 }
 
-const CommentSheet = ({
+const ArtifactCommentSheet = ({
   isOpen,
   onOpenChange,
-  blogId,
+  artifactId,
   comments = [],
   onCommentsChange
-}: CommentSheetProps) => {
+}: ArtifactCommentSheetProps) => {
   const { t } = useTranslate();
   const [commentContent, setCommentContent] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
@@ -61,7 +61,7 @@ const CommentSheet = ({
       setIsSubmittingComment(true);
 
       // Create a new comment
-      const newComment: Comment = {
+      const newComment: ArtifactComment = {
         id: uuidv4(),
         text: commentContent,
         isValidated: false, // Comments need validation by default
@@ -73,11 +73,11 @@ const CommentSheet = ({
       // Add the new comment
       const updatedComments = [...currentComments, newComment];
 
-      // Update the blog with the new comment
+      // Update the artifact with the new comment
       const { error } = await supabase
-        .from('blogs')
+        .from('artifacts')
         .update({ comments: updatedComments })
-        .eq('id', blogId);
+        .eq('id', artifactId);
 
       if (error) throw error;
 
@@ -113,9 +113,9 @@ const CommentSheet = ({
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>{t('leaveComment')}</SheetTitle>
+          <SheetTitle>{t('artifactLeaveComment')}</SheetTitle>
           <SheetDescription>
-            {t('commentDescription')}
+            {t('artifactCommentDescription')}
           </SheetDescription>
         </SheetHeader>
 
@@ -124,7 +124,7 @@ const CommentSheet = ({
             {/* Validated Comments Section */}
             {comments && comments.filter(c => c.isValidated).length > 0 && (
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-4">{t('comments')}</h3>
+                <h3 className="text-lg font-medium mb-4">{t('artifactComments')}</h3>
                 <ScrollArea className="h-[calc(100%-60px)]">
                   <div className="space-y-6">
                     {comments
@@ -176,4 +176,4 @@ const CommentSheet = ({
   );
 };
 
-export default CommentSheet;
+export default ArtifactCommentSheet;
