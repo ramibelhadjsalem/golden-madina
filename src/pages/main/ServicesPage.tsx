@@ -5,8 +5,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
 import { useTranslate } from "@/hooks/use-translate";
+import { supabase } from "@/lib/supabase";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Define the Service type based on our Supabase schema
@@ -23,17 +23,18 @@ interface Service {
 }
 
 // Helper function to format duration
-const formatDuration = (minutes: number): string => {
+const formatDuration = (minutes: number, t: (key: string) => string): string => {
   if (minutes < 60) {
-    return `${minutes} minutes`;
+    return `${minutes} ${minutes === 1 ? t('minute') : t('minutes')}`;
   } else if (minutes === 60) {
-    return `1 hour`;
+    return `1 ${t('hour')}`;
   } else if (minutes % 60 === 0) {
-    return `${minutes / 60} hours`;
+    const hours = minutes / 60;
+    return `${hours} ${hours === 1 ? t('hour') : t('hours')}`;
   } else {
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
-    return `${hours} hour${hours > 1 ? 's' : ''} ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}`;
+    return `${hours} ${hours === 1 ? t('hour') : t('hours')} ${remainingMinutes} ${remainingMinutes === 1 ? t('minute') : t('minutes')}`;
   }
 };
 
@@ -51,9 +52,13 @@ const ServicesPage = () => {
   const [bookingForm, setBookingForm] = useState({
     name: "",
     email: "",
+    phone: "",
     date: "",
+    time: "morning", // Default to morning
+    people: 1,
     notes: ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch services from Supabase
   useEffect(() => {
@@ -94,30 +99,61 @@ const ServicesPage = () => {
     setBookingForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleBookingSubmit = (e: React.FormEvent) => {
+  const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!selectedService) return;
 
-    // Here we would normally send the booking data to Supabase
-    console.log("Booking submitted:", { service: selectedService, ...bookingForm });
+    setIsSubmitting(true);
 
-    // Show success message
-    toast({
-      title: t('bookingRequestSubmitted'),
-      description: `${t('bookingConfirmationMessage')} ${selectedService.name}. ${t('contactShortly')}`,
-    });
+    try {
+      // Send booking data to Supabase
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert({
+          service_id: selectedService.id,
+          customer_name: bookingForm.name,
+          customer_email: bookingForm.email,
+          customer_phone: bookingForm.phone,
+          date: bookingForm.date,
+          time: bookingForm.time,
+          people: bookingForm.people,
+          notes: bookingForm.notes,
+          status: 'pending'
+        })
+        .select();
 
-    // Reset form
-    setBookingForm({
-      name: "",
-      email: "",
-      date: "",
-      notes: ""
-    });
+      if (error) throw error;
 
-    // Close booking form
-    setSelectedService(null);
+      // Show success message
+      toast({
+        title: t('bookingRequestSubmitted'),
+        description: `${t('bookingConfirmationMessage')} ${selectedService.name}. ${t('contactShortly')}`,
+      });
+
+      // Reset form
+      setBookingForm({
+        name: "",
+        email: "",
+        phone: "",
+        date: "",
+        time: "morning",
+        people: 1,
+        notes: ""
+      });
+
+      // Close booking form
+      setSelectedService(null);
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+      toast({
+        title: t('error'),
+        description: t('errorSubmittingBooking'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -125,9 +161,9 @@ const ServicesPage = () => {
       {/* Header */}
       <section className="bg-slate-900 text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-serif font-bold mb-4">Our Services</h1>
+          <h1 className="text-4xl font-serif font-bold mb-4">{t('servicesPageTitle')}</h1>
           <p className="text-xl max-w-2xl mx-auto">
-            Explore our range of professional heritage services designed to educate, engage, and inspire.
+            {t('servicesPageDescription')}
           </p>
         </div>
       </section>
@@ -174,7 +210,7 @@ const ServicesPage = () => {
             // No services found
             <div className="text-center py-12">
               <h3 className="text-xl font-medium mb-2">{t('noServicesFound')}</h3>
-              <p className="text-slate-600">{t('checkBackLater')}</p>
+              <p className="text-slate-600">{t('serviceCheckBackLater')}</p>
             </div>
           ) : (
             // Services grid
@@ -191,7 +227,7 @@ const ServicesPage = () => {
                   <CardHeader>
                     <CardTitle className="font-serif">{service.name}</CardTitle>
                     <CardDescription>
-                      {t('duration')}: {formatDuration(service.duration)} • {formatPrice(service.price)}
+                      {t('duration')}: {formatDuration(service.duration, t)} • {formatPrice(service.price)}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex-grow">
@@ -217,61 +253,118 @@ const ServicesPage = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <CardHeader>
-              <CardTitle className="font-serif">{t('book')} {selectedService.name}</CardTitle>
+              <CardTitle className="font-serif">{t('bookServiceTitle')} {selectedService.name}</CardTitle>
               <CardDescription>
-                {t('duration')}: {formatDuration(selectedService.duration)} • {formatPrice(selectedService.price)}
+                {t('duration')}: {formatDuration(selectedService.duration, t)} • {formatPrice(selectedService.price)}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleBookingSubmit} className="space-y-4">
+              <p className="text-sm text-slate-600 mb-4">{t('bookingFormDescription')}</p>
+              <form onSubmit={handleBookingSubmit} className="space-y-6">
+                {/* Personal Information Section */}
                 <div>
-                  <Label htmlFor="name">{t('yourName')}</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={bookingForm.name}
-                    onChange={handleInputChange}
-                    required
-                    className="mt-1"
-                  />
+                  <h3 className="text-lg font-medium mb-3">{t('personalInformation')}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">{t('yourName')} <span className="text-red-500">*</span></Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        value={bookingForm.name}
+                        onChange={handleInputChange}
+                        required
+                        className="mt-1"
+                        placeholder={t('yourName')}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="email">{t('emailAddress')} <span className="text-red-500">*</span></Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={bookingForm.email}
+                        onChange={handleInputChange}
+                        required
+                        className="mt-1"
+                        placeholder="example@email.com"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">{t('phoneNumber')}</Label>
+                      <Input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        value={bookingForm.phone}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                        placeholder="+1 (123) 456-7890"
+                      />
+                    </div>
+                  </div>
                 </div>
 
+                {/* Booking Details Section */}
                 <div>
-                  <Label htmlFor="email">{t('emailAddress')}</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={bookingForm.email}
-                    onChange={handleInputChange}
-                    required
-                    className="mt-1"
-                  />
-                </div>
+                  <h3 className="text-lg font-medium mb-3">{t('bookingDetails')}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="date">{t('preferredDate')} <span className="text-red-500">*</span></Label>
+                      <Input
+                        id="date"
+                        name="date"
+                        type="date"
+                        value={bookingForm.date}
+                        onChange={handleInputChange}
+                        required
+                        className="mt-1"
+                        min={new Date().toISOString().split('T')[0]} // Set min date to today
+                      />
+                    </div>
 
-                <div>
-                  <Label htmlFor="date">{t('preferredDate')}</Label>
-                  <Input
-                    id="date"
-                    name="date"
-                    type="date"
-                    value={bookingForm.date}
-                    onChange={handleInputChange}
-                    required
-                    className="mt-1"
-                    min={new Date().toISOString().split('T')[0]} // Set min date to today
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="time">{t('preferredTime')}</Label>
+                      <select
+                        id="time"
+                        name="time"
+                        value={bookingForm.time}
+                        onChange={handleInputChange}
+                        className="w-full h-10 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent"
+                      >
+                        <option value="morning">{t('morning')}</option>
+                        <option value="afternoon">{t('afternoon')}</option>
+                        <option value="evening">{t('evening')}</option>
+                      </select>
+                    </div>
 
-                <div>
-                  <Label htmlFor="notes">{t('specialRequests')}</Label>
-                  <Input
-                    id="notes"
-                    name="notes"
-                    value={bookingForm.notes}
-                    onChange={handleInputChange}
-                    className="mt-1"
-                  />
+                    <div className="space-y-2">
+                      <Label htmlFor="people">{t('numberOfPeople')}</Label>
+                      <Input
+                        id="people"
+                        name="people"
+                        type="number"
+                        min="1"
+                        value={bookingForm.people}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                      />
+                    </div>
+
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="notes">{t('specialRequests')}</Label>
+                      <Input
+                        id="notes"
+                        name="notes"
+                        value={bookingForm.notes}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                        placeholder={t('specialRequests')}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex gap-4 mt-6 pt-4 border-t">
@@ -280,14 +373,16 @@ const ServicesPage = () => {
                     variant="outline"
                     onClick={() => setSelectedService(null)}
                     className="flex-1"
+                    disabled={isSubmitting}
                   >
                     {t('cancel')}
                   </Button>
                   <Button
                     type="submit"
                     className="flex-1"
+                    disabled={isSubmitting}
                   >
-                    {t('submitBooking')}
+                    {isSubmitting ? t('submitting') : t('submitBooking')}
                   </Button>
                 </div>
               </form>

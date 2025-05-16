@@ -22,6 +22,8 @@ import AdminBlogEdit from "./pages/admin/AdminBlogEdit";
 import AdminArtifactList from "./pages/admin/AdminArtifactList";
 import AdminArtifactEdit from "./pages/admin/AdminArtifactEdit";
 import AdminServiceList from "./pages/admin/AdminServiceList";
+import AdminServiceCreate from "./pages/admin/AdminServiceCreate";
+import AdminServiceEdit from "./pages/admin/AdminServiceEdit";
 import AdminBookingList from "./pages/admin/AdminBookingList";
 import AdminPortfolioList from "./pages/admin/AdminPortfolioList";
 import AdminPortfolioEdit from "./pages/admin/AdminPortfolioEdit";
@@ -86,6 +88,8 @@ const App = () => {
                   <Route path="portfolio" element={<AdminPortfolioList />} />
                   <Route path="portfolio/:id" element={<AdminPortfolioEdit />} />
                   <Route path="services" element={<AdminServiceList />} />
+                  <Route path="services/create" element={<AdminServiceCreate />} />
+                  <Route path="services/:id" element={<AdminServiceEdit />} />
                   <Route path="bookings" element={<AdminBookingList />} />
                 </Route>
 

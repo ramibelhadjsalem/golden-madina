@@ -6,11 +6,11 @@ import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import ServiceDialog from "@/components/admin/ServiceDialog";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
 import { supabase } from "@/lib/supabase";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 // Define the Service type based on our Supabase schema
 interface Service {
@@ -47,12 +47,11 @@ const formatPrice = (price: number): string => {
 
 const AdminServiceList = () => {
   const { t } = useTranslate();
+  const navigate = useNavigate();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -95,81 +94,15 @@ const AdminServiceList = () => {
     formatDuration(service.duration).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleOpenDialog = (service?: Service) => {
-    setSelectedService(service || null);
-    setIsDialogOpen(true);
+  const handleEditService = (serviceId: string) => {
+    navigate(`/admin/services/${serviceId}`);
   };
 
-  const handleCloseDialog = () => {
-    setSelectedService(null);
-    setIsDialogOpen(false);
+  const handleCreateService = () => {
+    navigate('/admin/services/create');
   };
 
-  const handleSaveService = async (serviceData: {
-    name: string;
-    description: string;
-    duration: number;
-    price: number;
-    image_url: string;
-    available: boolean;
-    max_capacity: number | null;
-  }) => {
-    setIsSubmitting(true);
-
-    try {
-      if (selectedService) {
-        // Update existing service
-        const { error } = await supabase
-          .from('services')
-          .update(serviceData)
-          .eq('id', selectedService.id);
-
-        if (error) throw error;
-
-        // Update local state
-        setServices(prevServices =>
-          prevServices.map(service =>
-            service.id === selectedService.id ? { ...service, ...serviceData } : service
-          )
-        );
-
-        toast({
-          title: t('serviceUpdated'),
-          description: t('serviceUpdateSuccess'),
-        });
-      } else {
-        // Create new service
-        const { data, error } = await supabase
-          .from('services')
-          .insert(serviceData)
-          .select();
-
-        if (error) throw error;
-
-        // Update local state
-        if (data && data.length > 0) {
-          setServices(prevServices => [data[0], ...prevServices]);
-        }
-
-        toast({
-          title: t('serviceCreated'),
-          description: t('serviceCreateSuccess'),
-        });
-      }
-
-      // Close the dialog
-      handleCloseDialog();
-    } catch (error) {
-      console.error('Error saving service:', error);
-      toast({
-        title: t('error'),
-        description: error instanceof Error ? error.message : t('errorSavingService'),
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  // No handleSaveService function - Using separate pages now
 
   const handleDeleteClick = (id: string) => {
     setServiceToDelete(id);
@@ -239,7 +172,7 @@ const AdminServiceList = () => {
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
-        <Button className="w-full sm:w-auto" onClick={() => handleOpenDialog()}>
+        <Button className="w-full sm:w-auto" onClick={handleCreateService}>
           <Plus className="mr-2 h-4 w-4" />
           {t('addNewService')}
         </Button>
@@ -285,7 +218,7 @@ const AdminServiceList = () => {
         <div className="text-center py-12 bg-white rounded-lg shadow">
           <h3 className="text-xl font-medium mb-2">{t('noServicesFound')}</h3>
           <p className="text-slate-600 mb-4">{t('noServicesDescription')}</p>
-          <Button onClick={() => handleOpenDialog()}>
+          <Button onClick={handleCreateService}>
             <Plus className="mr-2 h-4 w-4" />
             {t('addNewService')}
           </Button>
@@ -325,7 +258,7 @@ const AdminServiceList = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleOpenDialog(service)}
+                  onClick={() => handleEditService(service.id)}
                   className="flex-1 mr-2"
                 >
                   <Pencil className="h-4 w-4 mr-2" />
@@ -346,13 +279,7 @@ const AdminServiceList = () => {
         </div>
       )}
 
-      {/* Service Dialog */}
-      <ServiceDialog
-        isOpen={isDialogOpen}
-        onClose={handleCloseDialog}
-        service={selectedService || undefined}
-        onSave={handleSaveService}
-      />
+      {/* No Service Dialog - Using separate pages now */}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
