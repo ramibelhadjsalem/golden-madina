@@ -54,8 +54,7 @@ const ServicesPage = () => {
     email: "",
     phone: "",
     date: "",
-    time: "morning", // Default to morning
-    people: 1,
+    participants: 1,
     notes: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -92,7 +91,7 @@ const ServicesPage = () => {
     };
 
     fetchServices();
-  }, []);
+  },[]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -108,7 +107,7 @@ const ServicesPage = () => {
 
     try {
       // Send booking data to Supabase
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('bookings')
         .insert({
           service_id: selectedService.id,
@@ -116,8 +115,7 @@ const ServicesPage = () => {
           customer_email: bookingForm.email,
           customer_phone: bookingForm.phone,
           date: bookingForm.date,
-          time: bookingForm.time,
-          people: bookingForm.people,
+          participants: bookingForm.participants,
           notes: bookingForm.notes,
           status: 'pending'
         })
@@ -137,8 +135,7 @@ const ServicesPage = () => {
         email: "",
         phone: "",
         date: "",
-        time: "morning",
-        people: 1,
+        participants: 1,
         notes: ""
       });
 
@@ -216,7 +213,7 @@ const ServicesPage = () => {
             // Services grid
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {services.map((service) => (
-                <Card key={service.id} className="overflow-hidden h-full hover:shadow-lg transition-shadow">
+                <Card key={service.id} className="overflow-hidden h-full hover:shadow-lg transition-shadow flex flex-col">
                   <div className="aspect-video w-full overflow-hidden">
                     <img
                       src={service.image_url}
@@ -233,7 +230,7 @@ const ServicesPage = () => {
                   <CardContent className="flex-grow">
                     <p className="text-slate-600">{service.description}</p>
                   </CardContent>
-                  <CardFooter>
+                  <CardFooter className="mt-auto">
                     <Button
                       onClick={() => setSelectedService(service)}
                       className="w-full"
@@ -325,29 +322,16 @@ const ServicesPage = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="time">{t('preferredTime')}</Label>
-                      <select
-                        id="time"
-                        name="time"
-                        value={bookingForm.time}
-                        onChange={handleInputChange}
-                        className="w-full h-10 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent"
-                      >
-                        <option value="morning">{t('morning')}</option>
-                        <option value="afternoon">{t('afternoon')}</option>
-                        <option value="evening">{t('evening')}</option>
-                      </select>
-                    </div>
+
 
                     <div className="space-y-2">
-                      <Label htmlFor="people">{t('numberOfPeople')}</Label>
+                      <Label htmlFor="participants">{t('numberOfPeople')}</Label>
                       <Input
-                        id="people"
-                        name="people"
+                        id="participants"
+                        name="participants"
                         type="number"
                         min="1"
-                        value={bookingForm.people}
+                        value={bookingForm.participants}
                         onChange={handleInputChange}
                         className="mt-1"
                       />

@@ -153,7 +153,6 @@ export interface Database {
           customer_email: string
           customer_phone: string | null
           date: string
-          time: string
           status: 'pending' | 'confirmed' | 'canceled'
           notes: string | null
           participants: number
@@ -166,7 +165,6 @@ export interface Database {
           customer_email: string
           customer_phone?: string | null
           date: string
-          time: string
           status?: 'pending' | 'confirmed' | 'canceled'
           notes?: string | null
           participants?: number
@@ -179,7 +177,6 @@ export interface Database {
           customer_email?: string
           customer_phone?: string | null
           date?: string
-          time?: string
           status?: 'pending' | 'confirmed' | 'canceled'
           notes?: string | null
           participants?: number
