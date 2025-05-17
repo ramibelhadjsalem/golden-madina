@@ -9,6 +9,45 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      chatbot_responses: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          intent: string
+          pattern: string[] // Array of patterns
+          response_en: string
+          response_fr: string | null
+          response_ar: string | null
+          priority: number
+          is_active: boolean
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          intent: string
+          pattern: string[] // Array of patterns
+          response_en: string
+          response_fr?: string | null
+          response_ar?: string | null
+          priority?: number
+          is_active?: boolean
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          intent?: string
+          pattern?: string[] // Array of patterns
+          response_en?: string
+          response_fr?: string | null
+          response_ar?: string | null
+          priority?: number
+          is_active?: boolean
+        }
+        Relationships: []
+      }
       artifacts: {
         Row: {
           id: string

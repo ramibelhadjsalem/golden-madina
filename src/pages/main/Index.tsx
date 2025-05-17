@@ -10,8 +10,6 @@ import {
 } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { useState } from "react";
 import { StarIcon, StarHalfIcon, ChevronLeftIcon, ChevronRightIcon, ImageIcon } from "lucide-react";
 import {
@@ -40,10 +38,6 @@ const Index = () => {
       description: t('heritageSubtitle'),
     });
   };
-
-  // Carousel images from config
-
-  // Reviews from config
 
   return (
     <main className="flex-grow">
@@ -304,7 +298,7 @@ const Index = () => {
               <Button className="bg-white hover:bg-gray-100 text-amber-900 font-medium">{t('bookService')}</Button>
             </Link>
             <Link to="/artifacts">
-              <Button variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button variant="outline" className="border-white text-white hover:bg-white/10 bg-white/20">
                 {t('exploreArtifacts')}
               </Button>
             </Link>

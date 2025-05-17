@@ -27,6 +27,7 @@ import AdminServiceEdit from "./pages/admin/AdminServiceEdit";
 import AdminBookingList from "./pages/admin/AdminBookingList";
 import AdminPortfolioList from "./pages/admin/AdminPortfolioList";
 import AdminPortfolioEdit from "./pages/admin/AdminPortfolioEdit";
+import AdminChatbotList from "./pages/admin/AdminChatbotList";
 import { useEffect } from "react";
 import AdminLayout from "./components/admin/AdminLayout";
 import MainLayout from "./components/main/MainLayout";
@@ -91,6 +92,7 @@ const App = () => {
                   <Route path="services/create" element={<AdminServiceCreate />} />
                   <Route path="services/:id" element={<AdminServiceEdit />} />
                   <Route path="bookings" element={<AdminBookingList />} />
+                  <Route path="chatbot" element={<AdminChatbotList />} />
                 </Route>
 
 
