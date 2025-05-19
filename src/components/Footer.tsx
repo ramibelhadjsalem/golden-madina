@@ -61,6 +61,10 @@ const Footer = () => {
               <li>
                 <Link to="/services" className="hover:text-amber-400 transition duration-200">{t('services')}</Link>
               </li>
+              <li>
+                <Link to="/admin" className="hover:text-amber-400 transition duration-200">{t('adminLogin')}</Link>
+              </li>
+
             </ul>
           </div>
 
@@ -89,8 +93,8 @@ const Footer = () => {
             <address className="not-italic">
               <p className="mb-2">{COMPANY_INFO.address}</p>
               <p className="mb-2">{COMPANY_INFO.city}</p>
-              <p className="mb-2">{t('phone')}: {COMPANY_INFO.phone}</p>
-              <p className="mb-2">{t('email')}: {COMPANY_INFO.email}</p>
+              <p className="mb-2">{t('phone')} {COMPANY_INFO.phone}</p>
+              <p className="mb-2">{t('email')} {COMPANY_INFO.email}</p>
             </address>
           </div>
         </div>

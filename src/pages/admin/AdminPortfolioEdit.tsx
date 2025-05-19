@@ -14,6 +14,7 @@ import { Editor } from "@tiptap/react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from "@/context/LanguageContext";
 import PortfolioImageManager from "@/components/admin/PortfolioImageManager";
+import { PORTFOLIO_CATEGORIES } from "@/lib/config";
 
 // Define portfolio type
 type Portfolio = {
@@ -27,17 +28,7 @@ type Portfolio = {
   language: string | null;
 };
 
-// Predefined categories
-const PORTFOLIO_CATEGORIES = [
-  "Exhibitions",
-  "Restorations",
-  "Workshops",
-  "Events",
-  "Publications",
-  "Research",
-  "Collaborations",
-  "Other"
-];
+
 
 const AdminPortfolioEdit = () => {
   const { id } = useParams<{ id: string }>();

@@ -67,12 +67,13 @@ const Navbar = () => {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <Link to="/admin">
+            
+            {/* admin login */}
+            {/* <Link to="/admin">
               <Button variant="outline" className="border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white">
                 {t('adminLogin')}
               </Button>
-            </Link>
+            </Link> */}
           </nav>
 
           {/* Mobile Navigation Button */}

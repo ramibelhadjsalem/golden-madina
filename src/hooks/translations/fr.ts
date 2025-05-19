@@ -48,7 +48,7 @@ export const fr = {
 
     // Mission section
     ourMission: "Notre Mission",
-    missionText: "Fondée en 1895, notre institution a été à l'avant-garde de la préservation et de la mise en valeur du riche patrimoine culturel de notre région. Grâce à une conservation minutieuse, à la recherche et à l'éducation, nous relions le passé au présent pour les générations futures.",
+    missionText: "Fondée en 2023, notre institution a été à l'avant-garde de la préservation et de la mise en valeur du riche patrimoine culturel de notre région. Grâce à une conservation minutieuse, à la recherche et à l'éducation, nous relions le passé au présent pour les générations futures.",
 
     // Cards
     artifactCollection: "Collection d'Artefacts",
@@ -68,9 +68,9 @@ export const fr = {
 
     // History section
     ourRichHistory: "Notre Riche Histoire",
-    historyText1: "Fondée en 1895 par le célèbre historien Professeur Edward Thornhill, notre organisation a commencé comme une petite collection privée dédiée à la préservation des artefacts locaux menacés par l'industrialisation rapide.",
+    historyText1: "Fondée en 2023 par le célèbre historien Professeur Edward Thornhill, notre organisation a commencé comme une petite collection privée dédiée à la préservation des artefacts locaux menacés par l'industrialisation rapide.",
     historyText2: "Au début des années 1900, nous nous sommes développés en une véritable institution du patrimoine, ouvrant notre premier musée public en 1912. Pendant l'entre-deux-guerres, notre équipe a mené plusieurs expéditions archéologiques importantes qui ont mis au jour d'importants trésors historiques maintenant présentés dans notre galerie principale.",
-    historyText3: "Aujourd'hui, nous sommes l'une des principales organisations du patrimoine culturel du pays, avec plus de 50 000 artefacts dans notre collection, des programmes de conservation primés et des initiatives éducatives qui touchent plus de 100 000 personnes chaque année.",
+    historyText3: "Aujourd'hui, nous sommes l'une des principales organisations du patrimoine culturel du pays, avec plus de 5000 artefacts dans notre collection, des programmes de conservation primés et des initiatives éducatives qui touchent plus de 100 000 personnes chaque année.",
     founded: "Fondée",
     artifactsPreserved: "Artefacts Préservés",
     annualVisitors: "Visiteurs Annuels",
@@ -99,17 +99,17 @@ export const fr = {
     exploreArtifacts: "Explorer les Artefacts",
 
     // Footer
-    companyDescription: "Préservation de notre héritage culturel et connexion des communautés avec leur passé depuis 1895.",
+    companyDescription: "Préservation de notre héritage culturel et connexion des communautés avec leur passé depuis 2023.",
     quickLinks: "Liens Rapides",
     resources: "Ressources",
     privacyPolicy: "Politique de Confidentialité",
     termsOfService: "Conditions d'Utilisation",
     contactUs: "Contactez-Nous",
     faqLink: "FAQ",
-    address: "123 Rue du Patrimoine",
-    city: "Quartier Historique, HT 12345",
-    phone: "Téléphone: (123) 456-7890",
-    email: "Email: info@heritageco.example",
+    address: "pépiniére d'entreprises , Nabeul",
+    city: "Nabeul, Tunisie",
+    phone: "Téléphone:",
+    email: "Email:",
     copyright: "© {year} Société du Patrimoine. Tous droits réservés.",
 
     // Social media
@@ -123,7 +123,7 @@ export const fr = {
     contact: "Contact",
 
     // Admin Login
-    adminArea: "Administration Heritage Co.",
+    adminArea: "Administration  Golden Madina.",
     signInToAdmin: "Connectez-vous pour accéder au panneau d'administration",
     password: "Mot de passe",
     forgotPassword: "Mot de passe oublié?",

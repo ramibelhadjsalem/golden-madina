@@ -16,7 +16,7 @@ const AdminLogin = () => {
   const { t } = useTranslate();
   const { currentLanguage } = useLanguage();
   const { signIn, user, loading: authLoading } = useAuth();
-  const [credentials, setCredentials] = useState({ email: "admin@example.com", password: "password" });
+  const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -107,6 +107,7 @@ const AdminLogin = () => {
                 name="password"
                 type="password"
                 required
+                placeholder="********"
                 value={credentials.password}
                 onChange={handleChange}
               />

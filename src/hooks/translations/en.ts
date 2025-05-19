@@ -48,7 +48,7 @@ export const en = {
 
     // Mission section
     ourMission: "Our Mission",
-    missionText: "Founded in 1895, our institution has been at the forefront of preserving and showcasing the rich cultural heritage of our region. Through careful conservation, research, and education, we connect the past with the present for future generations.",
+    missionText: "Founded in 2023, our institution has been at the forefront of preserving and showcasing the rich cultural heritage of our region. Through careful conservation, research, and education, we connect the past with the present for future generations.",
 
     // Cards
     artifactCollection: "Artifact Collection",
@@ -68,9 +68,9 @@ export const en = {
 
     // History section
     ourRichHistory: "Our Rich History",
-    historyText1: "Established in 1895 by renowned historian Professor Edward Thornhill, our organization began as a small private collection dedicated to preserving local artifacts threatened by rapid industrialization.",
+    historyText1: "Established in 2023 by renowned historian Professor Edward Thornhill, our organization began as a small private collection dedicated to preserving local artifacts threatened by rapid industrialization.",
     historyText2: "By the early 1900s, we had expanded into a full-fledged heritage institution, opening our first public museum in 1912. During the interwar period, our team conducted several significant archaeological expeditions that uncovered important historical treasures now featured in our main gallery.",
-    historyText3: "Today, we stand as one of the country's preeminent cultural heritage organizations, with over 50,000 artifacts in our collection, award-winning conservation programs, and educational initiatives that reach more than 100,000 people annually.",
+    historyText3: "Today, we stand as one of the country's preeminent cultural heritage organizations, with over 5,000 artifacts in our collection, award-winning conservation programs, and educational initiatives that reach more than 10,000 people annually.",
     founded: "Founded",
     artifactsPreserved: "Artifacts Preserved",
     annualVisitors: "Annual Visitors",
@@ -99,15 +99,15 @@ export const en = {
     exploreArtifacts: "Explore Artifacts",
 
     // Footer
-    companyDescription: "Preserving our cultural legacy and connecting communities with their past since 1895.",
+    companyDescription: "Preserving our cultural legacy and connecting communities with their past since 2023.",
     quickLinks: "Quick Links",
     resources: "Resources",
     privacyPolicy: "Privacy Policy",
     termsOfService: "Terms of Service",
     contactUs: "Contact Us",
     faqLink: "FAQ",
-    address: "123 Heritage Street",
-    city: "Historic District, HT 12345",
+    address: "pépiniére d'entreprises , Nabeul",
+    city: "Nabeul, Tunisie",
     phone: "Phone: (123) 456-7890",
     email: "Email",
     copyright: "© {year} Golden Madina Company. All rights reserved.",
