@@ -82,7 +82,7 @@ const AdminServiceEdit = () => {
     };
 
     fetchService();
-  }, [id, t]);
+  }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,7 +207,6 @@ const AdminServiceEdit = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             {t('backToServices')}
           </Button>
-          <h1 className="text-2xl font-bold">{t('editService')}</h1>
         </div>
       </div>
 

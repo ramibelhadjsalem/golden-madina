@@ -516,4 +516,8 @@ export const ar = {
     chatbotPatternAdded: "تمت إضافة النمط بنجاح",
     chatbotPatternDeleted: "تم حذف النمط بنجاح",
     errorAtLeastOnePattern: "يجب إضافة نمط واحد على الأقل",
+
+
+    serviceImage: "صورة الخدمة",
+    description: "الوصف"
 }

@@ -520,4 +520,7 @@ export const fr = {
     chatbotPatternAdded: "Modèle ajouté avec succès",
     chatbotPatternDeleted: "Modèle supprimé avec succès",
     errorAtLeastOnePattern: "Vous devez ajouter au moins un modèle",
+
+    serviceImage: "Image du service",
+    description: "Description"
 };

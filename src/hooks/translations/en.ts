@@ -570,4 +570,6 @@ export const en = {
     chatbotPatternAdded: "Pattern added successfully",
     chatbotPatternDeleted: "Pattern deleted successfully",
     errorAtLeastOnePattern: "You must add at least one pattern",
+
+    serviceImage: "Service Image"
 };
