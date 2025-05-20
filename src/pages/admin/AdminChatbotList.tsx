@@ -306,7 +306,7 @@ const AdminChatbotList = () => {
 
       {/* Create Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('addChatbotResponse')}</DialogTitle>
             <DialogDescription>{t('addChatbotResponseDescription')}</DialogDescription>
@@ -436,7 +436,7 @@ const AdminChatbotList = () => {
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('editChatbotResponse')}</DialogTitle>
             <DialogDescription>{t('editChatbotResponseDescription')}</DialogDescription>
@@ -566,7 +566,7 @@ const AdminChatbotList = () => {
 
       {/* Delete Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-h-[80vh] overflow-y-auto">
           <AlertDialogHeader>
             <AlertDialogTitle>{t('deleteChatbotResponse')}</AlertDialogTitle>
             <AlertDialogDescription>
