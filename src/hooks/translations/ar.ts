@@ -112,6 +112,28 @@ export const ar = {
     email: "البريد الإلكتروني:",
     copyright: "© {year} شركة التراث. جميع الحقوق محفوظة.",
 
+    // Contact Section
+    contactText: "هل لديك أسئلة أو ترغب في التواصل معنا؟ املأ النموذج أدناه وسنرد عليك في أقرب وقت ممكن.",
+    getInTouch: "تواصل معنا",
+    contactInfoText: "نحن نقدر اهتمامك بمجموعتنا التراثية. فريقنا مستعد لمساعدتك في أي استفسارات حول القطع الأثرية أو الخدمات أو معلومات الزيارة.",
+    emailResponse: "نرد خلال 24 ساعة",
+    phoneHours: "الاثنين-الجمعة، 9:00 صباحًا - 5:00 مساءً",
+    visitingHours: "مفتوح الثلاثاء-الأحد، 10:00 صباحًا - 5:00 مساءً",
+    followUs: "تابعنا",
+    contactForm: "نموذج الاتصال",
+    contactFormDescription: "املأ النموذج أدناه وسنرد عليك في أقرب وقت ممكن.",
+    subject: "الموضوع",
+    enterSubject: "أدخل الموضوع",
+    enterYourName: "أدخل اسمك",
+    enterYourEmail: "أدخل بريدك الإلكتروني",
+    enterYourPhone: "أدخل رقم هاتفك (اختياري)",
+    enterYourMessage: "أدخل رسالتك هنا...",
+    sendMessage: "إرسال الرسالة",
+    sending: "جاري الإرسال...",
+    messageSent: "تم إرسال الرسالة",
+    thankYouForMessage: "شكرًا لرسالتك. سنرد عليك قريبًا!",
+    emailSendError: "حدث خطأ أثناء إرسال رسالتك. يرجى المحاولة مرة أخرى لاحقًا.",
+
     // Social media
     facebook: "فيسبوك",
     instagram: "انستغرام",
@@ -319,7 +341,6 @@ export const ar = {
     afternoon: "ظهرًا",
     evening: "مساءً",
     bookingFormDescription: "يرجى ملء النموذج أدناه لطلب الحجز. سنتصل بك لتأكيد التوفر.",
-    submitting: "جاري التقديم...",
     errorSubmittingBooking: "حدث خطأ أثناء تقديم الحجز الخاص بك. يرجى المحاولة مرة أخرى.",
 
     // Duration formatting
@@ -387,7 +408,6 @@ export const ar = {
     canceledStatus: "ملغي",
     bookingUpdated: "تم تحديث الحجز",
     bookingStatusChanged: "تم تغيير حالة الحجز إلى {{status}}",
-    bookingDetails: "تفاصيل الحجز",
     selectStatus: "اختر حالة",
     cancelBookingConfirmation: "إلغاء هذا الحجز؟",
     cancelBookingWarning: "سيؤدي هذا الإجراء إلى وضع علامة على الحجز كملغي وإخطار العميل.",

@@ -112,6 +112,28 @@ export const fr = {
     email: "Email:",
     copyright: "© {year} Société du Patrimoine. Tous droits réservés.",
 
+    // Contact Section
+    contactText: "Vous avez des questions ou souhaitez nous contacter? Remplissez le formulaire ci-dessous et nous vous répondrons dès que possible.",
+    getInTouch: "Entrer en Contact",
+    contactInfoText: "Nous apprécions votre intérêt pour notre collection patrimoniale. Notre équipe est prête à vous aider pour toute demande concernant nos artefacts, services ou informations de visite.",
+    emailResponse: "Nous répondons sous 24 heures",
+    phoneHours: "Lun-Ven, 9h00 - 17h00",
+    visitingHours: "Ouvert Mar-Dim, 10h00 - 17h00",
+    followUs: "Suivez-Nous",
+    contactForm: "Formulaire de Contact",
+    contactFormDescription: "Remplissez le formulaire ci-dessous et nous vous répondrons dès que possible.",
+    subject: "Sujet",
+    enterSubject: "Entrez le sujet",
+    enterYourName: "Entrez votre nom",
+    enterYourEmail: "Entrez votre email",
+    enterYourPhone: "Entrez votre numéro de téléphone (optionnel)",
+    enterYourMessage: "Entrez votre message ici...",
+    sendMessage: "Envoyer le Message",
+    sending: "Envoi en cours...",
+    messageSent: "Message Envoyé",
+    thankYouForMessage: "Merci pour votre message. Nous vous répondrons bientôt!",
+    emailSendError: "Une erreur s'est produite lors de l'envoi de votre message. Veuillez réessayer plus tard.",
+
     // Social media
     facebook: "Facebook",
     instagram: "Instagram",
@@ -280,7 +302,6 @@ export const fr = {
     serviceCreateSuccess: "Le nouveau service a été créé avec succès",
     serviceDeleted: "Service Supprimé",
     serviceDeleteSuccess: "Le service a été supprimé avec succès",
-    createService: "Créer un Service",
     saveChanges: "Enregistrer les Modifications",
     backToServices: "Retour aux Services",
     serviceAvailable: "Disponible",
@@ -292,7 +313,6 @@ export const fr = {
     maxCapacity: "Capacité Maximale",
     availability: "Disponibilité",
     optional: "Optionnel",
-    recommendedImageSize: "Taille recommandée: 1200x800 pixels",
 
     // Services Page
     servicesPageTitle: "Nos Services",
@@ -322,7 +342,6 @@ export const fr = {
     afternoon: "Après-midi",
     evening: "Soir",
     bookingFormDescription: "Veuillez remplir le formulaire ci-dessous pour demander une réservation. Nous vous contacterons pour confirmer la disponibilité.",
-    submitting: "Soumission en cours...",
     errorSubmittingBooking: "Une erreur s'est produite lors de la soumission de votre réservation. Veuillez réessayer.",
 
     // Duration formatting
@@ -391,7 +410,6 @@ export const fr = {
     canceledStatus: "Annulé",
     bookingUpdated: "Réservation Mise à Jour",
     bookingStatusChanged: "Statut de réservation changé en {{status}}",
-    bookingDetails: "Détails de la Réservation",
     selectStatus: "Sélectionner un statut",
     cancelBookingConfirmation: "Annuler cette réservation?",
     cancelBookingWarning: "Cette action marquera la réservation comme annulée et notifiera le client.",

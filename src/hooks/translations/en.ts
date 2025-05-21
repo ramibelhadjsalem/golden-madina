@@ -108,9 +108,31 @@ export const en = {
     faqLink: "FAQ",
     address: "pépiniére d'entreprises , Nabeul",
     city: "Nabeul, Tunisie",
-    phone: "Phone: (123) 456-7890",
+    phone: "Phone",
     email: "Email",
     copyright: "© {year} Golden Madina Company. All rights reserved.",
+
+    // Contact Section
+    contactText: "Have questions or want to get in touch? Fill out the form below and we'll get back to you as soon as possible.",
+    getInTouch: "Get in Touch",
+    contactInfoText: "We value your interest in our heritage collection. Our team is ready to assist you with any inquiries about our artifacts, services, or visiting information.",
+    emailResponse: "We respond within 24 hours",
+    phoneHours: "Mon-Fri, 9:00 AM - 5:00 PM",
+    visitingHours: "Open Tue-Sun, 10:00 AM - 5:00 PM",
+    followUs: "Follow Us",
+    contactForm: "Contact Form",
+    contactFormDescription: "Fill out the form below and we'll get back to you as soon as possible.",
+    subject: "Subject",
+    enterSubject: "Enter subject",
+    enterYourName: "Enter your name",
+    enterYourEmail: "Enter your email",
+    enterYourPhone: "Enter your phone number (optional)",
+    enterYourMessage: "Enter your message here...",
+    sendMessage: "Send Message",
+    sending: "Sending...",
+    messageSent: "Message Sent",
+    thankYouForMessage: "Thank you for your message. We'll get back to you soon!",
+    emailSendError: "There was an error sending your message. Please try again later.",
 
     // Social media
     facebook: "Facebook",
@@ -330,7 +352,6 @@ export const en = {
     serviceCreateSuccess: "The new service has been successfully created",
     serviceDeleted: "Service Deleted",
     serviceDeleteSuccess: "The service has been successfully deleted",
-    createService: "Create Service",
     saveChanges: "Save Changes",
     backToServices: "Back to Services",
     serviceAvailable: "Available",
@@ -342,7 +363,6 @@ export const en = {
     maxCapacity: "Max Capacity",
     availability: "Availability",
     optional: "Optional",
-    recommendedImageSize: "Recommended size: 1200x800 pixels",
 
     // Services Page
     servicesPageTitle: "Our Services",
@@ -372,7 +392,6 @@ export const en = {
     afternoon: "Afternoon",
     evening: "Evening",
     bookingFormDescription: "Please fill out the form below to request a booking. We will contact you to confirm availability.",
-    submitting: "Submitting...",
     errorSubmittingBooking: "There was an error submitting your booking. Please try again.",
 
     // Duration formatting
@@ -423,7 +442,6 @@ export const en = {
     canceledStatus: "Canceled",
     bookingUpdated: "Booking Updated",
     bookingStatusChanged: "Booking status changed to {{status}}",
-    bookingDetails: "Booking Details",
     selectStatus: "Select a status",
     cancelBookingConfirmation: "Cancel this booking?",
     cancelBookingWarning: "This action will mark the booking as canceled and notify the customer.",

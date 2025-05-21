@@ -1,6 +1,6 @@
 /**
  * Application Configuration
- * 
+ *
  * This file contains global constants and configuration values used throughout the application.
  */
 
@@ -10,13 +10,21 @@ export const APP_TAGLINE = "Tunisian creative cultural industries";
 
 // Company Information
 export const COMPANY_INFO = {
+  name: "Golden Madina",
   foundedYear: 2023,
-  artifactsPreserved: "500+",
-  annualVisitors: "10K+",
-  address: "pépiniére d'entreprises , 8000",
-  city: "Nabeul, Tunisia,",
+  artifactsPreserved: "1000+",
+  annualVisitors: "25K+",
+  address: "pépiniére d'entreprises, 8000",
+  city: "Nabeul, Tunisia",
   phone: "+216 25 310 666",
   email: "contact@goldenmadina.art",
+  workingHours: "Mon-Fri, 9:00 AM - 5:00 PM",
+  visitingHours: "Tue-Sun, 10:00 AM - 5:00 PM",
+  responseTime: "24 hours",
+  location: {
+    latitude: 36.4513,
+    longitude: 10.7357
+  }
 };
 
 // Social Media Links
@@ -49,7 +57,7 @@ export const CAROUSEL_IMAGES = [
 
 // Our Rich History Section
 export const RICH_HISTORY = {
-  image: "https://scontent.ftun10-1.fna.fbcdn.net/v/t39.30808-6/481781870_488993204281504_3842935024160584440_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=127cfc&_nc_ohc=IqTNwYEHFYwQ7kNvwGKmoKy&_nc_oc=AdmYTkizVdfj03eB1oNYLP2vRkyp9wxELZBJMWWeW9Ksm-0OzAWNXtBkpfmxR2YPlSk&_nc_zt=23&_nc_ht=scontent.ftun10-1.fna&_nc_gid=ufIBs8dfHmpSxVzY9I7jNw&oh=00_AfIfceXW9GLWsAqGmeitUH5HQPE62ZVmmuvcKLxCQXb8bw&oe=682B2300",
+  image: "/slider1.jpg",
   alt: "Historical museum building",
   paragraphs: [
     "Founded in 2023, our institution has been at the forefront of preserving and showcasing the rich cultural heritage of our region. Through careful conservation, research, and education, we connect the past with the present for future generations.",
@@ -81,7 +89,7 @@ export const FEATURED_REVIEWS = [
 export const DEFAULT_PLACEHOLDER_IMAGE = "/placeholder.jpg";
 
 
-// Predefined categories 
+// Predefined categories
 export const PORTFOLIO_CATEGORIES = [
   "Exhibitions",
   "Restorations",
@@ -92,4 +100,3 @@ export const PORTFOLIO_CATEGORIES = [
   "Collaborations",
   "Other"
 ];
- 
