@@ -38,18 +38,17 @@ export const SOCIAL_MEDIA = {
 // Home Page Carousel Images
 export const CAROUSEL_IMAGES = [
   {
-    src: "https://scontent.ftun9-1.fna.fbcdn.net/v/t39.30808-6/499042976_541200562394101_7049174134388784715_n.png?_nc_cat=110&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=tHNMDnX57B0Q7kNvwGoiN_1&_nc_oc=AdkMkeVQHHUQA3hT9RpOejDixmKlTqvTqQ6XO-MvePEV7RrvHS31KHBy03Bwa_JV0jY&_nc_zt=23&_nc_ht=scontent.ftun9-1.fna&_nc_gid=NeT7bNMwkZXWJLxNK0Mk1w&oh=00_AfL8dit7ONm3oeJlIxYUgDt5HYsnTYGCuzDsu5obqN714w&oe=6831747C",
+    src : "/slider1.jpg",
     alt: "Historical landmark with mountains in background",
     caption: "Our preservation site in the mountains, circa 1923"
   },
   {
-    src: "https://scontent.ftun9-1.fna.fbcdn.net/v/t39.30808-6/499042976_541200562394101_7049174134388784715_n.png?_nc_cat=110&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=tHNMDnX57B0Q7kNvwGoiN_1&_nc_oc=AdkMkeVQHHUQA3hT9RpOejDixmKlTqvTqQ6XO-MvePEV7RrvHS31KHBy03Bwa_JV0jY&_nc_zt=23&_nc_ht=scontent.ftun9-1.fna&_nc_gid=NeT7bNMwkZXWJLxNK0Mk1w&oh=00_AfL8dit7ONm3oeJlIxYUgDt5HYsnTYGCuzDsu5obqN714w&oe=6831747C",
-
+    src: "/slider2.jpg",
     alt: "History is alive here!",
     caption: "History is alive here!"
   },
   {
-    src: "https://scontent.ftun9-1.fna.fbcdn.net/v/t39.30808-6/499042976_541200562394101_7049174134388784715_n.png?_nc_cat=110&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=tHNMDnX57B0Q7kNvwGoiN_1&_nc_oc=AdkMkeVQHHUQA3hT9RpOejDixmKlTqvTqQ6XO-MvePEV7RrvHS31KHBy03Bwa_JV0jY&_nc_zt=23&_nc_ht=scontent.ftun9-1.fna&_nc_gid=NeT7bNMwkZXWJLxNK0Mk1w&oh=00_AfL8dit7ONm3oeJlIxYUgDt5HYsnTYGCuzDsu5obqN714w&oe=6831747C",
+    src: "/slider3.jpg",
     alt: "Traditional architectural buildings",
     caption: "Cultural heritage buildings preserved by our foundation"
   },
@@ -57,7 +56,7 @@ export const CAROUSEL_IMAGES = [
 
 // Our Rich History Section
 export const RICH_HISTORY = {
-  image: "/slider1.jpg",
+  image: "/slider3.jpg",
   alt: "Historical museum building",
   paragraphs: [
     "Founded in 2023, our institution has been at the forefront of preserving and showcasing the rich cultural heritage of our region. Through careful conservation, research, and education, we connect the past with the present for future generations.",

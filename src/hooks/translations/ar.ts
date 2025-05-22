@@ -539,5 +539,28 @@ export const ar = {
 
 
     serviceImage: "صورة الخدمة",
+
+    // Artifacts Page
+    heritageCollection: "مجموعة التراث",
+    artifactsPageDescription: "استكشف مجموعتنا المنسقة من القطع الأثرية التاريخية التي تمتد عبر قرون من الإبداع والابتكار البشري.",
+    filterCollection: "تصفية المجموعة",
+    search: "بحث",
+    searchArtifactsPlaceholder: "البحث عن القطع الأثرية...",
+    categories: "الفئات",
+    showOnly3dModels: "عرض العناصر ذات النماذج ثلاثية الأبعاد فقط",
+    has3dModel: "نموذج ثلاثي الأبعاد",
+    viewDetails: "عرض التفاصيل",
+    noArtifactsFound: "لم يتم العثور على قطع أثرية",
+    adjustSearchCriteria: "حاول تعديل معايير البحث الخاصة بك",
+    errorOccurred: "حدث خطأ",
+    tryAgainLater: "يرجى المحاولة مرة أخرى لاحقًا",
+
+    // Blog Page
+    heritageBlogTitle: "مدونة التراث",
+    heritageBlogDescription: "استكشف القصص والأبحاث والرؤى من مجموعتنا وجهود الحفظ لدينا.",
+
+    // Services Page
+    somethingWentWrong: "حدث خطأ ما",
+    tryAgain: "حاول مرة أخرى",
     description: "الوصف"
 }

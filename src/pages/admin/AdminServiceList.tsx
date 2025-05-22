@@ -17,28 +17,12 @@ interface Service {
   id: string;
   name: string;
   description: string;
-  duration: number;
   price: number;
   image_url: string;
   available: boolean;
   max_capacity: number | null;
   created_at: string;
 }
-
-// Helper function to format duration
-const formatDuration = (minutes: number): string => {
-  if (minutes < 60) {
-    return `${minutes} minutes`;
-  } else if (minutes === 60) {
-    return `1 hour`;
-  } else if (minutes % 60 === 0) {
-    return `${minutes / 60} hours`;
-  } else {
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return `${hours} hour${hours > 1 ? 's' : ''} ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}`;
-  }
-};
 
 // Helper function to format price
 const formatPrice = (price: number): string => {
@@ -91,7 +75,7 @@ const AdminServiceList = () => {
 
   const filteredServices = services.filter(service =>
     service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    formatDuration(service.duration).toLowerCase().includes(searchTerm.toLowerCase())
+    service.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleEditService = (serviceId: string) => {
@@ -248,7 +232,7 @@ const AdminServiceList = () => {
               <CardHeader>
                 <CardTitle className="font-serif">{service.name}</CardTitle>
                 <CardDescription>
-                  {t('duration')}: {formatDuration(service.duration)} • {formatPrice(service.price)}
+                  {formatPrice(service.price)}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-grow">

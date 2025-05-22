@@ -165,7 +165,7 @@ export const fr = {
     language: "Langue",
     bookings: "Réservations",
     logout: "Déconnexion",
-    heritageAdmin: "Administration Heritage",
+    heritageAdmin: "Administration Golden madina",
     totalItemsInCollection: "Total des objets dans la collection",
     publishedArticles: "Articles publiés",
     activeServices: "Services actifs",
@@ -540,5 +540,28 @@ export const fr = {
     errorAtLeastOnePattern: "Vous devez ajouter au moins un modèle",
 
     serviceImage: "Image du service",
+
+    // Artifacts Page
+    heritageCollection: "Collection du Patrimoine",
+    artifactsPageDescription: "Explorez notre collection d'artefacts historiques s'étendant sur des siècles de créativité et d'innovation humaine.",
+    filterCollection: "Filtrer la Collection",
+    search: "Rechercher",
+    searchArtifactsPlaceholder: "Rechercher des artefacts...",
+    categories: "Catégories",
+    showOnly3dModels: "Afficher uniquement les objets avec modèles 3D",
+    has3dModel: "Modèle 3D",
+    viewDetails: "Voir les Détails",
+    noArtifactsFound: "Aucun Artefact Trouvé",
+    adjustSearchCriteria: "Essayez d'ajuster vos critères de recherche",
+    errorOccurred: "Une Erreur s'est Produite",
+    tryAgainLater: "Veuillez réessayer plus tard",
+
+    // Blog Page
+    heritageBlogTitle: "Blog du Patrimoine",
+    heritageBlogDescription: "Explorez les histoires, les recherches et les perspectives de notre collection et de nos efforts de conservation.",
+
+    // Services Page
+    somethingWentWrong: "Quelque Chose s'est Mal Passé",
+    tryAgain: "Réessayer",
     description: "Description"
 };

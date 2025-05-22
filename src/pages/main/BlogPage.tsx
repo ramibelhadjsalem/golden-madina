@@ -137,9 +137,9 @@ const BlogPage = () => {
       {/* Header */}
       <section className="bg-slate-900 text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-serif font-bold mb-4">Heritage Blog</h1>
+          <h1 className="text-4xl font-serif font-bold mb-4">{t('heritageBlogTitle') || 'Heritage Blog'}</h1>
           <p className="text-xl max-w-2xl mx-auto">
-            Explore stories, research, and insights from our collection and conservation efforts.
+            {t('heritageBlogDescription') || 'Explore stories, research, and insights from our collection and conservation efforts.'}
           </p>
         </div>
       </section>

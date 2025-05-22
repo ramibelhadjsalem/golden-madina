@@ -13,7 +13,6 @@ interface Service {
   id: string;
   name: string;
   description: string;
-  duration: number;
   price: number;
   image_url: string;
   available: boolean;
@@ -28,7 +27,6 @@ interface ServiceDialogProps {
   onSave: (service: {
     name: string;
     description: string;
-    duration: number;
     price: number;
     image_url: string;
     available: boolean;
@@ -39,7 +37,6 @@ interface ServiceDialogProps {
 const ServiceDialog = ({ isOpen, onClose, service, onSave }: ServiceDialogProps) => {
   const { t } = useTranslate();
   const [name, setName] = useState(service?.name || "");
-  const [duration, setDuration] = useState<number>(service?.duration || 60);
   const [price, setPrice] = useState<number>(service?.price || 0);
   const [description, setDescription] = useState(service?.description || "");
   const [imageUrl, setImageUrl] = useState(service?.image_url || "");
@@ -51,7 +48,6 @@ const ServiceDialog = ({ isOpen, onClose, service, onSave }: ServiceDialogProps)
   useEffect(() => {
     if (service) {
       setName(service.name || "");
-      setDuration(service.duration || 60);
       setPrice(service.price || 0);
       setDescription(service.description || "");
       setImageUrl(service.image_url || "");
@@ -60,7 +56,6 @@ const ServiceDialog = ({ isOpen, onClose, service, onSave }: ServiceDialogProps)
     } else {
       // Reset form for new service
       setName("");
-      setDuration(60);
       setPrice(0);
       setDescription("");
       setImageUrl("");
@@ -87,7 +82,6 @@ const ServiceDialog = ({ isOpen, onClose, service, onSave }: ServiceDialogProps)
     onSave({
       name,
       description: description || "",
-      duration,
       price,
       image_url: imageUrl,
       available,
@@ -137,31 +131,18 @@ const ServiceDialog = ({ isOpen, onClose, service, onSave }: ServiceDialogProps)
               />
             </div>
 
-            {/* Duration and Price in a row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="duration">{t('durationMinutes')}</Label>
-                <Input
-                  id="duration"
-                  type="number"
-                  min={1}
-                  value={duration}
-                  onChange={(e) => setDuration(parseInt(e.target.value) || 60)}
-                  placeholder="60"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="price">{t('price')}</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  min={0}
-                  step={0.01}
-                  value={price}
-                  onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
-                  placeholder="0.00"
-                />
-              </div>
+            {/* Price */}
+            <div className="grid gap-2">
+              <Label htmlFor="price">{t('price')}</Label>
+              <Input
+                id="price"
+                type="number"
+                min={0}
+                step={0.01}
+                value={price}
+                onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
+                placeholder="0.00"
+              />
             </div>
 
             {/* Max Capacity and Availability in a row */}

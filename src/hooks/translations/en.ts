@@ -589,5 +589,28 @@ export const en = {
     chatbotPatternDeleted: "Pattern deleted successfully",
     errorAtLeastOnePattern: "You must add at least one pattern",
 
-    serviceImage: "Service Image"
+    serviceImage: "Service Image",
+
+    // Artifacts Page
+    heritageCollection: "Heritage Collection",
+    artifactsPageDescription: "Explore our curated collection of historical artifacts spanning centuries of human creativity and innovation.",
+    filterCollection: "Filter Collection",
+    search: "Search",
+    searchArtifactsPlaceholder: "Search artifacts...",
+    categories: "Categories",
+    showOnly3dModels: "Show only items with 3D models",
+    has3dModel: "3D Model",
+    viewDetails: "View Details",
+    noArtifactsFound: "No Artifacts Found",
+    adjustSearchCriteria: "Try adjusting your search criteria",
+    errorOccurred: "An Error Occurred",
+    tryAgainLater: "Please try again later",
+
+    // Blog Page
+    heritageBlogTitle: "Heritage Blog",
+    heritageBlogDescription: "Explore stories, research, and insights from our collection and conservation efforts.",
+
+    // Services Page
+    somethingWentWrong: "Something Went Wrong",
+    tryAgain: "Try Again"
 };

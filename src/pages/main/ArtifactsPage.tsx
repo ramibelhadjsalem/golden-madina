@@ -96,9 +96,9 @@ const ArtifactsPage = () => {
       {/* Header */}
       <section className="bg-slate-900 text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-serif font-bold mb-4">Heritage Collection</h1>
+          <h1 className="text-4xl font-serif font-bold mb-4">{t('heritageCollection')}</h1>
           <p className="text-xl max-w-2xl mx-auto">
-            Explore our curated collection of historical artifacts spanning centuries of human creativity and innovation.
+            {t('artifactsPageDescription') }
           </p>
         </div>
       </section>
@@ -110,15 +110,15 @@ const ArtifactsPage = () => {
             {/* Filters Sidebar */}
             <div className="lg:col-span-1 mb-8 lg:mb-0">
               <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-                <h2 className="text-xl font-semibold mb-6">Filter Collection</h2>
+                <h2 className="text-xl font-semibold mb-6">{t('filterCollection') || 'Filter Collection'}</h2>
 
                 {/* Search */}
                 <div className="mb-6">
-                  <Label htmlFor="search">Search</Label>
+                  <Label htmlFor="search">{t('search') || 'Search'}</Label>
                   <Input
                     id="search"
                     type="text"
-                    placeholder="Search artifacts..."
+                    placeholder={t('searchArtifactsPlaceholder') || 'Search artifacts...'}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="mt-1"
@@ -127,7 +127,7 @@ const ArtifactsPage = () => {
 
                 {/* Category Filter */}
                 <div className="mb-6">
-                  <h3 className="text-sm font-medium mb-3">Categories</h3>
+                  <h3 className="text-sm font-medium mb-3">{t('categories') || 'Categories'}</h3>
                   <div className="space-y-2">
                     {isLoading ? (
                       // Loading skeleton for categories
@@ -168,7 +168,7 @@ const ArtifactsPage = () => {
                     htmlFor="3dmodels"
                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    Show only items with 3D models
+                    {t('showOnly3dModels') || 'Show only items with 3D models'}
                   </label>
                 </div>
               </div>
@@ -198,8 +198,8 @@ const ArtifactsPage = () => {
                 </div>
               ) : error ? (
                 <div className="text-center py-20 bg-slate-50 rounded-lg">
-                  <h3 className="text-2xl font-semibold text-slate-700 mb-2">{t('errorOccurred')}</h3>
-                  <p className="text-slate-500">{t('tryAgainLater')}</p>
+                  <h3 className="text-2xl font-semibold text-slate-700 mb-2">{t('errorOccurred') || 'An Error Occurred'}</h3>
+                  <p className="text-slate-500">{t('tryAgainLater') || 'Please try again later'}</p>
                 </div>
               ) : filteredArtifacts.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -216,7 +216,7 @@ const ArtifactsPage = () => {
                         />
                         {artifact.model_url && (
                           <div className="absolute top-3 right-3 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-md">
-                            3D Model
+                            {t('has3dModel') || '3D Model'}
                           </div>
                         )}
                       </div>
@@ -232,7 +232,7 @@ const ArtifactsPage = () => {
                           to={`/artifacts/${artifact.id}`}
                           className="text-slate-800 font-semibold hover:text-amber-600 transition-colors"
                         >
-                          {t('viewDetails')} →
+                          {t('viewDetails') || 'View Details'} →
                         </Link>
                       </CardFooter>
                     </Card>
@@ -240,8 +240,8 @@ const ArtifactsPage = () => {
                 </div>
               ) : (
                 <div className="text-center py-20 bg-slate-50 rounded-lg">
-                  <h3 className="text-2xl font-semibold text-slate-700 mb-2">{t('noArtifactsFound')}</h3>
-                  <p className="text-slate-500">{t('adjustSearchCriteria')}</p>
+                  <h3 className="text-2xl font-semibold text-slate-700 mb-2">{t('noArtifactsFound') || 'No Artifacts Found'}</h3>
+                  <p className="text-slate-500">{t('adjustSearchCriteria') || 'Try adjusting your search criteria'}</p>
                 </div>
               )}
             </div>

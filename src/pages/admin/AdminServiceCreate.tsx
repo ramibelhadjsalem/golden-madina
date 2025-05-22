@@ -14,10 +14,9 @@ import { Switch } from "@/components/ui/switch";
 const AdminServiceCreate = () => {
   const { t } = useTranslate();
   const navigate = useNavigate();
-  
+
   // Form state
   const [name, setName] = useState("");
-  const [duration, setDuration] = useState<number>(60);
   const [price, setPrice] = useState<number>(0);
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -44,7 +43,6 @@ const AdminServiceCreate = () => {
       const serviceData = {
         name,
         description: description || "",
-        duration,
         price,
         image_url: imageUrl,
         available,
@@ -82,9 +80,9 @@ const AdminServiceCreate = () => {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => navigate('/admin/services')}
             className="flex items-center"
           >
@@ -130,31 +128,18 @@ const AdminServiceCreate = () => {
                 />
               </div>
 
-              {/* Duration and Price in a row */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="duration">{t('durationMinutes')}</Label>
-                  <Input
-                    id="duration"
-                    type="number"
-                    min={1}
-                    value={duration}
-                    onChange={(e) => setDuration(parseInt(e.target.value) || 60)}
-                    placeholder="60"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="price">{t('price')}</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    value={price}
-                    onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
-                    placeholder="0.00"
-                  />
-                </div>
+              {/* Price */}
+              <div className="space-y-2">
+                <Label htmlFor="price">{t('price')}</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={price}
+                  onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
+                  placeholder="0.00"
+                />
               </div>
 
               {/* Max Capacity and Availability in a row */}
@@ -205,15 +190,15 @@ const AdminServiceCreate = () => {
           </div>
 
           <div className="flex justify-end space-x-2 pt-4 border-t">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => navigate('/admin/services')}
             >
               {t('cancel')}
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isLoading}
               className="flex items-center"
             >

@@ -14,29 +14,12 @@ interface Service {
   id: string;
   name: string;
   description: string;
-  duration: number;
   price: number;
   image_url: string;
   available: boolean;
   max_capacity: number | null;
   created_at: string;
 }
-
-// Helper function to format duration
-const formatDuration = (minutes: number, t: (key: string) => string): string => {
-  if (minutes < 60) {
-    return `${minutes} ${minutes === 1 ? t('minute') : t('minutes')}`;
-  } else if (minutes === 60) {
-    return `1 ${t('hour')}`;
-  } else if (minutes % 60 === 0) {
-    const hours = minutes / 60;
-    return `${hours} ${hours === 1 ? t('hour') : t('hours')}`;
-  } else {
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return `${hours} ${hours === 1 ? t('hour') : t('hours')} ${remainingMinutes} ${remainingMinutes === 1 ? t('minute') : t('minutes')}`;
-  }
-};
 
 // Helper function to format price
 const formatPrice = (price: number): string => {
@@ -91,7 +74,7 @@ const ServicesPage = () => {
     };
 
     fetchServices();
-  },[]);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -194,13 +177,13 @@ const ServicesPage = () => {
           ) : error ? (
             // Error message
             <div className="text-center py-12">
-              <h3 className="text-xl font-medium text-red-600 mb-2">{t('somethingWentWrong')}</h3>
+              <h3 className="text-xl font-medium text-red-600 mb-2">{t('somethingWentWrong') || 'Something Went Wrong'}</h3>
               <p className="text-slate-600 mb-4">{error}</p>
               <Button
                 onClick={() => window.location.reload()}
                 variant="outline"
               >
-                {t('tryAgain')}
+                {t('tryAgain') || 'Try Again'}
               </Button>
             </div>
           ) : services.length === 0 ? (
@@ -224,7 +207,7 @@ const ServicesPage = () => {
                   <CardHeader>
                     <CardTitle className="font-serif">{service.name}</CardTitle>
                     <CardDescription>
-                      {t('duration')}: {formatDuration(service.duration, t)} • {formatPrice(service.price)}
+                      {formatPrice(service.price)}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex-grow">
@@ -252,7 +235,7 @@ const ServicesPage = () => {
             <CardHeader>
               <CardTitle className="font-serif">{t('bookServiceTitle')} {selectedService.name}</CardTitle>
               <CardDescription>
-                {t('duration')}: {formatDuration(selectedService.duration, t)} • {formatPrice(selectedService.price)}
+                {formatPrice(selectedService.price)}
               </CardDescription>
             </CardHeader>
             <CardContent>

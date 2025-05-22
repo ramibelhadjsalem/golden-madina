@@ -154,7 +154,6 @@ export interface Database {
           name: string
           description: string
           price: number
-          duration: number
           image_url: string
           available: boolean
           max_capacity: number | null
@@ -165,7 +164,6 @@ export interface Database {
           name: string
           description: string
           price: number
-          duration: number
           image_url: string
           available?: boolean
           max_capacity?: number | null
@@ -176,7 +174,6 @@ export interface Database {
           name?: string
           description?: string
           price?: number
-          duration?: number
           image_url?: string
           available?: boolean
           max_capacity?: number | null
