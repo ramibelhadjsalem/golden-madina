@@ -33,7 +33,6 @@ interface Booking {
   // Service details from join
   services?: {
     name: string;
-    duration?: number;
     price?: number;
   };
 }
@@ -84,7 +83,6 @@ const AdminBookingList = () => {
             created_at,
             services (
               name,
-              duration,
               price
             )
           `)
@@ -135,7 +133,6 @@ const AdminBookingList = () => {
           created_at,
           services (
             name,
-            duration,
             price
           )
         `)
