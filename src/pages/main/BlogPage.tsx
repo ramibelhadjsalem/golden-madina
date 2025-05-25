@@ -39,6 +39,7 @@ interface BlogRow {
 }
 
 // Blog card skeleton for loading state
+// shimmer effect 
 const BlogCardSkeleton = () => (
   <Card className="overflow-hidden">
     <div className="aspect-video w-full overflow-hidden bg-slate-200 animate-pulse" />
@@ -67,6 +68,7 @@ const BlogPage = () => {
   const [error, setError] = useState<Error | null>(null);
 
   // Fetch blogs when filters change
+  // life cycle 
   useEffect(() => {
     // Define the fetch function inside the effect to avoid dependency issues
     async function fetchBlogs() {
