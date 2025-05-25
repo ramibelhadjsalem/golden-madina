@@ -33,6 +33,7 @@ import AdminLayout from "./components/admin/AdminLayout";
 import MainLayout from "./components/main/MainLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { setDocumentTitle } from "@/lib/document-utils";
+import ForgotPassword from "./pages/admin/ForgotPassword";
 
 // Add Google Fonts
 const loadFonts = () => {
@@ -74,6 +75,7 @@ const App = () => {
 
                 {/* Admin Login */}
                 <Route path="/admin" element={<AdminLogin />} />
+                <Route path="/admin/forgot-password" element={<ForgotPassword />} />
 
                 {/* Protected Admin Routes */}
                 <Route path="/admin" element={

@@ -3,10 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useTranslate } from "@/hooks/use-translate";
 import { useLanguage } from "@/context/LanguageContext";
+import { useFetch } from "@/hooks/use-supabase";
+import AdminChartsSection from "@/components/admin/AdminChartsSection";
 
 const AdminDashboard = () => {
   const { t } = useTranslate();
   const { currentLanguage } = useLanguage();
+
+  // Fetch real data from Supabase
+  const { data: artifacts } = useFetch('artifacts');
+  const { data: blogs } = useFetch('blogs');
+  const { data: services } = useFetch('services');
+  const { data: bookings } = useFetch('bookings');
+  const { data: portfolios } = useFetch('portfolios');
 
   // Temporary stats for demonstration
   const stats = [
@@ -233,6 +242,19 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Charts Section */}
+      {artifacts && blogs && services && bookings && (
+        <div className="mt-8">
+          <AdminChartsSection
+            artifacts={artifacts || []}
+            blogs={blogs || []}
+            services={services || []}
+            bookings={bookings || []}
+            portfolios={portfolios || []}
+          />
+        </div>
+      )}
     </>
   );
 };

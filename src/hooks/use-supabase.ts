@@ -62,7 +62,7 @@ export function useFetch<T>(
     };
 
     fetchData();
-  }, [tableName, options, t]);
+  }, [tableName, options]);
 
   return { data, error, loading };
 }

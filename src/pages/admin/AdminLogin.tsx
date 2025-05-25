@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -98,9 +98,9 @@ const AdminLogin = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">{t('password')}</Label>
-                <a href="#" className="text-xs text-slate-500 hover:text-slate-800">
+                <Link to="/admin/forgot-password" className="text-xs text-slate-500 hover:text-slate-800">
                   {t('forgotPassword')}
-                </a>
+                </Link>
               </div>
               <Input
                 id="password"
