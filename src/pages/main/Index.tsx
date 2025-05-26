@@ -211,7 +211,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Reviews Section */}
+      {/* Reviews Section
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-playfair font-bold mb-10 text-center">{t('visitorReviews')}</h2>
@@ -243,7 +243,7 @@ const Index = () => {
             </a>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* FAQ Section */}
       <section className="py-16 bg-slate-50">

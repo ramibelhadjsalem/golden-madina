@@ -8,24 +8,9 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { useState } from "react";
 import { useTranslate } from "@/hooks/use-translate";
 import { Badge } from "@/components/ui/badge";
+import { useEmail } from "@/hooks/use-email";
 
-// Define the Booking interface
-interface Booking {
-  id: string;
-  service_id: string;
-  service_name: string;
-  customer_name: string;
-  customer_email: string;
-  customer_phone?: string;
-  date: string;
-  time?: string;
-  people?: number;
-  notes?: string;
-  status: 'pending' | 'confirmed' | 'canceled';
-  created_at: string;
-}
-
-// Define the Booking interface
+// Define the Booking interface to match AdminBookingList
 interface Booking {
   id: string;
   service_id: string;
@@ -34,13 +19,13 @@ interface Booking {
   customer_phone?: string;
   date: string;
   time?: string;
-  people?: number;
+  participants?: number;
   notes?: string;
   status: 'pending' | 'confirmed' | 'canceled';
   created_at: string;
+  // Service details from join
   services?: {
     name: string;
-    duration?: number;
     price?: number;
   };
 }
@@ -58,26 +43,53 @@ const BookingDetailsDialog = ({ isOpen, onClose, booking, onStatusChange }: Book
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Initialize email hook
+  const { sendBookingStatusEmail } = useEmail({
+    showToast: false // We'll handle toasts manually
+  });
+
   if (!booking) return null;
 
   const handleStatusChange = (newStatus: string) => {
     setStatus(newStatus);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (status && status !== booking.status) {
       setIsSubmitting(true);
 
-      // Simulate a delay to show loading state
-      setTimeout(() => {
+      try {
+        // Update the status first
         onStatusChange(booking.id, status);
+
+        // Send email notification for the status change
+        await sendBookingStatusEmail({
+          customer_name: booking.customer_name,
+          customer_email: booking.customer_email,
+          service_name: booking.services?.name || 'Unknown Service',
+          booking_date: new Date(booking.date).toLocaleDateString(),
+          booking_id: booking.id,
+          status: status as 'pending' | 'confirmed' | 'canceled',
+          participants: booking.participants,
+          notes: booking.notes || undefined,
+          cancellation_reason: status === 'canceled' ? 'Booking has been canceled by the administrator' : undefined,
+        });
+
         toast({
           title: t('bookingUpdated'),
           description: t('bookingStatusChanged').replace('{{status}}', t(status)),
         });
-        setIsSubmitting(false);
         onClose();
-      }, 500);
+      } catch (error) {
+        console.error('Error updating status or sending email:', error);
+        toast({
+          title: t('error'),
+          description: 'Failed to update booking status or send notification email.',
+          variant: "destructive",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       onClose();
     }
@@ -132,12 +144,12 @@ const BookingDetailsDialog = ({ isOpen, onClose, booking, onStatusChange }: Book
             )}
           </div>
 
-          {(booking.people || booking.notes) && (
+          {(booking.participants || booking.notes) && (
             <div className="space-y-1 border-t pt-4">
-              {booking.people && (
+              {booking.participants && (
                 <div className="mb-2">
                   <Label className="text-sm text-muted-foreground">{t('numberOfPeople')}</Label>
-                  <p className="font-medium">{booking.people}</p>
+                  <p className="font-medium">{booking.participants}</p>
                 </div>
               )}
               {booking.notes && (
@@ -209,10 +221,32 @@ const BookingDetailsDialog = ({ isOpen, onClose, booking, onStatusChange }: Book
           <AlertDialogFooter>
             <AlertDialogCancel>{t('keepBooking')}</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
-                onStatusChange(booking.id, "canceled");
-                setIsAlertOpen(false);
-                onClose();
+              onClick={async () => {
+                try {
+                  onStatusChange(booking.id, "canceled");
+
+                  // Send cancellation email
+                  await sendBookingStatusEmail({
+                    customer_name: booking.customer_name,
+                    customer_email: booking.customer_email,
+                    service_name: booking.services?.name || 'Unknown Service',
+                    booking_date: new Date(booking.date).toLocaleDateString(),
+                    booking_id: booking.id,
+                    status: 'canceled',
+                    participants: booking.participants,
+                    cancellation_reason: 'Booking has been canceled by the administrator',
+                  });
+
+                  setIsAlertOpen(false);
+                  onClose();
+                } catch (error) {
+                  console.error('Error canceling booking or sending email:', error);
+                  toast({
+                    title: t('error'),
+                    description: 'Failed to cancel booking or send notification email.',
+                    variant: "destructive",
+                  });
+                }
               }}
               className="bg-red-600 hover:bg-red-700"
             >

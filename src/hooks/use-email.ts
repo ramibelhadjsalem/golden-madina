@@ -10,8 +10,9 @@ const EMAILJS_SERVICE_ID = "service_lfpyori"; // Replace with your actual servic
 const EMAILJS_TEMPLATE_ID = "template_s78rdl9"; // Replace with your actual template ID
 const EMAILJS_PUBLIC_KEY = "TaKmgQvMqfGVXkn92"; // Replace with your actual public key
 
-// Password Reset Template Configuration
-const PASSWORD_RESET_TEMPLATE_ID = "template_3nx1hho"; // Replace with your password reset template ID
+
+// Booking Notification Template ID
+const BOOKING_STATUS_TEMPLATE_ID = "template_qjeqqhs"; // Replace with your booking status template ID
 
 interface UseEmailProps {
   onSuccess?: () => void;
@@ -26,76 +27,6 @@ interface EmailTemplateParams {
   [key: string]: string | number;
 }
 
-
-
-// Token encoding/decoding functions for stateless password reset
-const encodeResetToken = (email: string, expiresAt: number): string => {
-  try {
-    const tokenData = {
-      email,
-      expiresAt
-    };
-    // Base64 encode the token data
-    const encoded = btoa(JSON.stringify(tokenData));
-    // Add some random padding to make tokens less predictable
-    const padding = Math.random().toString(36).substring(2, 8);
-    return `${encoded}.${padding}`;
-  } catch (error) {
-    console.error('Error encoding token:', error);
-    throw new Error('Failed to generate reset token');
-  }
-};
-
-const decodeResetToken = (token: string): { email: string; expiresAt: number } | null => {
-  try {
-    // Remove the padding (everything after the last dot)
-    const encoded = token.split('.')[0];
-    const decoded = atob(encoded);
-    const tokenData = JSON.parse(decoded);
-
-    // Validate the structure
-    if (tokenData && typeof tokenData.email === 'string' && typeof tokenData.expiresAt === 'number') {
-      return tokenData;
-    }
-    return null;
-  } catch (error) {
-    console.error('Error decoding token:', error);
-    return null;
-  }
-};
-
-const isTokenExpired = (expiresAt: number): boolean => {
-  return Date.now() > expiresAt;
-};
-
-// Simple token reuse prevention using localStorage
-const USED_TOKENS_KEY = 'used_reset_tokens';
-
-const markTokenAsUsed = (token: string) => {
-  try {
-    const usedTokens = JSON.parse(localStorage.getItem(USED_TOKENS_KEY) || '[]');
-    usedTokens.push({ token, usedAt: Date.now() });
-
-    // Clean tokens older than 24 hours
-    const cleanedTokens = usedTokens.filter((item: any) =>
-      Date.now() - item.usedAt < 86400000 // 24 hours
-    );
-
-    localStorage.setItem(USED_TOKENS_KEY, JSON.stringify(cleanedTokens));
-  } catch (error) {
-    console.error('Error marking token as used:', error);
-  }
-};
-
-const isTokenUsed = (token: string): boolean => {
-  try {
-    const usedTokens = JSON.parse(localStorage.getItem(USED_TOKENS_KEY) || '[]');
-    return usedTokens.some((item: any) => item.token === token);
-  } catch (error) {
-    console.error('Error checking if token is used:', error);
-    return false;
-  }
-};
 
 export const useEmail = ({
   onSuccess,
@@ -248,118 +179,7 @@ export const useEmail = ({
     }
   };
 
-  // Function to send password reset email
-  const sendPasswordResetEmail = async (email: string) => {
-    setIsSubmitting(true);
 
-    try {
-      // Generate reset token with 1 hour expiration
-      const expiresAt = Date.now() + 3600000; // 1 hour from now
-      const token = encodeResetToken(email, expiresAt);
-      const resetLink = `${window.location.origin}/admin/forgot-password?token=${token}`;
-
-      console.log('Generated reset link:', resetLink); // For debugging
-
-      // Prepare email template data
-      const templateParams = {
-        to_email: email,
-        user_email: email,
-        reset_link: resetLink,
-        company_name: COMPANY_INFO.name || "Golden Madina",
-        current_year: new Date().getFullYear().toString(),
-        current_date: new Date().toLocaleString(),
-        expiry_time: "1 hour"
-      };
-
-      const result = await emailjs.send(
-        serviceId,
-        PASSWORD_RESET_TEMPLATE_ID,
-        templateParams,
-        publicKey
-      );
-
-      console.log('Password reset email sent!', result.text);
-
-      if (showToast) {
-        toast({
-          title: "Reset Email Sent",
-          description: "Check your email for password reset instructions.",
-        });
-      }
-
-      // Call the success callback if provided
-      if (onSuccess) onSuccess();
-
-      return { success: true, token, result };
-
-    } catch (error: any) {
-      console.error('Failed to send password reset email:', error.text);
-
-      if (showToast) {
-        toast({
-          title: t('error') || 'Error',
-          description: "Failed to send reset email. Please try again.",
-          variant: "destructive",
-        });
-      }
-
-      // Call the error callback if provided
-      if (onError) onError();
-
-      throw error;
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Function to verify reset token
-  const verifyResetToken = (token: string) => {
-    console.log('Verifying token:', token); // For debugging
-
-    // Check if token has already been used
-    if (isTokenUsed(token)) {
-      console.log('Token has already been used'); // For debugging
-      return { valid: false, email: null };
-    }
-
-    const tokenData = decodeResetToken(token);
-
-    if (!tokenData) {
-      console.log('Token could not be decoded'); // For debugging
-      return { valid: false, email: null };
-    }
-
-    if (isTokenExpired(tokenData.expiresAt)) {
-      console.log('Token has expired'); // For debugging
-      return { valid: false, email: null };
-    }
-
-    console.log('Token is valid for email:', tokenData.email); // For debugging
-    return { valid: true, email: tokenData.email };
-  };
-
-  // Function to consume reset token (validate and mark as used)
-  const consumeResetToken = (token: string) => {
-    // // Check if token has already been used
-    // if (isTokenUsed(token)) {
-    //   return { success: false, email: null };
-    // }
-
-    const tokenData = decodeResetToken(token);
-
-    if (!tokenData) {
-      return { success: false, email: null };
-    }
-
-    if (isTokenExpired(tokenData.expiresAt)) {
-      return { success: false, email: null };
-    }
-
-    // Mark token as used to prevent reuse
-    markTokenAsUsed(token);
-
-    return { success: true, email: tokenData.email };
-  };
 
   // Function to validate password strength
   const validatePassword = (password: string) => {
@@ -398,12 +218,154 @@ export const useEmail = ({
     return strength;
   };
 
+  // Function to send booking status notification email
+  const sendBookingStatusEmail = async (bookingData: {
+    customer_name: string;
+    customer_email: string;
+    service_name: string;
+    booking_date: string;
+    booking_id: string;
+    status: 'pending' | 'confirmed' | 'canceled';
+    participants?: number;
+    notes?: string;
+    cancellation_reason?: string;
+  }) => {
+    setIsSubmitting(true);
+
+    try {
+      // Determine status-specific content
+      const getStatusContent = (status: string) => {
+        switch (status) {
+          case 'confirmed':
+            return {
+              status_title: '🎉 Booking Confirmed!',
+              status_message: 'Great news! Your booking has been confirmed. We\'re excited to welcome you to Golden Madina.',
+              status_color: '#16a34a',
+              status_bg_color: '#dcfce7',
+              status_border_color: '#bbf7d0',
+              status_icon: '✓',
+              action_title: 'What\'s Next?',
+              action_items: [
+                'Please arrive 15 minutes before your scheduled time',
+                'Bring a valid ID for verification',
+                'If you need to make changes, contact us at least 24 hours in advance',
+                'Check your email for any updates or additional information'
+              ]
+            };
+          case 'canceled':
+            return {
+              status_title: '❌ Booking Canceled',
+              status_message: 'We regret to inform you that your booking has been canceled. We apologize for any inconvenience this may cause.',
+              status_color: '#dc2626',
+              status_bg_color: '#fef2f2',
+              status_border_color: '#fecaca',
+              status_icon: '!',
+              action_title: 'What\'s Next?',
+              action_items: [
+                'If you paid in advance, a refund will be processed within 3-5 business days',
+                'You can book a new appointment at any time through our website',
+                'Contact us if you have any questions about this cancellation',
+                'We hope to serve you again in the future'
+              ]
+            };
+          case 'pending':
+          default:
+            return {
+              status_title: '⏳ Booking Pending',
+              status_message: 'Your booking is currently pending review. We will confirm your booking shortly.',
+              status_color: '#d97706',
+              status_bg_color: '#fef3c7',
+              status_border_color: '#fde68a',
+              status_icon: '⏳',
+              action_title: 'What\'s Next?',
+              action_items: [
+                'We will review your booking request within 24 hours',
+                'You will receive a confirmation email once approved',
+                'Please keep this booking ID for your records',
+                'Contact us if you have any questions'
+              ]
+            };
+        }
+      };
+
+      const statusContent = getStatusContent(bookingData.status);
+
+      const templateParams = {
+        to_email: bookingData.customer_email,
+        customer_name: bookingData.customer_name,
+        service_name: bookingData.service_name,
+        booking_date: bookingData.booking_date,
+        booking_id: bookingData.booking_id,
+        booking_status: bookingData.status,
+        participants: bookingData.participants?.toString() || '1',
+        notes: bookingData.notes || 'No special notes',
+        cancellation_reason: bookingData.cancellation_reason || 'Administrative decision',
+
+        // Status-specific content
+        status_title: statusContent.status_title,
+        status_message: statusContent.status_message,
+        status_color: statusContent.status_color,
+        status_bg_color: statusContent.status_bg_color,
+        status_border_color: statusContent.status_border_color,
+        status_icon: statusContent.status_icon,
+        action_title: statusContent.action_title,
+        action_items: statusContent.action_items.join('|'), // Join with | for template parsing
+
+        // Company info
+        company_name: COMPANY_INFO.name || "Golden Madina",
+        company_email: COMPANY_INFO.email,
+        company_phone: COMPANY_INFO.phone,
+        current_year: new Date().getFullYear().toString(),
+        current_date: new Date().toLocaleString(),
+      };
+
+      const result = await emailjs.send(
+        serviceId,
+        BOOKING_STATUS_TEMPLATE_ID,
+        templateParams,
+        publicKey
+      );
+
+      console.log(`Booking ${bookingData.status} email sent!`, result.text);
+
+      if (showToast) {
+        const statusMessages = {
+          confirmed: "Booking confirmation email has been sent to the customer.",
+          canceled: "Booking cancellation email has been sent to the customer.",
+          pending: "Booking pending email has been sent to the customer."
+        };
+
+        toast({
+          title: "Status Email Sent",
+          description: statusMessages[bookingData.status] || "Booking status email has been sent to the customer.",
+        });
+      }
+
+      if (onSuccess) onSuccess();
+      return { success: true, result };
+
+    } catch (error: any) {
+      console.error(`Failed to send booking ${bookingData.status} email:`, error.text);
+
+      if (showToast) {
+        toast({
+          title: "Email Error",
+          description: "Failed to send status notification email to customer.",
+          variant: "destructive",
+        });
+      }
+
+      if (onError) onError();
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return {
     sendEmail,
     sendDirectEmail,
-    sendPasswordResetEmail,
-    verifyResetToken,
-    consumeResetToken,
+    sendBookingStatusEmail,
     validatePassword,
     getPasswordStrength,
     isSubmitting

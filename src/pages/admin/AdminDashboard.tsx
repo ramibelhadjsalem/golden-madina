@@ -21,7 +21,7 @@ const AdminDashboard = () => {
   const stats = [
     {
       title: t('artifacts'),
-      value: "68",
+      value: artifacts?.length  ?? 0,
       description: t('totalItemsInCollection'),
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -33,7 +33,7 @@ const AdminDashboard = () => {
     },
     {
       title: t('blogPosts'),
-      value: "23",
+      value: blogs?.length ?? 0,
       description: t('publishedArticles'),
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -45,7 +45,7 @@ const AdminDashboard = () => {
     },
     {
       title: t('services'),
-      value: "6",
+      value: services?.length ?? 0,
       description: t('activeServices'),
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -57,7 +57,7 @@ const AdminDashboard = () => {
     },
     {
       title: t('bookings'),
-      value: "42",
+      value: bookings?.length ?? 0,
       description: t('thisMonth'),
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

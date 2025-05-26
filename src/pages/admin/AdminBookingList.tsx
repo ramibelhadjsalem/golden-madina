@@ -10,6 +10,7 @@ import { Search, Eye, CheckCircle, XCircle, MoreHorizontal, RefreshCw } from "lu
 import { useTranslate } from "@/hooks/use-translate";
 import { supabase } from "@/lib/supabase";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEmail } from "@/hooks/use-email";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +27,7 @@ interface Booking {
   customer_phone?: string;
   date: string;
   time?: string;
-  people?: number;
+  participants?: number;
   notes?: string;
   status: 'pending' | 'confirmed' | 'canceled';
   created_at: string;
@@ -59,6 +60,11 @@ const AdminBookingList = () => {
   const [selectedBookings, setSelectedBookings] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Initialize email hook
+  const { sendBookingStatusEmail } = useEmail({
+    showToast: false // We'll handle toasts manually
+  });
 
   // Fetch bookings from Supabase
   useEffect(() => {
@@ -192,6 +198,12 @@ const AdminBookingList = () => {
         throw new Error('Invalid status value');
       }
 
+      // Find the booking to get customer details
+      const booking = bookings.find(b => b.id === id);
+      if (!booking) {
+        throw new Error('Booking not found');
+      }
+
       // Update booking status in Supabase
       const { error } = await supabase
         .from('bookings')
@@ -201,6 +213,24 @@ const AdminBookingList = () => {
         .eq('id', id);
 
       if (error) throw error;
+
+      // Send email notification
+      try {
+        await sendBookingStatusEmail({
+          customer_name: booking.customer_name,
+          customer_email: booking.customer_email,
+          service_name: booking.services?.name || 'Unknown Service',
+          booking_date: formatDate(booking.date),
+          booking_id: booking.id,
+          status: newStatus as 'pending' | 'confirmed' | 'canceled',
+          participants: booking.participants,
+          notes: booking.notes || undefined,
+          cancellation_reason: newStatus === 'canceled' ? 'Booking has been updated by the administrator' : undefined,
+        });
+      } catch (emailError) {
+        console.error('Error sending email notification:', emailError);
+        // Don't fail the status update if email fails
+      }
 
       // Update local state
       setBookings(bookings.map(booking =>
@@ -248,6 +278,9 @@ const AdminBookingList = () => {
     try {
       const newStatus = action === 'confirm' ? 'confirmed' : 'canceled';
 
+      // Get the bookings that will be updated for email notifications
+      const bookingsToUpdate = bookings.filter(booking => selectedBookings.includes(booking.id));
+
       // Update bookings in Supabase
       const { error } = await supabase
         .from('bookings')
@@ -257,6 +290,29 @@ const AdminBookingList = () => {
         .in('id', selectedBookings);
 
       if (error) throw error;
+
+      // Send email notifications for each updated booking
+      const emailPromises = bookingsToUpdate.map(async (booking) => {
+        try {
+          await sendBookingStatusEmail({
+            customer_name: booking.customer_name,
+            customer_email: booking.customer_email,
+            service_name: booking.services?.name || 'Unknown Service',
+            booking_date: formatDate(booking.date),
+            booking_id: booking.id,
+            status: newStatus as 'pending' | 'confirmed' | 'canceled',
+            participants: booking.participants,
+            notes: booking.notes || undefined,
+            cancellation_reason: newStatus === 'canceled' ? 'Booking has been updated by the administrator' : undefined,
+          });
+        } catch (emailError) {
+          console.error(`Error sending email for booking ${booking.id}:`, emailError);
+          // Don't fail the bulk update if individual emails fail
+        }
+      });
+
+      // Wait for all emails to be sent (but don't fail if some fail)
+      await Promise.allSettled(emailPromises);
 
       // Update local state
       setBookings(bookings.map(booking =>
